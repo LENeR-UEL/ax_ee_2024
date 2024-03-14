@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "scheme": "ee-lener",
+    "name": "Interface EE LENeR",
+    "slug": "interface-ee-lener",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.lucasbortolisantos.interfaceeelener"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "@config-plugins/react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "neverForLocation": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 23,
+            "buildToolsVersion": "23.0.3"
+          },
+          "ios": {
+            "deploymentTarget": "13.0"
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "ab1b7c5f-b4e0-4f01-8e98-95d5cd97f94c"
+      }
+    },
+    "owner": "lucasbortolisantos"
+  }
+}

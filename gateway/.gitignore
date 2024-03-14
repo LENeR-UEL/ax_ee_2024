@@ -1,0 +1,5 @@
+.pio
+.idea
+.vscode
+platformio-device-monitor-*.log
+logs/
