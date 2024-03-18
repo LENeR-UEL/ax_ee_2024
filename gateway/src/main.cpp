@@ -8,27 +8,32 @@
 #include "Scale/Scale.h"
 #include "Data.h"
 #include "onBluetoothControl.h"
+#include "StateManager.h"
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d\n", variable)
 #define ONBOARD_LED 2
 
 static const char *TAG = "main";
 
+StateManager stateManager;
 FlagTrigger trigger;
 Data data;
 
-void onTwaiMessage(TwaiReceivedMessage *receivedTwaiMessage) {
-  switch (receivedTwaiMessage->Kind) {
-    case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
-      data.pwmFeedback = receivedTwaiMessage->ExtraData;
-      break;
-    default:
-      break;
+void onTwaiMessage(TwaiReceivedMessage *receivedTwaiMessage)
+{
+  switch (receivedTwaiMessage->Kind)
+  {
+  case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
+    data.pwmFeedback = receivedTwaiMessage->ExtraData;
+    break;
+  default:
+    break;
   }
 }
 
-void setup() {
-  pinMode(ONBOARD_LED, OUTPUT);
+void setup()
+{
+  // pinMode(ONBOARD_LED, OUTPUT);
 
   espBle.onControlReceivedCallback = &onBluetoothControl;
 
@@ -36,17 +41,23 @@ void setup() {
   scaleBeginOrDie();
   espBle.startOrDie();
   twaiStart();
+  stateManager.setup(StateKind::Disconnected);
 }
 
-void loop() {
+void loop()
+{
   // Na aba "Paralela", após setar o MESE, o PWM é diminuído gradualmente.
-  if (data.isDecreasingPwm) {
+  if (data.isDecreasingPwm)
+  {
     delay(250);
 
-    if (data.pwm <= 5) {
+    if (data.pwm <= 5)
+    {
       data.pwm = 0;
       data.isDecreasingPwm = false;
-    } else {
+    }
+    else
+    {
       data.pwm -= 5;
     }
   }
@@ -56,7 +67,8 @@ void loop() {
 
   // Decodar todas as mensagens na fila do CAN
   TwaiReceivedMessage twaiMessage;
-  while (twaiReceive(&twaiMessage) == ESP_OK) {
+  while (twaiReceive(&twaiMessage) == ESP_OK)
+  {
     onTwaiMessage(&twaiMessage);
   }
 
@@ -71,5 +83,7 @@ void loop() {
   // Enviar dados para o telefone
   data.sendToBle(espBle);
 
-  data.debugPrintAll();
+  // data.debugPrintAll();
+
+  stateManager.loop();
 }

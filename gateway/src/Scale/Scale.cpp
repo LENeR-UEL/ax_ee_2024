@@ -3,6 +3,8 @@
 #ifndef SCALE_USE_STUB
 #include <HX711.h>
 
+static const char *TAG = "RealScale";
+
 HX711 scale;
 
 // Valores iniciais da balança (offset), quando não há peso sobre elas
@@ -53,6 +55,8 @@ void readScale(Scale scaleId)
 
 void scaleBeginOrDie()
 {
+    ESP_LOGI(TAG, "Scale setup");
+
     // Obter os valores iniciais (offset) das balanças, quando não há peso sobre elas
     switchScale(Scale::A);
     baseReading[Scale::A] = scale.read_average();

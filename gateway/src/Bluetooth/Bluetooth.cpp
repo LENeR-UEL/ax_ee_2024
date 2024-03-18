@@ -1,4 +1,7 @@
 #include "Bluetooth.h"
+#include <esp_log.h>
+
+static const char *TAG = "Bluetooth";
 
 BLEService service("ab04");
 BLECharacteristic characteristicStatusFeedback("ff01", BLERead | BLENotify, 12);
@@ -9,21 +12,26 @@ Bluetooth espBle("ESP-32 LILAT2");
 // Advertising parameters should have a global scope. Do NOT define them in 'setup' or in 'loop'
 const uint8_t completeRawAdvertisingData[] = {0x02, 0x01, 0x06};
 
-Bluetooth::Bluetooth(const char *advertisingName) {
+Bluetooth::Bluetooth(const char *advertisingName)
+{
   this->AdvertisingName = advertisingName;
   this->onControlReceivedCallback = nullptr;
 }
 
-void Bluetooth::Update() {
+void Bluetooth::Update()
+{
   BLE.poll();
 }
 
-bool Bluetooth::isConnected() {
+bool Bluetooth::isConnected()
+{
   return BLE.connected();
 }
 
-void Bluetooth::startOrDie() {
-  while (!BLE.begin()) {
+void Bluetooth::startOrDie()
+{
+  while (!BLE.begin())
+  {
     Serial.println("failed to initialize BLE!");
   }
 
@@ -48,20 +56,23 @@ void Bluetooth::startOrDie() {
   BLE.setScanResponseData(scanData);
   BLE.advertise();
 
-  printf("Advertising! Bluetooth service UUID is %s\n", service.uuid());
+  ESP_LOGI(TAG, "Advertising! Bluetooth service UUID is %s", service.uuid());
 
   characteristicControl.setEventHandler(BLECharacteristicEvent::BLEWritten,
-                                        [](BLEDevice device, BLECharacteristic characteristic) {
-                                            uint16_t fullPayload = characteristicControl.value();
+                                        [](BLEDevice device, BLECharacteristic characteristic)
+                                        {
+                                          uint16_t fullPayload = characteristicControl.value();
 
-                                            if (espBle.onControlReceivedCallback != nullptr) {
-                                              espBle.onControlReceivedCallback(fullPayload);
-                                            }
+                                          if (espBle.onControlReceivedCallback != nullptr)
+                                          {
+                                            espBle.onControlReceivedCallback(fullPayload);
+                                          }
                                         });
 
   characteristicControl.subscribe();
 }
 
-void Bluetooth::writeStatusData(BleStatusPacket *packet) {
+void Bluetooth::writeStatusData(BleStatusPacket *packet)
+{
   characteristicStatusFeedback.writeValue(packet, sizeof(BleStatusPacket));
 }
