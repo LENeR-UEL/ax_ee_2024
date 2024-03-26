@@ -41,8 +41,7 @@ export default function MalhaAbertaView() {
     isOperating.setFalse();
     isWindingDown.setTrue();
 
-    await sendControl({ controlCode: "SaveMese", waitForResponse: true });
-    await sendControl({ controlCode: "ResetPwmGradual", waitForResponse: true });
+    await sendControl({ controlCode: "MESECollecter_RegisterMESE", waitForResponse: true });
   };
 
   const changeMese = async (sign: "+" | "-") => {
@@ -51,7 +50,7 @@ export default function MalhaAbertaView() {
     }
 
     await sendControl({
-      controlCode: sign === "+" ? "IncreasePwmStep" : "DecreasePwmStep",
+      controlCode: sign === "+" ? "MESECollecter_IncreaseOnce" : "MESECollecter_DecreaseOnce",
       waitForResponse: true
     });
   };

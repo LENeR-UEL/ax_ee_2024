@@ -56,4 +56,14 @@ int scaleGetMeasurement(Scale whichOne)
   return correctedReadingKg[whichOne];
 }
 
+int scaleGetWeightL()
+{
+  return scaleGetMeasurement(Scale::C) + scaleGetMeasurement(Scale::D);
+}
+
+int scaleGetWeightR()
+{
+  return scaleGetMeasurement(Scale::A) + scaleGetMeasurement(Scale::B);
+}
+
 #endif

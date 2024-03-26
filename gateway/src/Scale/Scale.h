@@ -16,3 +16,5 @@ enum Scale
 void scaleBeginOrDie();
 void scaleUpdate();
 int scaleGetMeasurement(Scale whichOne);
+int scaleGetWeightL();
+int scaleGetWeightR();

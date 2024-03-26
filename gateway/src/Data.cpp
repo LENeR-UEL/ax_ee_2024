@@ -5,7 +5,8 @@
 
 static const char *TAG = "Data";
 
-Data::Data() {
+Data::Data()
+{
   this->pwm = 0;
   this->mese = 0;
   this->meseMax = 0;
@@ -20,24 +21,18 @@ Data::Data() {
   this->lastBluetoothSendTime = 0;
 }
 
-void Data::sendToTwai() const {
-  twaiSend(TwaiSendMessageKind::WeightL, data.weightL);
-  twaiSend(TwaiSendMessageKind::WeightR, data.weightR);
-  twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwm);
-  twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
-  twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
-  twaiSend(TwaiSendMessageKind::Trigger, (uint8_t) trigger);
-}
-
-void Data::sendToBle(const Bluetooth &ble) {
-  if (!espBle.isConnected()) {
+void Data::sendToBle(const Bluetooth &ble)
+{
+  if (!espBle.isConnected())
+  {
     return;
   }
 
   // Se enviarmos o payload pelo Bluetooth tod0 instante, o frontend ficará sobrecarregado
   // Enviamos o payload com o status mais recente a cada N milissegundos.
   unsigned long now = millis();
-  if (now - data.lastBluetoothSendTime < 30) {
+  if (now - data.lastBluetoothSendTime < 120)
+  {
     return;
   }
 
@@ -57,7 +52,8 @@ void Data::sendToBle(const Bluetooth &ble) {
   espBle.writeStatusData(&status);
 }
 
-void Data::debugPrintAll() {
+void Data::debugPrintAll()
+{
   ESP_LOGI(TAG, "");
   DEBUG(this->weightL);
   DEBUG(this->weightR);

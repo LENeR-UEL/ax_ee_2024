@@ -1,18 +1,24 @@
 #pragma once
 #include <unordered_map>
+#include "Twai/Twai.h"
+#include "Bluetooth/Bluetooth.h"
 
 enum class StateKind
 {
     Disconnected,
-    StateB,
-    StateC,
-    StateD
+    ParameterSetup,
+    ParallelWeight,
+    MESECollecter,
+    MainOperation
 };
 
 typedef struct State
 {
+    const char *TAG;
     void (*onEnter)();
     void (*onLoop)();
+    void (*onTWAIMessage)(TwaiReceivedMessage *receivedMessage);
+    void (*onBLEControl)(BluetoothControlCode code, uint8_t extraData);
     void (*onExit)();
 } State;
 
@@ -27,9 +33,39 @@ public:
     void setup(StateKind initial);
     void switchTo(StateKind to);
     void loop();
+    void onTWAIMessage(TwaiReceivedMessage *receivedMessage);
+    void onBLEControl(BluetoothControlCode code, uint8_t extraData);
 };
 
+extern StateManager stateManager;
+
 // Definição dos estados
-void onEnter_Disconnected();
-void onLoop_Disconnected();
-void onExit_Disconnected();
+void onDisconnectedStateEnter();
+void onDisconnectedStateLoop();
+void onDisconnectedStateTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onDisconnectedStateBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onDisconnectedStateExit();
+
+void onParameterSetupStateEnter();
+void onParameterSetupStateLoop();
+void onParameterSetupStateTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onParameterSetupStateExit();
+
+void onParallelWeightStateEnter();
+void onParallelWeightStateLoop();
+void onParallelWeightStateTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onParallelWeightStateBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onParallelWeightStateExit();
+
+void onMESECollecterStateEnter();
+void onMESECollecterStateLoop();
+void onMESECollecterStateTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onMESECollecterStateBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onMESECollecterStateExit();
+
+void onMainOperationStateEnter();
+void onMainOperationStateLoop();
+void onMainOperationStateTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onMainOperationStateBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onMainOperationStateExit();

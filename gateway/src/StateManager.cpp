@@ -12,9 +12,45 @@ StateManager::StateManager()
         {
             StateKind::Disconnected,
             State{
-                .onEnter = onEnter_Disconnected,
-                .onLoop = onLoop_Disconnected,
-                .onExit = onExit_Disconnected,
+                .TAG = "DisconnectedState",
+                .onEnter = onDisconnectedStateEnter,
+                .onLoop = onDisconnectedStateLoop,
+                .onTWAIMessage = onDisconnectedStateTWAIMessage,
+                .onBLEControl = onDisconnectedStateBLEControl,
+                .onExit = onDisconnectedStateExit,
+            },
+        },
+        {
+            StateKind::ParameterSetup,
+            State{
+                .TAG = "ParameterSetup",
+                .onEnter = onParameterSetupStateEnter,
+                .onLoop = onParameterSetupStateLoop,
+                .onTWAIMessage = onParameterSetupStateTWAIMessage,
+                .onBLEControl = onParameterSetupStateBLEControl,
+                .onExit = onParameterSetupStateExit,
+            },
+        },
+        {
+            StateKind::ParallelWeight,
+            State{
+                .TAG = "ParallelWeight",
+                .onEnter = onParallelWeightStateEnter,
+                .onLoop = onParallelWeightStateLoop,
+                .onTWAIMessage = onParallelWeightStateTWAIMessage,
+                .onBLEControl = onParallelWeightStateBLEControl,
+                .onExit = onParallelWeightStateExit,
+            },
+        },
+        {
+            StateKind::MESECollecter,
+            State{
+                .TAG = "MESECollecter",
+                .onEnter = onMESECollecterStateEnter,
+                .onLoop = onMESECollecterStateLoop,
+                .onTWAIMessage = onMESECollecterStateTWAIMessage,
+                .onBLEControl = onMESECollecterStateBLEControl,
+                .onExit = onMESECollecterStateExit,
             },
         },
     };
@@ -22,10 +58,13 @@ StateManager::StateManager()
 
 void StateManager::setup(StateKind initial)
 {
-    ESP_LOGI(TAG, "Starting at state %d", initial);
-
     this->current = &this->states[initial];
-    this->current->onEnter();
+
+    ESP_LOGI(TAG, "State %s enter...", this->current->TAG);
+    if (this->current->onEnter != nullptr)
+    {
+        this->current->onEnter();
+    }
 }
 
 void StateManager::switchTo(StateKind to)
@@ -36,14 +75,41 @@ void StateManager::switchTo(StateKind to)
             ESP_LOGE(TAG, "State not found: %d", to);
     }
 
-    ESP_LOGI(TAG, "Switching to state %d", to);
+    ESP_LOGI(TAG, "State %s exit...", this->current->TAG);
+    if (this->current->onExit != nullptr)
+    {
+        this->current->onExit();
+    }
 
-    this->current->onExit();
     this->current = &this->states[to];
-    this->current->onEnter();
+
+    ESP_LOGI(TAG, "State %s enter...", this->current->TAG);
+    if (this->current->onEnter != nullptr)
+    {
+        this->current->onEnter();
+    }
 }
 
 void StateManager::loop()
 {
-    this->current->onLoop();
+    if (this->current->onLoop != nullptr)
+    {
+        this->current->onLoop();
+    }
+}
+
+void StateManager::onTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+    if (this->current->onTWAIMessage != nullptr)
+    {
+        this->current->onTWAIMessage(receivedMessage);
+    }
+}
+
+void StateManager::onBLEControl(BluetoothControlCode code, uint8_t extraData)
+{
+    if (this->current->onBLEControl != nullptr)
+    {
+        this->current->onBLEControl(code, extraData);
+    }
 }

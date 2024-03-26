@@ -78,7 +78,7 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
     received->Kind = (TwaiReceivedMessageKind)lastReceivedMessage.identifier;
     received->ExtraData = data;
 
-    // ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
+    ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
   }
   else
   {

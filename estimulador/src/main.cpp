@@ -2,7 +2,7 @@
 #include <esp_log.h>
 #include "Twai/Twai.h"
 
-#define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d\n", variable)
+#define DEBUG(variable) ESP_LOGI(TAG, #variable ": %d\n", variable)
 
 static const char *TAG = "main";
 
@@ -166,4 +166,5 @@ void loop()
   DEBUG(meseMax);
   DEBUG(setpointKg);
   DEBUG(flagTrigger);
+  ESP_LOGI(TAG, "");
 }

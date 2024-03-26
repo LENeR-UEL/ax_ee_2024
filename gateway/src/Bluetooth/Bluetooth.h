@@ -8,7 +8,22 @@ extern BLEService service;
 extern BLECharacteristic characteristicStatusFeedback;
 extern BLEShortCharacteristic characteristicControl;
 
-enum class BluetoothControlCode {
+enum class BluetoothControlCode
+{
+    /**
+     * Invoca um reset no gateway e no estimulador.
+     */
+    FirmwareInvokeReset = 0x00,
+
+    ParameterSetup_Complete = 0x2F,
+
+    Parallel_RegisterWeight = 0x10,
+    Parallel_Complete = 0x1f,
+
+    MESECollecter_IncreaseOnce = 0x21,
+    MESECollecter_DecreaseOnce = 0x22,
+    MESECollecter_RegisterMESE = 0x24,
+
     ResetPwmImmediate = 0x80,
     DecreasePwmStep = 0x81,
     IncreasePwmStep = 0x82,
@@ -22,7 +37,8 @@ enum class BluetoothControlCode {
     SetTrigger = 0xC0,
 };
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__))
+{
     uint16_t pwm;
     uint8_t weightL;
     uint8_t weightR;
@@ -33,7 +49,8 @@ typedef struct __attribute__((__packed__)) {
 } BleStatusPacket;
 
 /// Bluetooth class for handling Bluetooth operations
-class Bluetooth {
+class Bluetooth
+{
 private:
     const char *AdvertisingName; ///< Advertising name for Bluetooth device
 

@@ -23,7 +23,7 @@ export default function ParalelaView() {
 
   const countdown = useCountdown(async () => {
     // Requisitar dado...
-    await sendControl({ controlCode: "CollectAverageWeight", waitForResponse: true });
+    await sendControl({ controlCode: "Parallel_RegisterWeight", waitForResponse: true });
     hapticFeedbackControl();
   }, 1000);
 
@@ -40,6 +40,10 @@ export default function ParalelaView() {
     console.log("Peso médio coletado!");
     hapticFeedbackControl();
   }, [status.collectedWeight]);
+
+  async function goToMESECollecter() {
+    await sendControl({ controlCode: "Parallel_Complete", waitForResponse: true });
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -80,6 +84,7 @@ export default function ParalelaView() {
         label={'Ir para "Malha aberta"'}
         target="Malha Aberta"
         visible={status.collectedWeight > 0}
+        onClick={goToMESECollecter}
       />
     </View>
   );

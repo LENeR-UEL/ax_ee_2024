@@ -18,6 +18,23 @@ interface StatusPacket {
 }
 
 const ControlCodes = {
+  /**
+   * Invoca um reset no gateway e no estimulador.
+   */
+  FirmwareInvokeReset: 0x00,
+
+  /**
+   * Enviado pelo app ao salvar a parametrização para aquela sessão.
+   */
+  ParameterSetup_Complete: 0x2f,
+
+  Parallel_RegisterWeight: 0x10,
+  Parallel_Complete: 0x1f,
+
+  MESECollecter_IncreaseOnce: 0x21,
+  MESECollecter_DecreaseOnce: 0x22,
+  MESECollecter_RegisterMESE: 0x24,
+
   _Sync: 0x00,
   ResetPwmImmediate: 0x80,
   DecreasePwmStep: 0x81,

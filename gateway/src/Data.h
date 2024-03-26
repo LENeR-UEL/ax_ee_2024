@@ -32,8 +32,6 @@ public:
 
     unsigned long lastBluetoothSendTime;
 
-    void sendToTwai() const;
-
     void sendToBle(const Bluetooth &ble);
 
     void debugPrintAll();
