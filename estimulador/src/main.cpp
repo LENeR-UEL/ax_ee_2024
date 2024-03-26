@@ -54,8 +54,6 @@ void readEverythingFromTwai()
     // Árvore de decisão com base no controle das mensagens
     switch (latestMessage.Kind)
     {
-    case TEST:
-      // noop
     case WeightL:
       weightL = latestMessage.ExtraData;
       break;
@@ -73,7 +71,7 @@ void readEverythingFromTwai()
       break;
     case Trigger:
       integralErro = 0;
-      flagTrigger = latestMessage.ExtraData == 0 ? FlagTrigger::MalhaAberta : FlagTrigger::MalhaFechadaOperacao;
+      flagTrigger = latestMessage.ExtraData > 0 ? FlagTrigger::MalhaFechadaOperacao : FlagTrigger::MalhaAberta;
       break;
     case Mese:
       break;
@@ -140,7 +138,7 @@ void loop()
     freq = calculateFrequency();
   }
 
-  if (freq < 10)
+  if (freq < 5)
     freq = 0;
 
   unsigned long now_micros = micros();

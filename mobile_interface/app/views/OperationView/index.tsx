@@ -15,9 +15,15 @@ export default function OperationView() {
 
   async function updateMaxMese(operation: "+" | "-") {
     if (operation === "+") {
-      await sendControl({ controlCode: "IncreaseMeseMaxStep", waitForResponse: true });
+      await sendControl({
+        controlCode: "MainOperation_IncreaseMESEMaxOnce",
+        waitForResponse: true
+      });
     } else {
-      await sendControl({ controlCode: "DecreaseMeseMaxStep", waitForResponse: true });
+      await sendControl({
+        controlCode: "MainOperation_DecreaseMESEMaxOnce",
+        waitForResponse: true
+      });
     }
 
     await hapticFeedbackControl();
@@ -29,7 +35,7 @@ export default function OperationView() {
     newSetpoint = Math.round(newSetpoint);
     if (_setpointRef.current === newSetpoint) return;
     await sendControl({
-      controlCode: "SetSetpoint",
+      controlCode: "MainOperation_SetSetpoint",
       data: newSetpoint,
       waitForResponse: false
     });
@@ -37,14 +43,8 @@ export default function OperationView() {
   }
 
   useEffect(() => {
-    sendControl({
-      controlCode: "SetTrigger",
-      data: 1,
-      waitForResponse: true
-    });
-
     return () => {
-      sendControl({ controlCode: "SetTrigger", data: 0, waitForResponse: true });
+      sendControl({ controlCode: "MainOperation_GoBackToMESECollecter", waitForResponse: true });
     };
   }, []);
 

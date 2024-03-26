@@ -15,7 +15,6 @@ enum TwaiSendMessageKind
 
 enum TwaiReceivedMessageKind
 {
-    TEST = 0x99,
     WeightL = 0x51,
     WeightR = 0x52,
     SetRequestedPwm = 0x61,

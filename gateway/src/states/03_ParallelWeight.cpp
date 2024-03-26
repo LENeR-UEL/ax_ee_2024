@@ -11,6 +11,10 @@ static long lastTwaiSendTime = 0;
 
 void onParallelWeightStateEnter()
 {
+    data.mese = 0;
+    data.meseMax = 0;
+    data.setpoint = 0;
+    data.collectedWeight = 0;
 }
 
 void onParallelWeightStateLoop()
@@ -35,7 +39,15 @@ void onParallelWeightStateLoop()
     }
 }
 
-void onParallelWeightStateTWAIMessage(TwaiReceivedMessage *receivedMessage) {}
+void onParallelWeightStateTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+    switch (receivedMessage->Kind)
+    {
+    case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
+        data.pwmFeedback = receivedMessage->ExtraData;
+        break;
+    }
+}
 
 void onParallelWeightStateBLEControl(BluetoothControlCode code, uint8_t extraData)
 {
@@ -47,6 +59,9 @@ void onParallelWeightStateBLEControl(BluetoothControlCode code, uint8_t extraDat
         return;
     case BluetoothControlCode::Parallel_Complete:
         stateManager.switchTo(StateKind::MESECollecter);
+        return;
+    case BluetoothControlCode::Parallel_GoBackToParameterSetup:
+        stateManager.switchTo(StateKind::ParameterSetup);
         return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();

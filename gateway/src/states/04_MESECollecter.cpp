@@ -25,9 +25,9 @@ void onMESECollecterStateEnter()
     lastWindingDownTickTime = 0;
     isWindingDown = false;
 
-    data.pwmFeedback = 0;
     data.mese = 0;
     data.meseMax = 0;
+    data.setpoint = 0;
 }
 
 void onMESECollecterStateLoop()
@@ -61,13 +61,13 @@ void onMESECollecterStateLoop()
     if (now - lastTwaiSendTime >= COLLECTOR_TWAI_SEND_INTERVAL_MS)
     {
         lastTwaiSendTime = now;
+        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
         twaiSend(TwaiSendMessageKind::WeightL, scaleGetWeightL());
         twaiSend(TwaiSendMessageKind::WeightR, scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, requestedPwm);
-        twaiSend(TwaiSendMessageKind::Setpoint, 0);
-        twaiSend(TwaiSendMessageKind::Mese, 0);
-        twaiSend(TwaiSendMessageKind::MeseMax, 0);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+        twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
+        twaiSend(TwaiSendMessageKind::Mese, data.mese);
+        twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
     }
 }
 
@@ -110,7 +110,14 @@ void onMESECollecterStateBLEControl(BluetoothControlCode code, uint8_t extraData
         isWindingDown = true;
         data.mese = requestedPwm;
         data.meseMax = requestedPwm * 1.2f;
+        data.setpoint = requestedPwm * 0.5f;
         break;
+    case BluetoothControlCode::MESECollecter_Complete:
+        stateManager.switchTo(StateKind::MainOperation);
+        break;
+    case BluetoothControlCode::MESECollecter_GoBackToParallel:
+        stateManager.switchTo(StateKind::ParallelWeight);
+        return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();
         return;

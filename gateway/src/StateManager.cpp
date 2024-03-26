@@ -53,7 +53,17 @@ StateManager::StateManager()
                 .onExit = onMESECollecterStateExit,
             },
         },
-    };
+        {
+            StateKind::MainOperation,
+            State{
+                .TAG = "MainOperation",
+                .onEnter = onMainOperationStateEnter,
+                .onLoop = onMainOperationStateLoop,
+                .onTWAIMessage = onMainOperationStateTWAIMessage,
+                .onBLEControl = onMainOperationStateBLEControl,
+                .onExit = onMainOperationStateExit,
+            },
+        }};
 }
 
 void StateManager::setup(StateKind initial)

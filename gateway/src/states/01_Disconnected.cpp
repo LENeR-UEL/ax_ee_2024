@@ -37,7 +37,15 @@ void onDisconnectedStateLoop()
     }
 }
 
-void onDisconnectedStateTWAIMessage(TwaiReceivedMessage *receivedMessage) {}
+void onDisconnectedStateTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+    switch (receivedMessage->Kind)
+    {
+    case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
+        data.pwmFeedback = receivedMessage->ExtraData;
+        break;
+    }
+}
 
 void onDisconnectedStateBLEControl(BluetoothControlCode code, uint8_t extraData) {}
 

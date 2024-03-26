@@ -7,7 +7,6 @@ static const char *TAG = "Data";
 
 Data::Data()
 {
-  this->pwm = 0;
   this->mese = 0;
   this->meseMax = 0;
   this->weightL = 0;
@@ -15,8 +14,6 @@ Data::Data()
   this->collectedWeight = 0;
   this->setpoint = 0;
   this->pwmFeedback = 0;
-  this->trigger = FlagTrigger::MalhaAberta;
-  this->isDecreasingPwm = false;
 
   this->lastBluetoothSendTime = 0;
 }
@@ -58,12 +55,9 @@ void Data::debugPrintAll()
   DEBUG(this->weightL);
   DEBUG(this->weightR);
   DEBUG(this->collectedWeight);
-  DEBUG(this->pwm);
   DEBUG(this->pwmFeedback);
   DEBUG(this->mese);
   DEBUG(this->meseMax);
   DEBUG(this->setpoint);
-  DEBUG(this->trigger);
-  DEBUG(this->isDecreasingPwm);
   ESP_LOGI(TAG, "");
 }

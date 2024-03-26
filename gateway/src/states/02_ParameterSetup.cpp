@@ -12,6 +12,10 @@ static long lastTwaiSendTime = 0;
 
 void onParameterSetupStateEnter()
 {
+    data.mese = 0;
+    data.meseMax = 0;
+    data.setpoint = 0;
+    data.collectedWeight = 0;
 }
 
 void onParameterSetupStateLoop()
@@ -37,7 +41,15 @@ void onParameterSetupStateLoop()
     }
 }
 
-void onParameterSetupStateTWAIMessage(TwaiReceivedMessage *receivedMessage) {}
+void onParameterSetupStateTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+    switch (receivedMessage->Kind)
+    {
+    case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
+        data.pwmFeedback = receivedMessage->ExtraData;
+        break;
+    }
+}
 
 void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraData)
 {

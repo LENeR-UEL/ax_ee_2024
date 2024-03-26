@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { Button } from "react-native-paper";
 import { useCountdown } from "../../hooks/useCountdown";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { hapticFeedbackControl } from "../../haptics/HapticFeedback";
@@ -44,6 +44,12 @@ export default function ParalelaView() {
   async function goToMESECollecter() {
     await sendControl({ controlCode: "Parallel_Complete", waitForResponse: true });
   }
+
+  useEffect(() => {
+    return () => {
+      sendControl({ controlCode: "Parallel_GoBackToParameterSetup", waitForResponse: true });
+    };
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
