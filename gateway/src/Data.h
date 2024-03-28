@@ -25,6 +25,9 @@ public:
     // PWM atual indicado pelo hardware estimulador.
     uint16_t pwmFeedback;
 
+    // Informar o app do estado atual da operação
+    uint8_t mainOperationStateInformApp[4];
+
     unsigned long lastBluetoothSendTime;
 
     void sendToBle(const Bluetooth &ble);

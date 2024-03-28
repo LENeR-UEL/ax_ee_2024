@@ -1,5 +1,6 @@
 
 #include "Data.h"
+#include "string.h"
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d", variable)
 
@@ -16,6 +17,10 @@ Data::Data()
   this->pwmFeedback = 0;
 
   this->lastBluetoothSendTime = 0;
+  this->mainOperationStateInformApp[0] = 0;
+  this->mainOperationStateInformApp[1] = 0;
+  this->mainOperationStateInformApp[2] = 0;
+  this->mainOperationStateInformApp[3] = 0;
 }
 
 void Data::sendToBle(const Bluetooth &ble)
@@ -45,6 +50,10 @@ void Data::sendToBle(const Bluetooth &ble)
   status.weightR = data.weightR;
   status.collectedWeight = data.collectedWeight;
   status.setpoint = data.setpoint;
+  status.mainOperationStateInformApp[0] = this->mainOperationStateInformApp[0];
+  status.mainOperationStateInformApp[1] = this->mainOperationStateInformApp[1];
+  status.mainOperationStateInformApp[2] = this->mainOperationStateInformApp[2];
+  status.mainOperationStateInformApp[3] = this->mainOperationStateInformApp[3];
 
   espBle.writeStatusData(&status);
 }

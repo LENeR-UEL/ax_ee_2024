@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, View } from "react-native";
-import { FAB } from "react-native-paper";
+import { Text, FAB } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { WeightIndicationBar } from "./WeightIndicatorBar";
@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { useBluetoothConnection } from "../../bluetooth/Context";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
+import { run } from "../../utils/run";
 
 export default function OperationView() {
   const bt = useBluetoothConnection();
@@ -106,6 +107,29 @@ export default function OperationView() {
         </View>
         <View style={styles.statusDisplayWrapper}></View>
       </View>
+      <Text style={styles.statusText}>
+        {run(() => {
+          const state = status.mainOperationState;
+          switch (state?.state) {
+            case "START_WAIT_FOR_ZERO":
+              return `Aguardando peso classe 0 durante 2000 ms. Classe atual = ${state.currentWeightClass}`;
+            case "START_WAIT_FOR_WEIGHT_SETPOINT":
+              return `Aguardando peso atingir o setpoint`;
+            case "GRADUAL_INCREMENT":
+              return "Incremento manual, de 0 até MESE";
+            case "TRANSITION":
+              return "Transição. Aguardando liberação do peso nas barras";
+            case "ACTION_CONTROL":
+              return `Operação. Erro: ${state.currentErrorValue} kg`;
+            case "GRADUAL_DECREMENT":
+              return "Decremento manual, até 0";
+            case "STOPPED":
+              return "Finalizado";
+            default:
+              return "";
+          }
+        })}
+      </Text>
     </ScrollView>
   );
 }
@@ -149,5 +173,11 @@ const styles = StyleSheet.create({
   weightBarsWrapper: {
     marginTop: 16,
     gap: 2
+  },
+  statusText: {
+    textAlign: "center",
+    //@ts-expect-error
+    width: "calc(100% - 96)",
+    marginHorizontal: 48
   }
 });

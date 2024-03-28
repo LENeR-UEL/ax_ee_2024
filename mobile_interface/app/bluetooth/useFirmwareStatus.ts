@@ -15,6 +15,18 @@ interface StatusPacket {
   mese: number;
   meseMax: number;
   setpoint: number;
+  mainOperationState:
+    | null
+    | {
+        state: "START_WAIT_FOR_ZERO";
+        currentWeightClass: number;
+      }
+    | { state: "START_WAIT_FOR_WEIGHT_SETPOINT" }
+    | { state: "GRADUAL_INCREMENT" }
+    | { state: "TRANSITION"; currentWeightClass: number }
+    | { state: "ACTION_CONTROL"; currentErrorValue: number }
+    | { state: "GRADUAL_DECREMENT" }
+    | { state: "STOPPED" };
 }
 
 const ControlCodes = {
@@ -56,6 +68,25 @@ const ControlCodes = {
   SetTrigger: 0xc0
 } as const;
 
+enum MainOperationState {
+  _NOT_IN_MAIN_OPERATION = 0,
+
+  // Aguardar peso medido zerar (classe 0) para podermos iniciar a operação
+  START_WAIT_FOR_ZERO = 5,
+  // Voluntário sentado... Aguardar peso nas barras = setpoint
+  START_WAIT_FOR_WEIGHT_SETPOINT,
+  // Aumento gradual do PWM, em malha aberta, de 0 até MESE
+  GRADUAL_INCREMENT,
+  // Voluntário de pé, mas ainda se equilibrando com as barras. Aguardar classe 0 por 2 segundos, significando que ele está de pé e equilibrado
+  TRANSITION,
+  // Estimulação contínua, malha fechada, entre MESE e MESE_MAX. Aguardar fadiga do voluntário (classe 2 por 2s)
+  ACTION_CONTROL,
+  // Decremento gradual do PWM, do valor atual até 0
+  GRADUAL_DECREMENT,
+  // Operação finalizada
+  STOPPED
+}
+
 type ControlCodeDispatcher = (options: {
   controlCode: keyof typeof ControlCodes;
   waitForResponse: boolean;
@@ -63,6 +94,30 @@ type ControlCodeDispatcher = (options: {
 }) => Promise<boolean>;
 
 function parseStatusPacket(packet: Buffer): StatusPacket {
+  let mainOpStateObj: StatusPacket["mainOperationState"];
+
+  const mainOpState: MainOperationState = packet.readUint8(12);
+
+  if (mainOpState === MainOperationState._NOT_IN_MAIN_OPERATION) {
+    mainOpStateObj = null;
+  } else if (mainOpState === MainOperationState.START_WAIT_FOR_ZERO) {
+    mainOpStateObj = { state: "START_WAIT_FOR_ZERO", currentWeightClass: packet.readUint8(13) };
+  } else if (mainOpState === MainOperationState.START_WAIT_FOR_WEIGHT_SETPOINT) {
+    mainOpStateObj = { state: "START_WAIT_FOR_WEIGHT_SETPOINT" };
+  } else if (mainOpState === MainOperationState.GRADUAL_INCREMENT) {
+    mainOpStateObj = { state: "GRADUAL_INCREMENT" };
+  } else if (mainOpState === MainOperationState.TRANSITION) {
+    mainOpStateObj = { state: "TRANSITION", currentWeightClass: packet.readUint8(13) };
+  } else if (mainOpState === MainOperationState.ACTION_CONTROL) {
+    mainOpStateObj = { state: "ACTION_CONTROL", currentErrorValue: packet.readInt16BE(13) };
+  } else if (mainOpState === MainOperationState.GRADUAL_DECREMENT) {
+    mainOpStateObj = { state: "GRADUAL_DECREMENT" };
+  } else if (mainOpState === MainOperationState.STOPPED) {
+    mainOpStateObj = { state: "STOPPED" };
+  } else {
+    throw new Error(`Unexpected main operation state: ${mainOpState}`);
+  }
+
   return {
     pwm: packet.readUint16LE(0),
     weightL: packet.readUint8(2),
@@ -70,7 +125,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     collectedWeight: packet.readUint16LE(4),
     mese: packet.readUint16LE(6),
     meseMax: packet.readUint16LE(8),
-    setpoint: packet.readUint16LE(10)
+    setpoint: packet.readUint16LE(10),
+    mainOperationState: mainOpStateObj
   };
 }
 
@@ -83,7 +139,8 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
     collectedWeight: 0,
     mese: 0,
     meseMax: 0,
-    setpoint: 0
+    setpoint: 0,
+    mainOperationState: null
   });
 
   useEffect(() => {
@@ -117,6 +174,7 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
       const parsed = parseStatusPacket(payload);
 
       console.debug("Firmware Status: " + payload.toString("hex"));
+      console.debug(parsed.mainOperationState);
 
       _setValue(parsed);
     }

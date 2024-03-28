@@ -54,6 +54,9 @@ typedef struct __attribute__((__packed__))
     uint16_t mese;
     uint16_t meseMax;
     uint16_t setpoint;
+
+    // Informar o app do estado atual da operação
+    uint8_t mainOperationStateInformApp[4];
 } BleStatusPacket;
 
 /// Bluetooth class for handling Bluetooth operations

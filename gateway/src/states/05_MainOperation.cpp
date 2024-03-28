@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <esp_log.h>
+#include <string.h>
 #include "../Bluetooth/Bluetooth.h"
 #include "../Twai/Twai.h"
 #include "../Data.h"
@@ -8,13 +9,10 @@
 
 static const char *TAG = "MainOperation";
 
-#define MAIN_OPERATION_TWAI_SEND_INTERVAL_MS 100
-#define MAIN_OPERATION_MESE_MAX_STEP 5
-
 enum class MainOperationState
 {
     // Aguardar peso medido zerar (classe 0) para podermos iniciar a operação
-    START_WAIT_FOR_ZERO,
+    START_WAIT_FOR_ZERO = 5,
     // Voluntário sentado... Aguardar peso nas barras = setpoint
     START_WAIT_FOR_WEIGHT_SETPOINT,
     // Aumento gradual do PWM, em malha aberta, de 0 até MESE
@@ -29,19 +27,26 @@ enum class MainOperationState
     STOPPED
 };
 
+static const uint8_t MAIN_OPERATION_TWAI_SEND_INTERVAL_MS = 100;
 static long lastTwaiSendTime;
-
-static uint8_t lastWeightClass = 0;
-static long lastWeightClassChangeTime = 0;
-
-#define GRADUAL_PWM_STEP 5
-#define GRADUAL_INTERVAL_MS 1000
-static long lastGradualChangeTime = 0;
-
-static MainOperationState substate;
 
 // Dividir o peso lido em grupos desse tamanho. Usado para transições de estado, já que pode haver flutuações na leitura das balanças.
 static const uint8_t MAIN_OPERATION_WEIGHT_CLASS_SIZE = 10;
+static uint8_t lastWeightClass = 0;
+static long lastWeightClassChangeTime = 0;
+
+static const uint8_t GRADUAL_PWM_STEP = 5;
+static const uint16_t GRADUAL_INTERVAL_MS = 500;
+static long lastGradualChangeTime = 0;
+
+static const uint8_t MAIN_OPERATION_MESE_MAX_STEP = 5;
+
+// Instante mais recente onde o valor de erro era negativo
+// Usado para calcular quanto tempo o erro está positivo, no estado de transição
+static long calculatedErrorValueLastNegativeTime = 0;
+
+static MainOperationState substate;
+
 uint8_t determineCurrentWeightClass()
 {
     int weightTotal = scaleGetWeightL() + scaleGetWeightR();
@@ -55,6 +60,11 @@ void onMainOperationStateEnter()
     lastWeightClass = determineCurrentWeightClass();
     lastWeightClassChangeTime = millis();
     lastGradualChangeTime = millis();
+    calculatedErrorValueLastNegativeTime = millis();
+    data.mainOperationStateInformApp[0] = 0;
+    data.mainOperationStateInformApp[1] = 0;
+    data.mainOperationStateInformApp[2] = 0;
+    data.mainOperationStateInformApp[3] = 0;
 }
 
 void onMainOperationStateLoop()
@@ -92,6 +102,11 @@ void onMainOperationStateLoop()
             break;
         }
 
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = currentWeightClass;
+        data.mainOperationStateInformApp[2] = 0;
+        data.mainOperationStateInformApp[3] = 0;
+
         break;
     }
     case MainOperationState::START_WAIT_FOR_WEIGHT_SETPOINT:
@@ -108,6 +123,11 @@ void onMainOperationStateLoop()
 
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = 0;
+        data.mainOperationStateInformApp[2] = 0;
+        data.mainOperationStateInformApp[3] = 0;
 
         break;
     }
@@ -135,6 +155,11 @@ void onMainOperationStateLoop()
 
         trigger = FlagTrigger::MalhaAberta;
 
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = 0;
+        data.mainOperationStateInformApp[2] = 0;
+        data.mainOperationStateInformApp[3] = 0;
+
         break;
     }
     case MainOperationState::TRANSITION:
@@ -148,19 +173,31 @@ void onMainOperationStateLoop()
             substate = MainOperationState::ACTION_CONTROL;
             lastWeightClassChangeTime = now;
             lastGradualChangeTime = now;
+            calculatedErrorValueLastNegativeTime = now;
             break;
         }
 
         trigger = FlagTrigger::MalhaAberta;
 
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = currentWeightClass;
+        data.mainOperationStateInformApp[2] = 0;
+        data.mainOperationStateInformApp[3] = 0;
+
         break;
     }
     case MainOperationState::ACTION_CONTROL:
     {
-        ESP_LOGD(TAG, "Operação... Aguardando classe de peso >=2 durante 2000ms. Delta: %d Classe atual: %d", classChangeTimeDelta, currentWeightClass);
+        short currentErrorValue = (scaleGetWeightL() + scaleGetWeightR()) - data.setpoint;
+        if (currentErrorValue < 0)
+        {
+            calculatedErrorValueLastNegativeTime = now;
+        }
 
-        // 20kg+ aplicado durante 2000ms
-        if (lastWeightClass >= 2 && classChangeTimeDelta >= 2000)
+        ESP_LOGD(TAG, "Operação... Aguardando erro positivo durante 2000ms. Delta = %d ms, erro = %d", now - calculatedErrorValueLastNegativeTime, currentErrorValue);
+
+        // Erro positivo durante 2000ms?
+        if (now - calculatedErrorValueLastNegativeTime >= 2000)
         {
             ESP_LOGD(TAG, "Objetivo alcançado.");
             substate = MainOperationState::GRADUAL_DECREMENT;
@@ -171,6 +208,11 @@ void onMainOperationStateLoop()
         }
 
         trigger = FlagTrigger::MalhaFechadaOperacao;
+
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = (currentErrorValue & 0xFF00) << 8;
+        data.mainOperationStateInformApp[2] = currentErrorValue & 0x00FF;
+        data.mainOperationStateInformApp[3] = 0;
 
         break;
     }
@@ -207,12 +249,20 @@ void onMainOperationStateLoop()
         }
 
         trigger = FlagTrigger::MalhaAberta;
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = 0;
+        data.mainOperationStateInformApp[2] = 0;
+        data.mainOperationStateInformApp[3] = 0;
     }
     case MainOperationState::STOPPED:
     {
 
         ESP_LOGD(TAG, "Parado.");
         trigger = FlagTrigger::MalhaAberta;
+        data.mainOperationStateInformApp[0] = (uint8_t)substate;
+        data.mainOperationStateInformApp[1] = 0;
+        data.mainOperationStateInformApp[2] = 0;
+        data.mainOperationStateInformApp[3] = 0;
     }
     }
 

@@ -4,7 +4,7 @@
 static const char *TAG = "Bluetooth";
 
 BLEService service("ab04");
-BLECharacteristic characteristicStatusFeedback("ff01", BLERead | BLENotify, 12);
+BLECharacteristic characteristicStatusFeedback("ff01", BLERead | BLENotify, sizeof(BleStatusPacket));
 BLEShortCharacteristic characteristicControl("ff0f", BLEWriteWithoutResponse | BLEWrite | BLENotify);
 
 Bluetooth espBle("ESP-32 LILAT2");
