@@ -31,18 +31,6 @@ enum class BluetoothControlCode
     MainOperation_SetSetpoint = 0x31,
     MainOperation_IncreaseMESEMaxOnce = 0x32,
     MainOperation_DecreaseMESEMaxOnce = 0x33,
-
-    ResetPwmImmediate = 0x80,
-    DecreasePwmStep = 0x81,
-    IncreasePwmStep = 0x82,
-    ResetPwmGradual = 0x83,
-    CollectWeight = 0x8A,
-    SaveMese = 0x90,
-    DecreaseMeseMaxStep = 0xA1,
-    IncreaseMeseMaxStep = 0xA2,
-    SetSetpoint = 0xB1,
-    // Na transição de telas de "Paralela" para "Operação", o app envia essa flag
-    SetTrigger = 0xC0,
 };
 
 typedef struct __attribute__((__packed__))

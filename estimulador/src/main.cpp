@@ -17,6 +17,7 @@ enum class FlagTrigger
 uint16_t weightL;
 uint16_t weightR;
 uint16_t requestedPwm;
+uint16_t mese;
 uint16_t meseMax;
 uint16_t setpointKg;
 FlagTrigger flagTrigger;
@@ -74,6 +75,7 @@ void readEverythingFromTwai()
       flagTrigger = latestMessage.ExtraData > 0 ? FlagTrigger::MalhaFechadaOperacao : FlagTrigger::MalhaAberta;
       break;
     case Mese:
+      mese = latestMessage.ExtraData;
       break;
     }
   }
@@ -91,7 +93,17 @@ int calculateFrequency()
   int pi = KP * erro + KI * integralErro;
 
   // Não deixar pi passar de meseMax
-  pi = min(pi, (int)meseMax);
+
+  if (pi < mese)
+  {
+    pi = Mese;
+  }
+  else if (pi > meseMax)
+  {
+    pi = meseMax;
+  }
+
+  // pi = min(pi, (int)meseMax);
 
   return pi;
 }

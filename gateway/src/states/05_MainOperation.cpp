@@ -113,7 +113,7 @@ void onMainOperationStateLoop()
     {
         ESP_LOGD(TAG, "Iniciando... Aguardando peso >= setpoint.");
         uint16_t currentWeight = scaleGetWeightL() + scaleGetWeightR();
-        if (currentWeight >= data.setpoint)
+        if (currentWeight >= data.setpoint * 2)
         {
             ESP_LOGD(TAG, "Objetivo alcançado.");
             substate = MainOperationState::GRADUAL_INCREMENT;
@@ -210,8 +210,9 @@ void onMainOperationStateLoop()
         trigger = FlagTrigger::MalhaFechadaOperacao;
 
         data.mainOperationStateInformApp[0] = (uint8_t)substate;
-        data.mainOperationStateInformApp[1] = (currentErrorValue & 0xFF00) << 8;
-        data.mainOperationStateInformApp[2] = currentErrorValue & 0x00FF;
+        // little-endian
+        data.mainOperationStateInformApp[1] = currentErrorValue & 0xFF;
+        data.mainOperationStateInformApp[2] = (currentErrorValue >> 8) & 0xFF;
         data.mainOperationStateInformApp[3] = 0;
 
         break;

@@ -50,10 +50,7 @@ void Data::sendToBle(const Bluetooth &ble)
   status.weightR = data.weightR;
   status.collectedWeight = data.collectedWeight;
   status.setpoint = data.setpoint;
-  status.mainOperationStateInformApp[0] = this->mainOperationStateInformApp[0];
-  status.mainOperationStateInformApp[1] = this->mainOperationStateInformApp[1];
-  status.mainOperationStateInformApp[2] = this->mainOperationStateInformApp[2];
-  status.mainOperationStateInformApp[3] = this->mainOperationStateInformApp[3];
+  memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp, sizeof(status.mainOperationStateInformApp));
 
   espBle.writeStatusData(&status);
 }

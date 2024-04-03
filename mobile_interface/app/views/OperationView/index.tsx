@@ -8,6 +8,7 @@ import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { useBluetoothConnection } from "../../bluetooth/Context";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
 import { run } from "../../utils/run";
+import { timeout } from "../../utils/timeout";
 
 export default function OperationView() {
   const bt = useBluetoothConnection();
@@ -48,6 +49,12 @@ export default function OperationView() {
       sendControl({ controlCode: "MainOperation_GoBackToMESECollecter", waitForResponse: true });
     };
   }, []);
+
+  useEffect(() => {
+    hapticFeedbackControl()
+      .then(() => timeout(100))
+      .then(() => hapticFeedbackControl());
+  }, [status.mainOperationState?.state]);
 
   return (
     <ScrollView>
@@ -114,15 +121,15 @@ export default function OperationView() {
             case "START_WAIT_FOR_ZERO":
               return `Aguardando peso classe 0 durante 2000 ms. Classe atual = ${state.currentWeightClass}`;
             case "START_WAIT_FOR_WEIGHT_SETPOINT":
-              return `Aguardando peso atingir o setpoint`;
+              return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
             case "GRADUAL_INCREMENT":
-              return "Incremento manual, de 0 até MESE";
+              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese})`;
             case "TRANSITION":
               return "Transição. Aguardando liberação do peso nas barras";
             case "ACTION_CONTROL":
               return `Operação. Erro: ${state.currentErrorValue} kg`;
             case "GRADUAL_DECREMENT":
-              return "Decremento manual, até 0";
+              return `Decremento manual, até 0 (${status.pwm} / 0)`;
             case "STOPPED":
               return "Finalizado";
             default:

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fullUUID, BleError, BleErrorCode, Characteristic } from "react-native-ble-plx";
 import { Buffer } from "buffer";
 import { useBluetoothConnection } from "./Context";
+import { BufferReader } from "./bufferReader";
 
 const SERVICE_UUID = fullUUID("ab04");
 const STATUS_UUID = fullUUID("ff01");
@@ -53,19 +54,7 @@ const ControlCodes = {
   MainOperation_GoBackToMESECollecter: 0x30,
   MainOperation_SetSetpoint: 0x31,
   MainOperation_IncreaseMESEMaxOnce: 0x32,
-  MainOperation_DecreaseMESEMaxOnce: 0x33,
-
-  _Sync: 0x00,
-  ResetPwmImmediate: 0x80,
-  DecreasePwmStep: 0x81,
-  IncreasePwmStep: 0x82,
-  ResetPwmGradual: 0x83,
-  CollectAverageWeight: 0x8a,
-  SaveMese: 0x90,
-  DecreaseMeseMaxStep: 0xa1,
-  IncreaseMeseMaxStep: 0xa2,
-  SetSetpoint: 0xb1,
-  SetTrigger: 0xc0
+  MainOperation_DecreaseMESEMaxOnce: 0x33
 } as const;
 
 enum MainOperationState {
@@ -94,38 +83,64 @@ type ControlCodeDispatcher = (options: {
 }) => Promise<boolean>;
 
 function parseStatusPacket(packet: Buffer): StatusPacket {
-  let mainOpStateObj: StatusPacket["mainOperationState"];
+  const reader = new BufferReader(packet);
 
-  const mainOpState: MainOperationState = packet.readUint8(12);
+  const pwm = reader.readUnsignedShortLE();
+  const weightL = reader.readUnsignedChar();
+  const weightR = reader.readUnsignedChar();
+  const collectedWeight = reader.readUnsignedShortLE();
+  const mese = reader.readUnsignedShortLE();
+  const meseMax = reader.readUnsignedShortLE();
+  const setpoint = reader.readUnsignedShortLE();
+  const mainOpState = reader.readUnsignedChar() as MainOperationState;
+
+  let mainOpStateObj: StatusPacket["mainOperationState"];
 
   if (mainOpState === MainOperationState._NOT_IN_MAIN_OPERATION) {
     mainOpStateObj = null;
   } else if (mainOpState === MainOperationState.START_WAIT_FOR_ZERO) {
-    mainOpStateObj = { state: "START_WAIT_FOR_ZERO", currentWeightClass: packet.readUint8(13) };
+    mainOpStateObj = {
+      state: "START_WAIT_FOR_ZERO",
+      currentWeightClass: reader.readUnsignedChar()
+    };
   } else if (mainOpState === MainOperationState.START_WAIT_FOR_WEIGHT_SETPOINT) {
-    mainOpStateObj = { state: "START_WAIT_FOR_WEIGHT_SETPOINT" };
+    mainOpStateObj = {
+      state: "START_WAIT_FOR_WEIGHT_SETPOINT"
+    };
   } else if (mainOpState === MainOperationState.GRADUAL_INCREMENT) {
-    mainOpStateObj = { state: "GRADUAL_INCREMENT" };
+    mainOpStateObj = {
+      state: "GRADUAL_INCREMENT"
+    };
   } else if (mainOpState === MainOperationState.TRANSITION) {
-    mainOpStateObj = { state: "TRANSITION", currentWeightClass: packet.readUint8(13) };
+    mainOpStateObj = {
+      state: "TRANSITION",
+      currentWeightClass: reader.readUnsignedChar()
+    };
   } else if (mainOpState === MainOperationState.ACTION_CONTROL) {
-    mainOpStateObj = { state: "ACTION_CONTROL", currentErrorValue: packet.readInt16BE(13) };
+    mainOpStateObj = {
+      state: "ACTION_CONTROL",
+      currentErrorValue: reader.readShortLE()
+    };
   } else if (mainOpState === MainOperationState.GRADUAL_DECREMENT) {
-    mainOpStateObj = { state: "GRADUAL_DECREMENT" };
+    mainOpStateObj = {
+      state: "GRADUAL_DECREMENT"
+    };
   } else if (mainOpState === MainOperationState.STOPPED) {
-    mainOpStateObj = { state: "STOPPED" };
+    mainOpStateObj = {
+      state: "STOPPED"
+    };
   } else {
     throw new Error(`Unexpected main operation state: ${mainOpState}`);
   }
 
   return {
-    pwm: packet.readUint16LE(0),
-    weightL: packet.readUint8(2),
-    weightR: packet.readUint8(3),
-    collectedWeight: packet.readUint16LE(4),
-    mese: packet.readUint16LE(6),
-    meseMax: packet.readUint16LE(8),
-    setpoint: packet.readUint16LE(10),
+    pwm,
+    weightL,
+    weightR,
+    collectedWeight,
+    mese,
+    meseMax,
+    setpoint,
     mainOperationState: mainOpStateObj
   };
 }
