@@ -21,6 +21,8 @@ Data::Data()
   this->mainOperationStateInformApp[1] = 0;
   this->mainOperationStateInformApp[2] = 0;
   this->mainOperationStateInformApp[3] = 0;
+  this->mainOperationStateInformApp[4] = 0;
+  this->mainOperationStateInformApp[5] = 0;
 }
 
 void Data::sendToBle(const Bluetooth &ble)

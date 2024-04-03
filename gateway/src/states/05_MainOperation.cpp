@@ -61,10 +61,13 @@ void onMainOperationStateEnter()
     lastWeightClassChangeTime = millis();
     lastGradualChangeTime = millis();
     calculatedErrorValueLastNegativeTime = millis();
+    data.setpoint = data.collectedWeight / 2.0;
     data.mainOperationStateInformApp[0] = 0;
     data.mainOperationStateInformApp[1] = 0;
     data.mainOperationStateInformApp[2] = 0;
     data.mainOperationStateInformApp[3] = 0;
+    data.mainOperationStateInformApp[4] = 0;
+    data.mainOperationStateInformApp[5] = 0;
 }
 
 void onMainOperationStateLoop()
@@ -106,7 +109,8 @@ void onMainOperationStateLoop()
         data.mainOperationStateInformApp[1] = currentWeightClass;
         data.mainOperationStateInformApp[2] = 0;
         data.mainOperationStateInformApp[3] = 0;
-
+        data.mainOperationStateInformApp[4] = 0;
+        data.mainOperationStateInformApp[5] = 0;
         break;
     }
     case MainOperationState::START_WAIT_FOR_WEIGHT_SETPOINT:
@@ -128,7 +132,8 @@ void onMainOperationStateLoop()
         data.mainOperationStateInformApp[1] = 0;
         data.mainOperationStateInformApp[2] = 0;
         data.mainOperationStateInformApp[3] = 0;
-
+        data.mainOperationStateInformApp[4] = 0;
+        data.mainOperationStateInformApp[5] = 0;
         break;
     }
     case MainOperationState::GRADUAL_INCREMENT:
@@ -159,7 +164,8 @@ void onMainOperationStateLoop()
         data.mainOperationStateInformApp[1] = 0;
         data.mainOperationStateInformApp[2] = 0;
         data.mainOperationStateInformApp[3] = 0;
-
+        data.mainOperationStateInformApp[4] = 0;
+        data.mainOperationStateInformApp[5] = 0;
         break;
     }
     case MainOperationState::TRANSITION:
@@ -183,7 +189,8 @@ void onMainOperationStateLoop()
         data.mainOperationStateInformApp[1] = currentWeightClass;
         data.mainOperationStateInformApp[2] = 0;
         data.mainOperationStateInformApp[3] = 0;
-
+        data.mainOperationStateInformApp[4] = 0;
+        data.mainOperationStateInformApp[5] = 0;
         break;
     }
     case MainOperationState::ACTION_CONTROL:
@@ -197,7 +204,8 @@ void onMainOperationStateLoop()
         ESP_LOGD(TAG, "Operação... Aguardando erro positivo durante 2000ms. Delta = %d ms, erro = %d", now - calculatedErrorValueLastNegativeTime, currentErrorValue);
 
         // Erro positivo durante 2000ms?
-        if (now - calculatedErrorValueLastNegativeTime >= 2000)
+        unsigned short delta = now - calculatedErrorValueLastNegativeTime;
+        if (delta >= 2000)
         {
             ESP_LOGD(TAG, "Objetivo alcançado.");
             substate = MainOperationState::GRADUAL_DECREMENT;
@@ -213,8 +221,9 @@ void onMainOperationStateLoop()
         // little-endian
         data.mainOperationStateInformApp[1] = currentErrorValue & 0xFF;
         data.mainOperationStateInformApp[2] = (currentErrorValue >> 8) & 0xFF;
-        data.mainOperationStateInformApp[3] = 0;
-
+        data.mainOperationStateInformApp[3] = delta & 0xFF;
+        data.mainOperationStateInformApp[4] = (delta >> 8) & 0xFF;
+        data.mainOperationStateInformApp[5] = 0;
         break;
     }
     case MainOperationState::GRADUAL_DECREMENT:
@@ -254,6 +263,8 @@ void onMainOperationStateLoop()
         data.mainOperationStateInformApp[1] = 0;
         data.mainOperationStateInformApp[2] = 0;
         data.mainOperationStateInformApp[3] = 0;
+        data.mainOperationStateInformApp[4] = 0;
+        data.mainOperationStateInformApp[5] = 0;
     }
     case MainOperationState::STOPPED:
     {
@@ -264,6 +275,8 @@ void onMainOperationStateLoop()
         data.mainOperationStateInformApp[1] = 0;
         data.mainOperationStateInformApp[2] = 0;
         data.mainOperationStateInformApp[3] = 0;
+        data.mainOperationStateInformApp[4] = 0;
+        data.mainOperationStateInformApp[5] = 0;
     }
     }
 

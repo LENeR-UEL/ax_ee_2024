@@ -26,7 +26,7 @@ public:
     uint16_t pwmFeedback;
 
     // Informar o app do estado atual da operação
-    uint8_t mainOperationStateInformApp[4];
+    uint8_t mainOperationStateInformApp[6];
 
     unsigned long lastBluetoothSendTime;
 

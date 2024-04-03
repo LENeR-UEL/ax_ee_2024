@@ -127,7 +127,7 @@ export default function OperationView() {
             case "TRANSITION":
               return "Transição. Aguardando liberação do peso nas barras";
             case "ACTION_CONTROL":
-              return `Operação. Erro: ${state.currentErrorValue} kg`;
+              return `Operação.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
             case "GRADUAL_DECREMENT":
               return `Decremento manual, até 0 (${status.pwm} / 0)`;
             case "STOPPED":
