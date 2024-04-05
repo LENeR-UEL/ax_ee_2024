@@ -118,14 +118,19 @@ export default function OperationView() {
         {run(() => {
           const state = status.mainOperationState;
           switch (state?.state) {
-            case "START_WAIT_FOR_ZERO":
-              return `Aguardando peso classe 0 durante 2000 ms. Classe atual = ${state.currentWeightClass}`;
+            case "START_WAIT_FOR_ZERO": {
+              // Só mostrar counter caso esteja em classe 0
+              const timer = state.currentWeightClass === 0 ? state.classChangeTimeDelta : 0;
+              return `Aguardando peso classe 0 durante 2000 ms.\nClasse atual: ${state.currentWeightClass}\n Timer: ${timer} / 2000 ms`;
+            }
             case "START_WAIT_FOR_WEIGHT_SETPOINT":
               return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
             case "GRADUAL_INCREMENT":
               return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese})`;
-            case "TRANSITION":
-              return "Transição. Aguardando liberação do peso nas barras";
+            case "TRANSITION": {
+              const timer = state.currentWeightClass === 0 ? state.classChangeTimeDelta : 0;
+              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.currentWeightClass}\nTimer: ${timer} / 2000 ms`;
+            }
             case "ACTION_CONTROL":
               return `Operação.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
             case "GRADUAL_DECREMENT":

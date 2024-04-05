@@ -23,7 +23,7 @@ uint16_t setpointKg;
 FlagTrigger flagTrigger;
 
 const float KP = 1.4;
-const float KI = 2.8;
+const float KI = 0.f;
 
 int integralErro = 0;
 
@@ -84,7 +84,7 @@ void readEverythingFromTwai()
 int calculateFrequency()
 {
   int pesoTotal = weightL + weightR;
-  int erro = pesoTotal - setpointKg;
+  int erro = pesoTotal - setpointKg * 2;
   integralErro += erro;
 
   // Não deixar integralErro passar de -50 e 50
@@ -94,14 +94,18 @@ int calculateFrequency()
 
   // Não deixar pi passar de meseMax
 
+  int pi_original = pi;
+
   if (pi < mese)
   {
-    pi = Mese;
+    pi = mese;
   }
   else if (pi > meseMax)
   {
     pi = meseMax;
   }
+
+  Serial.printf("Original: %d\tApós saturar: %d\n", pi_original, pi);
 
   // pi = min(pi, (int)meseMax);
 
@@ -168,13 +172,13 @@ void loop()
 
     twaiSend(TwaiSendMessageKind::PwmFeedbackEstimulador, (uint16_t)freq);
   }
-
-  DEBUG(freq);
-  DEBUG(weightL);
-  DEBUG(weightR);
-  DEBUG(requestedPwm);
-  DEBUG(meseMax);
-  DEBUG(setpointKg);
-  DEBUG(flagTrigger);
-  ESP_LOGI(TAG, "\n");
+  /*
+    DEBUG(freq);
+    DEBUG(weightL);
+    DEBUG(weightR);
+    DEBUG(requestedPwm);
+    DEBUG(meseMax);
+    DEBUG(setpointKg);
+    DEBUG(flagTrigger);
+    ESP_LOGI(TAG, "\n");*/
 }

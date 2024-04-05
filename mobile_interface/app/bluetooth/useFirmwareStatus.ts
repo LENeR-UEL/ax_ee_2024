@@ -21,10 +21,11 @@ interface StatusPacket {
     | {
         state: "START_WAIT_FOR_ZERO";
         currentWeightClass: number;
+        classChangeTimeDelta: number;
       }
     | { state: "START_WAIT_FOR_WEIGHT_SETPOINT" }
     | { state: "GRADUAL_INCREMENT" }
-    | { state: "TRANSITION"; currentWeightClass: number }
+    | { state: "TRANSITION"; currentWeightClass: number; classChangeTimeDelta: number }
     | { state: "ACTION_CONTROL"; currentErrorValue: number; errorPositiveTimer: number }
     | { state: "GRADUAL_DECREMENT" }
     | { state: "STOPPED" };
@@ -101,7 +102,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   } else if (mainOpState === MainOperationState.START_WAIT_FOR_ZERO) {
     mainOpStateObj = {
       state: "START_WAIT_FOR_ZERO",
-      currentWeightClass: reader.readUnsignedChar()
+      currentWeightClass: reader.readUnsignedChar(),
+      classChangeTimeDelta: reader.readUnsignedShortLE()
     };
   } else if (mainOpState === MainOperationState.START_WAIT_FOR_WEIGHT_SETPOINT) {
     mainOpStateObj = {
@@ -114,7 +116,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   } else if (mainOpState === MainOperationState.TRANSITION) {
     mainOpStateObj = {
       state: "TRANSITION",
-      currentWeightClass: reader.readUnsignedChar()
+      currentWeightClass: reader.readUnsignedChar(),
+      classChangeTimeDelta: reader.readUnsignedShortLE()
     };
   } else if (mainOpState === MainOperationState.ACTION_CONTROL) {
     mainOpStateObj = {

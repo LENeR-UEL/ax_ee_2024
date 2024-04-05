@@ -107,8 +107,8 @@ void onMainOperationStateLoop()
 
         data.mainOperationStateInformApp[0] = (uint8_t)substate;
         data.mainOperationStateInformApp[1] = currentWeightClass;
-        data.mainOperationStateInformApp[2] = 0;
-        data.mainOperationStateInformApp[3] = 0;
+        data.mainOperationStateInformApp[2] = classChangeTimeDelta & 0xFF;
+        data.mainOperationStateInformApp[3] = (classChangeTimeDelta >> 8) & 0xFF;
         data.mainOperationStateInformApp[4] = 0;
         data.mainOperationStateInformApp[5] = 0;
         break;
@@ -187,21 +187,21 @@ void onMainOperationStateLoop()
 
         data.mainOperationStateInformApp[0] = (uint8_t)substate;
         data.mainOperationStateInformApp[1] = currentWeightClass;
-        data.mainOperationStateInformApp[2] = 0;
-        data.mainOperationStateInformApp[3] = 0;
+        data.mainOperationStateInformApp[2] = classChangeTimeDelta & 0xFF;
+        data.mainOperationStateInformApp[3] = (classChangeTimeDelta >> 8) & 0xFF;
         data.mainOperationStateInformApp[4] = 0;
         data.mainOperationStateInformApp[5] = 0;
         break;
     }
     case MainOperationState::ACTION_CONTROL:
     {
-        short currentErrorValue = (scaleGetWeightL() + scaleGetWeightR()) - data.setpoint;
+        short currentErrorValue = (scaleGetWeightL() + scaleGetWeightR()) - data.setpoint * 2;
         if (currentErrorValue < 0)
         {
             calculatedErrorValueLastNegativeTime = now;
         }
 
-        ESP_LOGD(TAG, "Operação... Aguardando erro positivo durante 2000ms. Delta = %d ms, erro = %d", now - calculatedErrorValueLastNegativeTime, currentErrorValue);
+        ESP_LOGD(TAG, "Operação... Aguardando erro negativo durante 2000ms. Delta = %d ms, erro = %d", now - calculatedErrorValueLastNegativeTime, currentErrorValue);
 
         // Erro positivo durante 2000ms?
         unsigned short delta = now - calculatedErrorValueLastNegativeTime;
