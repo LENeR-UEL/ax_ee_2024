@@ -54,16 +54,61 @@ StateManager::StateManager()
             },
         },
         {
-            StateKind::MainOperation,
+            StateKind::OperationStart,
             State{
-                .TAG = "MainOperation",
-                .onEnter = onMainOperationStateEnter,
-                .onLoop = onMainOperationStateLoop,
-                .onTWAIMessage = onMainOperationStateTWAIMessage,
-                .onBLEControl = onMainOperationStateBLEControl,
-                .onExit = onMainOperationStateExit,
+                .TAG = "OperationStart",
+                .onEnter = onOperationStartEnter,
+                .onLoop = onOperationStartLoop,
+                .onTWAIMessage = onOperationStartTWAIMessage,
+                .onBLEControl = onOperationStartBLEControl,
+                .onExit = onOperationStartExit,
             },
-        }};
+        },
+        {
+            StateKind::OperationGradualIncrease,
+            State{
+                .TAG = "OperationGradualIncrease",
+                .onEnter = onOperationGradualIncreaseEnter,
+                .onLoop = onOperationGradualIncreaseLoop,
+                .onTWAIMessage = onOperationGradualIncreaseTWAIMessage,
+                .onBLEControl = onOperationGradualIncreaseBLEControl,
+                .onExit = onOperationGradualIncreaseExit,
+            },
+        },
+        {
+            StateKind::OperationTransition,
+            State{
+                .TAG = "OperationTransition",
+                .onEnter = onOperationTransitionEnter,
+                .onLoop = onOperationTransitionLoop,
+                .onTWAIMessage = onOperationTransitionTWAIMessage,
+                .onBLEControl = onOperationTransitionBLEControl,
+                .onExit = onOperationTransitionExit,
+            },
+        },
+        {
+            StateKind::OperationMalhaFechada,
+            State{
+                .TAG = "OperationMalhaFechada",
+                .onEnter = onOperationMalhaFechadaEnter,
+                .onLoop = onOperationMalhaFechadaLoop,
+                .onTWAIMessage = onOperationMalhaFechadaTWAIMessage,
+                .onBLEControl = onOperationMalhaFechadaBLEControl,
+                .onExit = onOperationMalhaFechadaExit,
+            },
+        },
+        {
+            StateKind::OperationStop,
+            State{
+                .TAG = "OperationStop",
+                .onEnter = onOperationStopEnter,
+                .onLoop = onOperationStopLoop,
+                .onTWAIMessage = onOperationStopTWAIMessage,
+                .onBLEControl = onOperationStopBLEControl,
+                .onExit = onOperationStopExit,
+            },
+        },
+    };
 }
 
 void StateManager::setup(StateKind initial)

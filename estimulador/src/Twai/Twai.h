@@ -8,12 +8,12 @@
 // #define WIRESS_GPIO_TX GPIO_NUM_5
 // #define WIRESS_GPIO_RX GPIO_NUM_4
 
-enum TwaiSendMessageKind
+enum TwaiSendMessageKind : uint8_t
 {
     PwmFeedbackEstimulador = 0x6A
 };
 
-enum TwaiReceivedMessageKind
+enum TwaiReceivedMessageKind : uint8_t
 {
     WeightL = 0x51,
     WeightR = 0x52,

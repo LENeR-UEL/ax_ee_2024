@@ -9,7 +9,12 @@ enum class StateKind
     ParameterSetup,
     ParallelWeight,
     MESECollecter,
-    MainOperation
+    MainOperation,
+    OperationStart,
+    OperationGradualIncrease,
+    OperationTransition,
+    OperationMalhaFechada,
+    OperationStop
 };
 
 typedef struct State
@@ -69,3 +74,33 @@ void onMainOperationStateLoop();
 void onMainOperationStateTWAIMessage(TwaiReceivedMessage *receivedMessage);
 void onMainOperationStateBLEControl(BluetoothControlCode code, uint8_t extraData);
 void onMainOperationStateExit();
+
+void onOperationStartEnter();
+void onOperationStartLoop();
+void onOperationStartTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onOperationStartBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onOperationStartExit();
+
+void onOperationGradualIncreaseEnter();
+void onOperationGradualIncreaseLoop();
+void onOperationGradualIncreaseTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onOperationGradualIncreaseBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onOperationGradualIncreaseExit();
+
+void onOperationTransitionEnter();
+void onOperationTransitionLoop();
+void onOperationTransitionTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onOperationTransitionBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onOperationTransitionExit();
+
+void onOperationMalhaFechadaEnter();
+void onOperationMalhaFechadaLoop();
+void onOperationMalhaFechadaTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onOperationMalhaFechadaBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onOperationMalhaFechadaExit();
+
+void onOperationStopEnter();
+void onOperationStopLoop();
+void onOperationStopTWAIMessage(TwaiReceivedMessage *receivedMessage);
+void onOperationStopBLEControl(BluetoothControlCode code, uint8_t extraData);
+void onOperationStopExit();

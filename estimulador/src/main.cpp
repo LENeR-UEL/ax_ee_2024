@@ -81,7 +81,7 @@ void readEverythingFromTwai()
   }
 }
 
-int calculateFrequency()
+int calculatePulseWidth()
 {
   int pesoTotal = weightL + weightR;
   int erro = pesoTotal - setpointKg * 2;
@@ -142,27 +142,30 @@ void modulate(int pwm)
 
 void loop()
 {
+  // Clear linux console
+  // Serial.print("\e[1;1H\e[2J");
+
   readEverythingFromTwai();
 
-  int freq = 0;
+  int pulseWidth = 0;
   if (flagTrigger == FlagTrigger::MalhaAberta)
   {
-    freq = requestedPwm;
+    pulseWidth = requestedPwm;
   }
   else if (flagTrigger == FlagTrigger::MalhaFechadaOperacao)
   {
-    freq = calculateFrequency();
+    pulseWidth = calculatePulseWidth();
   }
 
-  if (freq < 5)
-    freq = 0;
+  if (pulseWidth < 5)
+    pulseWidth = 0;
 
   unsigned long now_micros = micros();
   if (now_micros - lastModulateTime > vDurationMicros)
   {
-    modulate(freq);
+    modulate(pulseWidth);
     lastModulateTime = now_micros;
-    vDurationMicros = (uint32_t)(((1 / 35.0) * 1000000) - ((2 * freq) - 8));
+    vDurationMicros = (uint32_t)(((1 / 35.0) * 1000000) - ((2 * pulseWidth) - 8));
   }
 
   unsigned long now_ms = millis();
@@ -170,15 +173,15 @@ void loop()
   {
     lastTwaiSendTime = now_ms;
 
-    twaiSend(TwaiSendMessageKind::PwmFeedbackEstimulador, (uint16_t)freq);
+    twaiSend(TwaiSendMessageKind::PwmFeedbackEstimulador, (uint16_t)pulseWidth);
   }
-  /*
-    DEBUG(freq);
-    DEBUG(weightL);
-    DEBUG(weightR);
-    DEBUG(requestedPwm);
-    DEBUG(meseMax);
-    DEBUG(setpointKg);
-    DEBUG(flagTrigger);
-    ESP_LOGI(TAG, "\n");*/
+
+  DEBUG(pulseWidth);
+  DEBUG(weightL);
+  DEBUG(weightR);
+  DEBUG(requestedPwm);
+  DEBUG(meseMax);
+  DEBUG(setpointKg);
+  DEBUG(flagTrigger);
+  Serial.println();
 }
