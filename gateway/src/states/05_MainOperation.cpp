@@ -36,7 +36,7 @@ static uint8_t lastWeightClass = 0;
 static long lastWeightClassChangeTime = 0;
 
 static const uint8_t GRADUAL_PWM_STEP = 5;
-static const uint16_t GRADUAL_INTERVAL_MS = 500;
+static const uint16_t GRADUAL_INTERVAL_MS = 300;
 static long lastGradualChangeTime = 0;
 
 static const uint8_t MAIN_OPERATION_MESE_MAX_STEP = 5;

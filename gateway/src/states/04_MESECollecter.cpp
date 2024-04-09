@@ -9,7 +9,7 @@
 static const char *TAG = "MESECollecter";
 
 #define COLLECTOR_TWAI_SEND_INTERVAL_MS 100
-#define COLLECTOR_PWM_STEP 15
+#define COLLECTOR_PWM_STEP 5
 #define WINDING_DOWN_PWM_STEP 5
 #define WINDING_DOWN_INTERVAL_MS 500
 
