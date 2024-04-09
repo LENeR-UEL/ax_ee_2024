@@ -10,8 +10,8 @@
 static const char *TAG = "OperationStop";
 static unsigned long lastTwaiSendTime = 0;
 
-static const uint8_t DECREASE_PWM_STEP = 5;
-static const uint16_t PWM_STEP_INTERVAL_MS = 250;
+static const uint8_t DECREASE_PWM_STEP = 1;
+static const uint16_t PWM_STEP_INTERVAL_MS = 50;
 static unsigned long lastStepTime = 0;
 
 void onOperationStopEnter()

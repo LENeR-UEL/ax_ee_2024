@@ -157,7 +157,8 @@ void loop()
     pulseWidth = calculatePulseWidth();
   }
 
-  if (pulseWidth < 5)
+  // AS etapas de incremento/decremento gradual no gateway não podem ser menores que o valor nessa condição
+  if (pulseWidth < 1)
     pulseWidth = 0;
 
   unsigned long now_micros = micros();
