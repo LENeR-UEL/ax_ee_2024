@@ -1,18 +1,14 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigationContainerRef
-} from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 
 import BluetoothConnectView from "./views/BluetoothConnectView";
 import ParalelaView from "./views/Paralela";
 import MalhaAbertaView from "./views/MalhaAbertaView";
 import OperationView from "./views/OperationView";
-import { createStackNavigator } from "@react-navigation/stack";
 import { AppBar } from "./components/AppBar";
+import ParameterSetup from "./views/ParameterSetup";
 
-export type ScreenNames = ["Bluetooth", "Paralela", "Malha Aberta", "Operação"];
+export type ScreenNames = ["Bluetooth", "Parametrização", "Paralela", "Malha Aberta", "Operação"];
 export type RootStackParamList = Record<ScreenNames[number], undefined>;
 export type StackNavigation = NavigationProp<RootStackParamList>;
 
@@ -35,6 +31,11 @@ export function Router() {
         name="Bluetooth"
         component={BluetoothConnectView}
         initialParams={{ title: "Conexão Bluetooth", previousPage: null }}
+      />
+      <Stack.Screen
+        name="Parametrização"
+        component={ParameterSetup}
+        initialParams={{ title: "Parametrização", previousPage: "Bluetooth" }}
       />
       <Stack.Screen
         name="Paralela"

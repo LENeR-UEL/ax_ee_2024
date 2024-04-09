@@ -169,9 +169,9 @@ export default function BluetoothConnectView() {
       </Portal>
       <NextViewButton
         visible={connectionModalShown === false && ble.status === "CONNECTED"}
-        icon="drag-vertical-variant"
-        label={'Ir para "Paralela"'}
-        target="Paralela"
+        icon="cog"
+        label={'Ir para "Parametrização"'}
+        target="Parametrização"
       />
     </View>
   );

@@ -10,13 +10,15 @@ interface Props {
   icon?: string;
   label?: string;
   target: ScreenNames[number];
+  onClick?: () => Promise<void> | void;
 }
 
 export function NextViewButton(props: Props) {
   const navigator = useNavigation();
 
-  function handleClick() {
+  async function handleClick() {
     hapticFeedbackControl();
+    if (props.onClick) await props.onClick();
     navigator.navigate(props.target);
   }
 

@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, View } from "react-native";
-import { FAB } from "react-native-paper";
+import { Text, FAB } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { WeightIndicationBar } from "./WeightIndicatorBar";
@@ -7,6 +7,8 @@ import { useEffect, useRef } from "react";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { useBluetoothConnection } from "../../bluetooth/Context";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
+import { run } from "../../utils/run";
+import { timeout } from "../../utils/timeout";
 
 export default function OperationView() {
   const bt = useBluetoothConnection();
@@ -15,9 +17,15 @@ export default function OperationView() {
 
   async function updateMaxMese(operation: "+" | "-") {
     if (operation === "+") {
-      await sendControl({ controlCode: "IncreaseMeseMaxStep", waitForResponse: true });
+      await sendControl({
+        controlCode: "MainOperation_IncreaseMESEMaxOnce",
+        waitForResponse: true
+      });
     } else {
-      await sendControl({ controlCode: "DecreaseMeseMaxStep", waitForResponse: true });
+      await sendControl({
+        controlCode: "MainOperation_DecreaseMESEMaxOnce",
+        waitForResponse: true
+      });
     }
 
     await hapticFeedbackControl();
@@ -29,7 +37,7 @@ export default function OperationView() {
     newSetpoint = Math.round(newSetpoint);
     if (_setpointRef.current === newSetpoint) return;
     await sendControl({
-      controlCode: "SetSetpoint",
+      controlCode: "MainOperation_SetSetpoint",
       data: newSetpoint,
       waitForResponse: false
     });
@@ -37,16 +45,16 @@ export default function OperationView() {
   }
 
   useEffect(() => {
-    sendControl({
-      controlCode: "SetTrigger",
-      data: 1,
-      waitForResponse: true
-    });
-
     return () => {
-      sendControl({ controlCode: "SetTrigger", data: 0, waitForResponse: true });
+      sendControl({ controlCode: "MainOperation_GoBackToMESECollecter", waitForResponse: true });
     };
   }, []);
+
+  useEffect(() => {
+    hapticFeedbackControl()
+      .then(() => timeout(100))
+      .then(() => hapticFeedbackControl());
+  }, [status.mainOperationState?.state]);
 
   return (
     <ScrollView>
@@ -106,6 +114,34 @@ export default function OperationView() {
         </View>
         <View style={styles.statusDisplayWrapper}></View>
       </View>
+      <Text style={styles.statusText}>
+        {run(() => {
+          const state = status.mainOperationState;
+          switch (state?.state) {
+            case "START_WAIT_FOR_ZERO": {
+              // Só mostrar counter caso esteja em classe 0
+              const timer = state.currentWeightClass === 0 ? state.classChangeTimeDelta : 0;
+              return `Aguardando peso classe 0 durante 2000 ms.\nClasse atual: ${state.currentWeightClass}\n Timer: ${timer} / 2000 ms`;
+            }
+            case "START_WAIT_FOR_WEIGHT_SETPOINT":
+              return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
+            case "GRADUAL_INCREMENT":
+              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese})`;
+            case "TRANSITION": {
+              const timer = state.currentWeightClass === 0 ? state.classChangeTimeDelta : 0;
+              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.currentWeightClass}\nTimer: ${timer} / 2000 ms`;
+            }
+            case "ACTION_CONTROL":
+              return `Operação.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
+            case "GRADUAL_DECREMENT":
+              return `Decremento manual, até 0 (${status.pwm} / 0)`;
+            case "STOPPED":
+              return "Finalizado";
+            default:
+              return "";
+          }
+        })}
+      </Text>
     </ScrollView>
   );
 }
@@ -149,5 +185,11 @@ const styles = StyleSheet.create({
   weightBarsWrapper: {
     marginTop: 16,
     gap: 2
+  },
+  statusText: {
+    textAlign: "center",
+    //@ts-expect-error
+    width: "calc(100% - 96)",
+    marginHorizontal: 48
   }
 });

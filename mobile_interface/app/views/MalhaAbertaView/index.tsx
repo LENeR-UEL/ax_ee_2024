@@ -41,8 +41,7 @@ export default function MalhaAbertaView() {
     isOperating.setFalse();
     isWindingDown.setTrue();
 
-    await sendControl({ controlCode: "SaveMese", waitForResponse: true });
-    await sendControl({ controlCode: "ResetPwmGradual", waitForResponse: true });
+    await sendControl({ controlCode: "MESECollecter_RegisterMESE", waitForResponse: true });
   };
 
   const changeMese = async (sign: "+" | "-") => {
@@ -51,7 +50,7 @@ export default function MalhaAbertaView() {
     }
 
     await sendControl({
-      controlCode: sign === "+" ? "IncreasePwmStep" : "DecreasePwmStep",
+      controlCode: sign === "+" ? "MESECollecter_IncreaseOnce" : "MESECollecter_DecreaseOnce",
       waitForResponse: true
     });
   };
@@ -62,11 +61,13 @@ export default function MalhaAbertaView() {
     }
   }, [isWindingDown, status.pwm]);
 
-  // Mecanismo de segurança: caso o usuário saia da tela pelo botão Back do celular,
-  // devemos zerar o estímulo elétrico gradualmente.
+  async function goToOperation() {
+    await sendControl({ controlCode: "MESECollecter_Complete", waitForResponse: true });
+  }
+
   useEffect(() => {
     return () => {
-      sendControl({ controlCode: "ResetPwmGradual", waitForResponse: true });
+      sendControl({ controlCode: "MESECollecter_GoBackToParallel", waitForResponse: true });
     };
   }, []);
 
@@ -122,6 +123,7 @@ export default function MalhaAbertaView() {
         label={'Ir para "Operação"'}
         target="Operação"
         visible={isWindingDown.value === false && isOperating.value === false && status.mese > 0}
+        onClick={goToOperation}
       />
     </View>
   );

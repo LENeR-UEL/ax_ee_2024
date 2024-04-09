@@ -53,11 +53,11 @@ void twaiSend(TwaiSendMessageKind kind, uint16_t extraData)
     // Fila de transmissão
     if (twai_transmit(&message, pdMS_TO_TICKS(0)) == ESP_OK)
     {
-        ESP_LOGD(TAG, "Message (Kind=%0X, Data=%0X) queued for transmission", kind, extraData);
+        // ESP_LOGD(TAG, "Message (Kind=%0X, Data=%0X) queued for transmission", kind, extraData);
     }
     else
     {
-        ESP_LOGD(TAG, "Failed to queue message (Kind=%0X, Data=%0X) for transmission", kind, extraData);
+        // ESP_LOGD(TAG, "Failed to queue message (Kind=%0X, Data=%0X) for transmission", kind, extraData);
     }
 }
 
@@ -78,11 +78,11 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
         received->Kind = (TwaiReceivedMessageKind)lastReceivedMessage.identifier;
         received->ExtraData = data;
 
-        ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
+        // ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
     }
     else
     {
-        ESP_LOGD(TAG, "Message RX queue empty. Status code: 0x%0X", statusCode);
+        // ESP_LOGD(TAG, "Message RX queue empty. Status code: 0x%0X", statusCode);
     }
 
     return statusCode;

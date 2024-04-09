@@ -2,7 +2,7 @@
 #include <esp_log.h>
 #include "Twai/Twai.h"
 
-#define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d\n", variable)
+#define DEBUG(variable) ESP_LOGI(TAG, #variable ": %d", variable)
 
 static const char *TAG = "main";
 
@@ -17,12 +17,13 @@ enum class FlagTrigger
 uint16_t weightL;
 uint16_t weightR;
 uint16_t requestedPwm;
+uint16_t mese;
 uint16_t meseMax;
 uint16_t setpointKg;
 FlagTrigger flagTrigger;
 
 const float KP = 1.4;
-const float KI = 2.8;
+const float KI = 0.f;
 
 int integralErro = 0;
 
@@ -54,8 +55,6 @@ void readEverythingFromTwai()
     // Árvore de decisão com base no controle das mensagens
     switch (latestMessage.Kind)
     {
-    case TEST:
-      // noop
     case WeightL:
       weightL = latestMessage.ExtraData;
       break;
@@ -73,9 +72,10 @@ void readEverythingFromTwai()
       break;
     case Trigger:
       integralErro = 0;
-      flagTrigger = latestMessage.ExtraData == 0 ? FlagTrigger::MalhaAberta : FlagTrigger::MalhaFechadaOperacao;
+      flagTrigger = latestMessage.ExtraData > 0 ? FlagTrigger::MalhaFechadaOperacao : FlagTrigger::MalhaAberta;
       break;
     case Mese:
+      mese = latestMessage.ExtraData;
       break;
     }
   }
@@ -84,7 +84,7 @@ void readEverythingFromTwai()
 int calculateFrequency()
 {
   int pesoTotal = weightL + weightR;
-  int erro = pesoTotal - setpointKg;
+  int erro = pesoTotal - setpointKg * 2;
   integralErro += erro;
 
   // Não deixar integralErro passar de -50 e 50
@@ -93,7 +93,21 @@ int calculateFrequency()
   int pi = KP * erro + KI * integralErro;
 
   // Não deixar pi passar de meseMax
-  pi = min(pi, (int)meseMax);
+
+  int pi_original = pi;
+
+  if (pi < mese)
+  {
+    pi = mese;
+  }
+  else if (pi > meseMax)
+  {
+    pi = meseMax;
+  }
+
+  Serial.printf("Original: %d\tApós saturar: %d\n", pi_original, pi);
+
+  // pi = min(pi, (int)meseMax);
 
   return pi;
 }
@@ -140,7 +154,7 @@ void loop()
     freq = calculateFrequency();
   }
 
-  if (freq < 10)
+  if (freq < 5)
     freq = 0;
 
   unsigned long now_micros = micros();
@@ -158,12 +172,13 @@ void loop()
 
     twaiSend(TwaiSendMessageKind::PwmFeedbackEstimulador, (uint16_t)freq);
   }
-
-  DEBUG(freq);
-  DEBUG(weightL);
-  DEBUG(weightR);
-  DEBUG(requestedPwm);
-  DEBUG(meseMax);
-  DEBUG(setpointKg);
-  DEBUG(flagTrigger);
+  /*
+    DEBUG(freq);
+    DEBUG(weightL);
+    DEBUG(weightR);
+    DEBUG(requestedPwm);
+    DEBUG(meseMax);
+    DEBUG(setpointKg);
+    DEBUG(flagTrigger);
+    ESP_LOGI(TAG, "\n");*/
 }
