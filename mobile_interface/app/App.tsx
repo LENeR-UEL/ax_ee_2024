@@ -8,9 +8,12 @@ import { Router } from "./Routing";
 import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
+import { useKeepAwake } from "expo-keep-awake";
 
 export default function App() {
   const navigator = useNavigationContainerRef();
+
+  useKeepAwake();
 
   return (
     <SafeAreaProvider>
