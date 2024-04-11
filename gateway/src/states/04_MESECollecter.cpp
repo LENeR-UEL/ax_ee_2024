@@ -13,7 +13,7 @@ static const char *TAG = "MESECollecter";
 #define WINDING_DOWN_PWM_STEP 5
 #define WINDING_DOWN_INTERVAL_MS 500
 
-static long lastTwaiSendTime = 0;
+static unsigned long lastTwaiSendTime = 0;
 static long lastWindingDownTickTime = 0;
 static bool isWindingDown = false;
 
@@ -113,7 +113,7 @@ void onMESECollecterStateBLEControl(BluetoothControlCode code, uint8_t extraData
         data.setpoint = requestedPwm * 0.5f;
         break;
     case BluetoothControlCode::MESECollecter_Complete:
-        stateManager.switchTo(StateKind::MainOperation);
+        stateManager.switchTo(StateKind::OperationStart);
         break;
     case BluetoothControlCode::MESECollecter_GoBackToParallel:
         stateManager.switchTo(StateKind::ParallelWeight);

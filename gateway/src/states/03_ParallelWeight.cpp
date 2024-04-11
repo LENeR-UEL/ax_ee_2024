@@ -7,7 +7,7 @@
 #include "../Scale/Scale.h"
 
 static const char *TAG = "ParallelWeight";
-static long lastTwaiSendTime = 0;
+static unsigned long lastTwaiSendTime = 0;
 
 void onParallelWeightStateEnter()
 {

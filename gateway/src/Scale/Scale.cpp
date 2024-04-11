@@ -95,4 +95,8 @@ int scaleGetWeightR()
     return scaleGetMeasurement(Scale::A) + scaleGetMeasurement(Scale::B);
 }
 
+int scaleGetTotalWeight()
+{
+    return scaleGetWeightL() + scaleGetWeightR();
+}
 #endif

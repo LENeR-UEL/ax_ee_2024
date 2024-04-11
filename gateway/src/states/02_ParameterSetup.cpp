@@ -8,7 +8,7 @@
 
 static const char *TAG = "ParameterSetup";
 
-static long lastTwaiSendTime = 0;
+static unsigned long lastTwaiSendTime = 0;
 
 void onParameterSetupStateEnter()
 {
