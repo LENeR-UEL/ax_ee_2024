@@ -3,13 +3,12 @@
 #include "Twai/Twai.h"
 #include "Bluetooth/Bluetooth.h"
 
-enum class StateKind
+enum class StateKind : uint8_t
 {
     Disconnected,
     ParameterSetup,
     ParallelWeight,
     MESECollecter,
-    MainOperation,
     OperationStart,
     OperationGradualIncrease,
     OperationTransition,
@@ -34,6 +33,7 @@ private:
 
 public:
     State *current;
+    StateKind currentKind;
     StateManager();
     void setup(StateKind initial);
     void switchTo(StateKind to);

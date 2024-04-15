@@ -114,6 +114,7 @@ StateManager::StateManager()
 void StateManager::setup(StateKind initial)
 {
     this->current = &this->states[initial];
+    this->currentKind = initial;
 
     ESP_LOGI(TAG, "State %s enter...", this->current->TAG);
     if (this->current->onEnter != nullptr)
@@ -137,6 +138,7 @@ void StateManager::switchTo(StateKind to)
     }
 
     this->current = &this->states[to];
+    this->currentKind = to;
 
     ESP_LOGI(TAG, "State %s enter...", this->current->TAG);
     if (this->current->onEnter != nullptr)

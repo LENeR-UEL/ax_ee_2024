@@ -59,6 +59,14 @@ void onOperationMalhaFechadaLoop()
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
     }
+
+    data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
+    // little-endian
+    data.mainOperationStateInformApp[1] = currentErrorValue & 0xFF;
+    data.mainOperationStateInformApp[2] = (currentErrorValue >> 8) & 0xFF;
+    data.mainOperationStateInformApp[3] = delta & 0xFF;
+    data.mainOperationStateInformApp[4] = (delta >> 8) & 0xFF;
+    data.mainOperationStateInformApp[5] = 0;
 }
 
 void onOperationMalhaFechadaTWAIMessage(TwaiReceivedMessage *receivedMessage)

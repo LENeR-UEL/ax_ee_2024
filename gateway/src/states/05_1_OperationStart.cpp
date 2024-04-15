@@ -51,6 +51,13 @@ void onOperationStartLoop()
         twaiSend(TwaiSendMessageKind::Mese, 0);
         twaiSend(TwaiSendMessageKind::MeseMax, 0);
     }
+
+    data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
+    data.mainOperationStateInformApp[1] = 0;
+    data.mainOperationStateInformApp[2] = 0;
+    data.mainOperationStateInformApp[3] = 0;
+    data.mainOperationStateInformApp[4] = 0;
+    data.mainOperationStateInformApp[5] = 0;
 }
 
 void onOperationStartTWAIMessage(TwaiReceivedMessage *receivedMessage)
