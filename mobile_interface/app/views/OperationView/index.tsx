@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { WeightIndicationBar } from "./WeightIndicatorBar";
 import { useEffect, useRef } from "react";
-import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
+import { FirmwareState, useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { useBluetoothConnection } from "../../bluetooth/Context";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
 import { run } from "../../utils/run";
@@ -118,25 +118,24 @@ export default function OperationView() {
         {run(() => {
           const state = status.mainOperationState;
           switch (state?.state) {
-            case "START_WAIT_FOR_ZERO": {
-              // Só mostrar counter caso esteja em classe 0
-              const timer = state.currentWeightClass === 0 ? state.classChangeTimeDelta : 0;
-              return `Aguardando peso classe 0 durante 2000 ms.\nClasse atual: ${state.currentWeightClass}\n Timer: ${timer} / 2000 ms`;
-            }
-            case "START_WAIT_FOR_WEIGHT_SETPOINT":
+            case FirmwareState.OperationStart: {
               return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
-            case "GRADUAL_INCREMENT":
-              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese})`;
-            case "TRANSITION": {
-              const timer = state.currentWeightClass === 0 ? state.classChangeTimeDelta : 0;
-              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.currentWeightClass}\nTimer: ${timer} / 2000 ms`;
             }
-            case "ACTION_CONTROL":
-              return `Operação.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
-            case "GRADUAL_DECREMENT":
-              return `Decremento manual, até 0 (${status.pwm} / 0)`;
-            case "STOPPED":
-              return "Finalizado";
+            case FirmwareState.OperationGradualIncrease:
+              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese})`;
+            case FirmwareState.OperationTransition: {
+              const timer = state.weightClass === 0 ? state.weightClassTimer : 0;
+              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / 2000 ms`;
+            }
+            case FirmwareState.OperationMalhaFechada:
+              return `Malha fechada.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
+            case FirmwareState.OperationStop: {
+              if (status.pwm === 0) {
+                return "Finalizado."
+              } else {
+                return `Decremento manual, até 0 (${status.pwm} / 0)`;
+              }
+            }
             default:
               return "";
           }

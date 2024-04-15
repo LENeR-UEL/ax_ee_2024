@@ -8,6 +8,18 @@ const SERVICE_UUID = fullUUID("ab04");
 const STATUS_UUID = fullUUID("ff01");
 const CONTROL_UUID = fullUUID("ff0f");
 
+export enum FirmwareState {
+  Disconnected,
+  ParameterSetup,
+  ParallelWeight,
+  MESECollecter,
+  OperationStart,
+  OperationGradualIncrease,
+  OperationTransition,
+  OperationMalhaFechada,
+  OperationStop
+}
+
 interface StatusPacket {
   pwm: number;
   weightL: number;
@@ -19,16 +31,20 @@ interface StatusPacket {
   mainOperationState:
     | null
     | {
-        state: "START_WAIT_FOR_ZERO";
-        currentWeightClass: number;
-        classChangeTimeDelta: number;
+        state: FirmwareState.OperationStart;
       }
-    | { state: "START_WAIT_FOR_WEIGHT_SETPOINT" }
-    | { state: "GRADUAL_INCREMENT" }
-    | { state: "TRANSITION"; currentWeightClass: number; classChangeTimeDelta: number }
-    | { state: "ACTION_CONTROL"; currentErrorValue: number; errorPositiveTimer: number }
-    | { state: "GRADUAL_DECREMENT" }
-    | { state: "STOPPED" };
+    | { state: FirmwareState.OperationGradualIncrease }
+    | {
+        state: FirmwareState.OperationTransition;
+        weightClass: number;
+        weightClassTimer: number;
+      }
+    | {
+        state: FirmwareState.OperationMalhaFechada;
+        currentErrorValue: number;
+        errorPositiveTimer: number;
+      }
+    | { state: FirmwareState.OperationStop };
 }
 
 const ControlCodes = {
@@ -58,25 +74,6 @@ const ControlCodes = {
   MainOperation_DecreaseMESEMaxOnce: 0x33
 } as const;
 
-enum MainOperationState {
-  _NOT_IN_MAIN_OPERATION = 0,
-
-  // Aguardar peso medido zerar (classe 0) para podermos iniciar a operação
-  START_WAIT_FOR_ZERO = 5,
-  // Voluntário sentado... Aguardar peso nas barras = setpoint
-  START_WAIT_FOR_WEIGHT_SETPOINT,
-  // Aumento gradual do PWM, em malha aberta, de 0 até MESE
-  GRADUAL_INCREMENT,
-  // Voluntário de pé, mas ainda se equilibrando com as barras. Aguardar classe 0 por 2 segundos, significando que ele está de pé e equilibrado
-  TRANSITION,
-  // Estimulação contínua, malha fechada, entre MESE e MESE_MAX. Aguardar fadiga do voluntário (classe 2 por 2s)
-  ACTION_CONTROL,
-  // Decremento gradual do PWM, do valor atual até 0
-  GRADUAL_DECREMENT,
-  // Operação finalizada
-  STOPPED
-}
-
 type ControlCodeDispatcher = (options: {
   controlCode: keyof typeof ControlCodes;
   waitForResponse: boolean;
@@ -93,48 +90,47 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   const mese = reader.readUnsignedShortLE();
   const meseMax = reader.readUnsignedShortLE();
   const setpoint = reader.readUnsignedShortLE();
-  const mainOpState = reader.readUnsignedChar() as MainOperationState;
+  const state = reader.readUnsignedChar() as FirmwareState;
 
   let mainOpStateObj: StatusPacket["mainOperationState"];
 
-  if (mainOpState === MainOperationState._NOT_IN_MAIN_OPERATION) {
-    mainOpStateObj = null;
-  } else if (mainOpState === MainOperationState.START_WAIT_FOR_ZERO) {
-    mainOpStateObj = {
-      state: "START_WAIT_FOR_ZERO",
-      currentWeightClass: reader.readUnsignedChar(),
-      classChangeTimeDelta: reader.readUnsignedShortLE()
-    };
-  } else if (mainOpState === MainOperationState.START_WAIT_FOR_WEIGHT_SETPOINT) {
-    mainOpStateObj = {
-      state: "START_WAIT_FOR_WEIGHT_SETPOINT"
-    };
-  } else if (mainOpState === MainOperationState.GRADUAL_INCREMENT) {
-    mainOpStateObj = {
-      state: "GRADUAL_INCREMENT"
-    };
-  } else if (mainOpState === MainOperationState.TRANSITION) {
-    mainOpStateObj = {
-      state: "TRANSITION",
-      currentWeightClass: reader.readUnsignedChar(),
-      classChangeTimeDelta: reader.readUnsignedShortLE()
-    };
-  } else if (mainOpState === MainOperationState.ACTION_CONTROL) {
-    mainOpStateObj = {
-      state: "ACTION_CONTROL",
-      currentErrorValue: reader.readShortLE(),
-      errorPositiveTimer: reader.readUnsignedShortLE()
-    };
-  } else if (mainOpState === MainOperationState.GRADUAL_DECREMENT) {
-    mainOpStateObj = {
-      state: "GRADUAL_DECREMENT"
-    };
-  } else if (mainOpState === MainOperationState.STOPPED) {
-    mainOpStateObj = {
-      state: "STOPPED"
-    };
-  } else {
-    throw new Error(`Unexpected main operation state: ${mainOpState}`);
+  switch (state) {
+    case FirmwareState.OperationStart: {
+      mainOpStateObj = {
+        state: FirmwareState.OperationStart
+      };
+      break;
+    }
+    case FirmwareState.OperationGradualIncrease: {
+      mainOpStateObj = {
+        state: FirmwareState.OperationGradualIncrease
+      };
+      break;
+    }
+    case FirmwareState.OperationTransition: {
+      mainOpStateObj = {
+        state: FirmwareState.OperationTransition,
+        weightClass: reader.readUnsignedChar(),
+        weightClassTimer: reader.readShortLE()
+      };
+      break;
+    }
+    case FirmwareState.OperationMalhaFechada: {
+      mainOpStateObj = {
+        state: FirmwareState.OperationMalhaFechada,
+        currentErrorValue: reader.readShortLE(),
+        errorPositiveTimer: reader.readUnsignedShortLE()
+      };
+      break;
+    }
+    case FirmwareState.OperationStop: {
+      mainOpStateObj = {
+        state: FirmwareState.OperationStop
+      };
+      break;
+    }
+    default:
+      mainOpStateObj = null;
   }
 
   return {

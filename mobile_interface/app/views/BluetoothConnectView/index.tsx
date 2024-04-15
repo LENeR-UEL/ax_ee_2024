@@ -108,6 +108,12 @@ export default function BluetoothConnectView() {
     alert("Gateway reiniciando...");
   };
 
+  async function onStartProcessClick() {
+    if (ble.status !== "CONNECTED") return;
+    await sendControl({ controlCode: "ParameterSetup_Complete", waitForResponse: true })
+    navigator.navigate("Paralela");
+  }
+
   console.log(`Encontrado ${$foundDevices.current.length} dispositivos distintos`);
 
   const contents = (
@@ -148,7 +154,7 @@ export default function BluetoothConnectView() {
                   contentStyle={styles.resetButtonInner}>
                   <MaterialCommunityIcons name="nuke" color="#484848" size={16} />
                   {"    "}
-                  Reiniciar Gateway (software reset)
+                  Reiniciar Gateway
                 </Button>
                 <Button
                   onPress={() => navigator.navigate("Parametrização")}
@@ -159,7 +165,7 @@ export default function BluetoothConnectView() {
                   Parametrização
                 </Button>
                 <Button
-                  onPress={() => navigator.navigate("Paralela")}
+                  onPress={onStartProcessClick}
                   mode="contained"
                   contentStyle={styles.startButtonInner}>
                   <MaterialCommunityIcons name="weight-kilogram" color="#fff" size={16} />
