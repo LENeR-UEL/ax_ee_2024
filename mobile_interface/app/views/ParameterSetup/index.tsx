@@ -44,11 +44,11 @@ export default function ParameterSetup() {
         </Text>
         <View style={{ flexDirection: "row" }}>
           <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>Etapa: {rampupStep} µS</Text>
+            <Text style={{ paddingHorizontal: 16 }}>{rampupStep} µS</Text>
             <Slider
               step={1}
               minimumValue={1}
-              maximumValue={10}
+              maximumValue={25}
               value={rampupStep}
               onValueChange={(v) => {
                 hapticFeedbackControlLight();
@@ -57,7 +57,7 @@ export default function ParameterSetup() {
             />
           </View>
           <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>Intervalo: {rampupInterval} ms</Text>
+            <Text style={{ paddingHorizontal: 16 }}>{rampupInterval} ms</Text>
             <Slider
               step={50}
               minimumValue={100}
@@ -81,7 +81,7 @@ export default function ParameterSetup() {
           {transitionDuration} ms, antes de entrar na etapa de malha fechada.
         </Text>
         <View>
-          <Text style={{ paddingHorizontal: 16 }}>Intervalo: {transitionDuration} ms</Text>
+          <Text style={{ paddingHorizontal: 16 }}>{transitionDuration} ms</Text>
           <Slider
             step={100}
             minimumValue={100}
@@ -101,11 +101,11 @@ export default function ParameterSetup() {
         </Text>
         <View style={{ flexDirection: "row" }}>
           <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>Etapa: {winddownStep} µS</Text>
+            <Text style={{ paddingHorizontal: 16 }}>{winddownStep} µS</Text>
             <Slider
               step={1}
               minimumValue={1}
-              maximumValue={10}
+              maximumValue={25}
               value={winddownStep}
               onValueChange={(v) => {
                 hapticFeedbackControlLight();
@@ -114,7 +114,7 @@ export default function ParameterSetup() {
             />
           </View>
           <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>Intervalo: {winddownInterval} ms</Text>
+            <Text style={{ paddingHorizontal: 16 }}>{winddownInterval} ms</Text>
             <Slider
               step={50}
               minimumValue={100}
@@ -133,11 +133,11 @@ export default function ParameterSetup() {
         </Text>
       </GroupBox>
       <Text style={{ paddingHorizontal: 12 }}>
-        Os parâmetros serão salvos no hardware Gateway, usando o módulo de Preferences.
+        Os parâmetros serão salvos na memória do hardware Gateway.
       </Text>
       <View style={{ flexDirection: "row", justifyContent: "space-between", paddingBottom: 16 }}>
         <Button mode="text" onPress={resetParameters}>
-          Redefinir campos para o padrão
+          Redefinir campos
         </Button>
         <Button mode="contained" onPress={saveParameters}>
           Salvar
