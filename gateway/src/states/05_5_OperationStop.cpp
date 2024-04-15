@@ -37,6 +37,13 @@ void onOperationStopLoop()
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
         lastStepTime = now;
     }
+
+    data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
+    data.mainOperationStateInformApp[1] = 0;
+    data.mainOperationStateInformApp[2] = 0;
+    data.mainOperationStateInformApp[3] = 0;
+    data.mainOperationStateInformApp[4] = 0;
+    data.mainOperationStateInformApp[5] = 0;
 }
 
 void onOperationStopTWAIMessage(TwaiReceivedMessage *receivedMessage)

@@ -49,6 +49,13 @@ void onOperationTransitionLoop()
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
         twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
     }
+
+    data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
+    data.mainOperationStateInformApp[1] = weightClass;
+    data.mainOperationStateInformApp[2] = weightClassTimer & 0xFF;
+    data.mainOperationStateInformApp[3] = (weightClassTimer >> 8) & 0xFF;
+    data.mainOperationStateInformApp[4] = 0;
+    data.mainOperationStateInformApp[5] = 0;
 }
 
 void onOperationTransitionTWAIMessage(TwaiReceivedMessage *receivedMessage)
