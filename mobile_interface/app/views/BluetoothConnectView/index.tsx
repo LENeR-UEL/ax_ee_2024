@@ -12,10 +12,14 @@ import {
 } from "../../haptics/HapticFeedback";
 import { run } from "../../utils/run";
 import { NextViewButton } from "../../components/NextViewButton";
+import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
+import { useNavigation } from "../../hooks/useNavigation";
 
 export default function BluetoothConnectView() {
+  const navigator = useNavigation();
   const [isConnecting, setConnecting] = useState(false);
   const ble = useBluetoothConnection();
+  const [firmwareStatus, sendControl] = useFirmwareStatus();
 
   const $foundDevices = useRef<Device[]>([]);
   const updateOnFoundDevice = useUpdate();
@@ -93,6 +97,17 @@ export default function BluetoothConnectView() {
     hapticFeedbackControl();
   };
 
+  const invokeReset = async () => {
+    if (ble.status !== "CONNECTED") {
+      return;
+    }
+
+    await sendControl({ controlCode: "FirmwareInvokeReset", waitForResponse: false });
+    hapticFeedbackControl();
+    ble.disconnect();
+    alert("Gateway reiniciando...");
+  };
+
   console.log(`Encontrado ${$foundDevices.current.length} dispositivos distintos`);
 
   const contents = (
@@ -117,14 +132,41 @@ export default function BluetoothConnectView() {
         {run(() => {
           if (ble.status === "CONNECTED") {
             return (
-              <Button
-                contentStyle={styles.pairButtonInner}
-                mode="elevated"
-                onPress={disconnect}
-                disabled={isConnecting}
-              >
-                Desconectar
-              </Button>
+              <>
+                <Button
+                  contentStyle={styles.pairButtonInner}
+                  mode="elevated"
+                  onPress={disconnect}
+                  disabled={isConnecting}>
+                  <MaterialCommunityIcons name="close" color="#484848" size={16} />
+                  {"    "}
+                  Desconectar
+                </Button>
+                <Button
+                  onPress={invokeReset}
+                  mode="elevated"
+                  contentStyle={styles.resetButtonInner}>
+                  <MaterialCommunityIcons name="nuke" color="#484848" size={16} />
+                  {"    "}
+                  Reiniciar Gateway (software reset)
+                </Button>
+                <Button
+                  onPress={() => navigator.navigate("Parametrização")}
+                  mode="elevated"
+                  contentStyle={styles.parameterButtonInner}>
+                  <MaterialCommunityIcons name="cog" color="#484848" size={16} />
+                  {"    "}
+                  Parametrização
+                </Button>
+                <Button
+                  onPress={() => navigator.navigate("Paralela")}
+                  mode="contained"
+                  contentStyle={styles.startButtonInner}>
+                  <MaterialCommunityIcons name="weight-kilogram" color="#fff" size={16} />
+                  {"    "}
+                  Iniciar processo
+                </Button>
+              </>
             );
           } else {
             return (
@@ -132,8 +174,7 @@ export default function BluetoothConnectView() {
                 contentStyle={styles.pairButtonInner}
                 mode="elevated"
                 onPress={showConnectionModal}
-                disabled={isConnecting}
-              >
+                disabled={isConnecting}>
                 Procurar dispositivos...
               </Button>
             );
@@ -149,13 +190,12 @@ export default function BluetoothConnectView() {
               <Text style={styles.statusIndicator}>Procurando dispositivos...</Text>
             </View>
             <ScrollView contentContainerStyle={styles.deviceList}>
-              {$foundDevices.current.map((device, index) => {
+              {$foundDevices.current.map((device) => {
                 return (
                   <Button
                     key={device.id}
                     contentStyle={styles.deviceListDevice}
-                    onPress={() => onDeviceSelect(device)}
-                  >
+                    onPress={() => onDeviceSelect(device)}>
                     {device.name}
                   </Button>
                 );
@@ -167,12 +207,6 @@ export default function BluetoothConnectView() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-      <NextViewButton
-        visible={connectionModalShown === false && ble.status === "CONNECTED"}
-        icon="cog"
-        label={'Ir para "Parametrização"'}
-        target="Parametrização"
-      />
     </View>
   );
 
@@ -196,8 +230,16 @@ const styles = StyleSheet.create({
     gap: 8
   },
   pairButtonInner: {
-    paddingVertical: 12,
-    backgroundColor: "#f0f0f0"
+    paddingVertical: 4
+  },
+  resetButtonInner: {
+    paddingVertical: 4
+  },
+  parameterButtonInner: {
+    paddingVertical: 4
+  },
+  startButtonInner: {
+    paddingVertical: 4
   },
   statusIndicator: {
     marginLeft: 16
