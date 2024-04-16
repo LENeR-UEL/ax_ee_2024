@@ -28,7 +28,8 @@ void onOperationStopLoop()
         requestedPwm = 0;
     }
 
-    if (now - lastStepTime >= data.parameterSetup.gradualDecreaseInterval)
+    unsigned int pwmDecreaseTimeDelta = now - lastStepTime;
+    if (pwmDecreaseTimeDelta >= data.parameterSetup.gradualDecreaseInterval)
     {
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, requestedPwm);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
@@ -36,8 +37,8 @@ void onOperationStopLoop()
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-    data.mainOperationStateInformApp[1] = 0;
-    data.mainOperationStateInformApp[2] = 0;
+    data.mainOperationStateInformApp[1] = pwmDecreaseTimeDelta & 0xFF;
+    data.mainOperationStateInformApp[2] = (pwmDecreaseTimeDelta >> 8) & 0xFF;
     data.mainOperationStateInformApp[3] = 0;
     data.mainOperationStateInformApp[4] = 0;
     data.mainOperationStateInformApp[5] = 0;

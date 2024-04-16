@@ -36,11 +36,11 @@ void onOperationMalhaFechadaLoop()
         calculatedErrorValueLastNegativeTime = now;
     }
 
-    ESP_LOGD(TAG, "Operação... Aguardando erro negativo durante 2000ms. Delta = %d ms, erro = %d", now - calculatedErrorValueLastNegativeTime, currentErrorValue);
+    ESP_LOGD(TAG, "Operação... Aguardando erro negativo durante %dms. Delta = %d ms, erro = %d", data.parameterSetup.malhaFechadaAboveSetpointTime, now - calculatedErrorValueLastNegativeTime, currentErrorValue);
 
     // Erro positivo durante 2000ms?
     unsigned short delta = now - calculatedErrorValueLastNegativeTime;
-    if (delta >= 2000)
+    if (delta >= data.parameterSetup.malhaFechadaAboveSetpointTime)
     {
         ESP_LOGD(TAG, "Condição atingida.");
         stateManager.switchTo(StateKind::OperationStop);
@@ -54,8 +54,7 @@ void onOperationMalhaFechadaLoop()
         // twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaFechadaOperacao);
         twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
-        twaiSend(TwaiSendMessageKind::WeightL, scaleGetWeightL());
-        twaiSend(TwaiSendMessageKind::WeightR, scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
     }

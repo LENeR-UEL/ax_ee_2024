@@ -35,6 +35,7 @@ enum class BluetoothControlCode
     ParameterSetup_SetTransitionTime = 0x63,
     ParameterSetup_SetGradualDecreaseInterval = 0x64,
     ParameterSetup_SetGradualDecreaseStep = 0x65,
+    ParameterSetup_SetMalhaFechadaAboveSetpointTime = 0x66,
     ParameterSetup_Reset = 0x6D,
     ParameterSetup_Save = 0x6E,
     ParameterSetup_Complete = 0x6F,
@@ -57,6 +58,7 @@ typedef struct __attribute__((__packed__))
         uint16_t transitionTime;
         uint16_t gradualDecreaseInterval;
         uint8_t gradualDecreaseStep;
+        uint16_t malhaFechadaAboveSetpointTime;
     } parameterSetup;
 
     // Informar o app do estado atual da operação

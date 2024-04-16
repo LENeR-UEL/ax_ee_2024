@@ -16,6 +16,7 @@ static unsigned long lastTwaiSendTime = 0;
 #define PARAMETERS_DEFAULT_TRANSITION_TIME 1500
 #define PARAMETERS_DEFAULT_GRADUAL_DECREASE_INTERVAL 100
 #define PARAMETERS_DEFAULT_GRADUAL_DECREASE_STEP 1
+#define PARAMETERS_DEFAULT_MALHA_FECHADA_ABOVE_SETPOINT_TIME 2000
 
 static Preferences preferences;
 
@@ -29,6 +30,7 @@ void reloadData(bool resetToDefaults)
     data.parameterSetup.transitionTime = preferences.getUShort("c", PARAMETERS_DEFAULT_TRANSITION_TIME);
     data.parameterSetup.gradualDecreaseInterval = preferences.getUShort("d", PARAMETERS_DEFAULT_GRADUAL_DECREASE_INTERVAL);
     data.parameterSetup.gradualDecreaseStep = preferences.getUChar("e", PARAMETERS_DEFAULT_GRADUAL_DECREASE_STEP);
+    data.parameterSetup.malhaFechadaAboveSetpointTime = preferences.getUShort("f", PARAMETERS_DEFAULT_MALHA_FECHADA_ABOVE_SETPOINT_TIME);
     preferences.end();
 }
 
@@ -40,6 +42,7 @@ void saveData()
     preferences.putUShort("c", data.parameterSetup.transitionTime);
     preferences.putUShort("d", data.parameterSetup.gradualDecreaseInterval);
     preferences.putUChar("e", data.parameterSetup.gradualDecreaseStep);
+    preferences.putUShort("f", data.parameterSetup.malhaFechadaAboveSetpointTime);
     preferences.end();
 }
 
@@ -65,8 +68,7 @@ void onParameterSetupStateLoop()
     long now = millis();
     if (now - lastTwaiSendTime >= 100)
     {
-        twaiSend(TwaiSendMessageKind::WeightL, scaleGetWeightL());
-        twaiSend(TwaiSendMessageKind::WeightR, scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
         twaiSend(TwaiSendMessageKind::Setpoint, 0);
         twaiSend(TwaiSendMessageKind::Mese, 0);
@@ -103,6 +105,9 @@ void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraDat
         break;
     case BluetoothControlCode::ParameterSetup_SetGradualDecreaseStep:
         data.parameterSetup.gradualDecreaseStep = extraData;
+        break;
+    case BluetoothControlCode::ParameterSetup_SetMalhaFechadaAboveSetpointTime:
+        data.parameterSetup.malhaFechadaAboveSetpointTime = extraData * 100;
         break;
     case BluetoothControlCode::ParameterSetup_Reset:
         reloadData(true);

@@ -43,8 +43,7 @@ void onOperationTransitionLoop()
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.mese);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
-        twaiSend(TwaiSendMessageKind::WeightL, scaleGetWeightL());
-        twaiSend(TwaiSendMessageKind::WeightR, scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
         twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);

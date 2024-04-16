@@ -14,8 +14,7 @@ enum class FlagTrigger
   MalhaFechadaOperacao
 };
 
-uint16_t weightL;
-uint16_t weightR;
+uint16_t weightTotal;
 uint16_t requestedPwm;
 uint16_t mese;
 uint16_t meseMax;
@@ -55,26 +54,23 @@ void readEverythingFromTwai()
     // Árvore de decisão com base no controle das mensagens
     switch (latestMessage.Kind)
     {
-    case WeightL:
-      weightL = latestMessage.ExtraData;
+    case TwaiReceivedMessageKind::WeightTotal:
+      weightTotal = latestMessage.ExtraData;
       break;
-    case WeightR:
-      weightR = latestMessage.ExtraData;
-      break;
-    case SetRequestedPwm:
+    case TwaiReceivedMessageKind::SetRequestedPwm:
       requestedPwm = latestMessage.ExtraData;
       break;
-    case MeseMax:
+    case TwaiReceivedMessageKind::MeseMax:
       meseMax = latestMessage.ExtraData;
       break;
-    case Setpoint:
+    case TwaiReceivedMessageKind::Setpoint:
       setpointKg = latestMessage.ExtraData;
       break;
-    case Trigger:
+    case TwaiReceivedMessageKind::Trigger:
       integralErro = 0;
       flagTrigger = latestMessage.ExtraData > 0 ? FlagTrigger::MalhaFechadaOperacao : FlagTrigger::MalhaAberta;
       break;
-    case Mese:
+    case TwaiReceivedMessageKind::Mese:
       mese = latestMessage.ExtraData;
       break;
     }
@@ -83,8 +79,7 @@ void readEverythingFromTwai()
 
 int calculatePulseWidth()
 {
-  int pesoTotal = weightL + weightR;
-  int erro = pesoTotal - setpointKg * 2;
+  int erro = weightTotal - setpointKg * 2;
   integralErro += erro;
 
   // Não deixar integralErro passar de -50 e 50
@@ -100,7 +95,8 @@ int calculatePulseWidth()
   {
     pi = mese;
   }
-  else if (pi > meseMax)
+
+  if (pi > meseMax)
   {
     pi = meseMax;
   }
@@ -178,11 +174,9 @@ void loop()
   }
 
   DEBUG(pulseWidth);
-  DEBUG(weightL);
-  DEBUG(weightR);
+  DEBUG(weightTotal);
   DEBUG(requestedPwm);
   DEBUG(meseMax);
   DEBUG(setpointKg);
   DEBUG(flagTrigger);
-  Serial.println();
 }

@@ -62,8 +62,7 @@ void onMESECollecterStateLoop()
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
-        twaiSend(TwaiSendMessageKind::WeightL, scaleGetWeightL());
-        twaiSend(TwaiSendMessageKind::WeightR, scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, requestedPwm);
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);

@@ -44,13 +44,14 @@ interface StatusPacket {
         currentErrorValue: number;
         errorPositiveTimer: number;
       }
-    | { state: FirmwareState.OperationStop };
+    | { state: FirmwareState.OperationStop; pwmDecreaseTimeDelta: number };
   parameters: {
     gradualIncreaseInterval: number;
     gradualIncreaseStep: number;
     transitionTime: number;
     gradualDecreaseInterval: number;
     gradualDecreaseStep: number;
+    malhaFechadaAboveSetpointTime: number;
   };
 }
 
@@ -80,6 +81,7 @@ const ControlCodes = {
   ParameterSetup_SetTransitionTime: 0x63,
   ParameterSetup_SetGradualDecreaseInterval: 0x64,
   ParameterSetup_SetGradualDecreaseStep: 0x65,
+  ParameterSetup_SetMalhaFechadaAboveSetpointTime: 0x66,
   ParameterSetup_Reset: 0x6d,
   ParameterSetup_Save: 0x6e,
   ParameterSetup_Complete: 0x6f
@@ -108,7 +110,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     gradualIncreaseStep: reader.readUnsignedChar(),
     transitionTime: reader.readUnsignedShortLE(),
     gradualDecreaseInterval: reader.readUnsignedShortLE(),
-    gradualDecreaseStep: reader.readUnsignedChar()
+    gradualDecreaseStep: reader.readUnsignedChar(),
+    malhaFechadaAboveSetpointTime: reader.readUnsignedShortLE()
   };
 
   const state = reader.readUnsignedChar() as FirmwareState;
@@ -146,7 +149,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     }
     case FirmwareState.OperationStop: {
       mainOpStateObj = {
-        state: FirmwareState.OperationStop
+        state: FirmwareState.OperationStop,
+        pwmDecreaseTimeDelta: reader.readUnsignedShortLE()
       };
       break;
     }
@@ -183,7 +187,8 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
       gradualIncreaseStep: 0,
       transitionTime: 0,
       gradualDecreaseInterval: 0,
-      gradualDecreaseStep: 0
+      gradualDecreaseStep: 0,
+      malhaFechadaAboveSetpointTime: 0
     }
   });
 
