@@ -17,12 +17,9 @@ Data::Data()
   this->pwmFeedback = 0;
 
   this->lastBluetoothSendTime = 0;
-  this->mainOperationStateInformApp[0] = 0;
-  this->mainOperationStateInformApp[1] = 0;
-  this->mainOperationStateInformApp[2] = 0;
-  this->mainOperationStateInformApp[3] = 0;
-  this->mainOperationStateInformApp[4] = 0;
-  this->mainOperationStateInformApp[5] = 0;
+
+  memset(this->mainOperationStateInformApp, 0, sizeof(this->mainOperationStateInformApp));
+  memset(&this->parameterSetup, 0, sizeof(this->parameterSetup));
 }
 
 void Data::sendToBle(const Bluetooth &ble)
@@ -53,6 +50,7 @@ void Data::sendToBle(const Bluetooth &ble)
   status.collectedWeight = data.collectedWeight;
   status.setpoint = data.setpoint;
   memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp, sizeof(status.mainOperationStateInformApp));
+  memcpy(&status.parameterSetup, &this->parameterSetup, sizeof(this->parameterSetup));
 
   espBle.writeStatusData(&status);
 }

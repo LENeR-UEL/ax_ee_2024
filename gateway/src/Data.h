@@ -25,6 +25,15 @@ public:
     // PWM atual indicado pelo hardware estimulador.
     uint16_t pwmFeedback;
 
+    struct __attribute__((__packed__))
+    {
+        uint16_t gradualIncreaseInterval;
+        uint8_t gradualIncreaseStep;
+        uint16_t transitionTime;
+        uint16_t gradualDecreaseInterval;
+        uint8_t gradualDecreaseStep;
+    } parameterSetup;
+
     // Informar o app do estado atual da operação
     uint8_t mainOperationStateInformApp[6];
 

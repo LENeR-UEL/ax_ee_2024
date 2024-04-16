@@ -29,9 +29,9 @@ void onOperationTransitionLoop()
 
     updateCurrentWeightClass();
 
-    ESP_LOGD(TAG, "Transição... Aguardando classe de peso 0 durante 2000ms. Timer: %d Classe atual: %d", weightClassTimer, weightClass);
+    ESP_LOGD(TAG, "Transição... Aguardando classe de peso 0 durante %dms. Timer: %d Classe atual: %d", data.parameterSetup.transitionTime, weightClassTimer, weightClass);
 
-    if (weightClass == 0 && weightClassTimer >= 2000)
+    if (weightClass == 0 && weightClassTimer >= data.parameterSetup.transitionTime)
     {
         ESP_LOGD(TAG, "Condição atingida.");
         stateManager.switchTo(StateKind::OperationMalhaFechada);
