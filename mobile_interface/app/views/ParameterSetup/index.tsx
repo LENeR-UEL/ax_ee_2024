@@ -5,7 +5,6 @@ import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import GroupBox from "./GroupBox";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
 import { ScrollView } from "react-native-gesture-handler";
-import { useNavigation } from "../../hooks/useNavigation";
 
 export default function ParameterSetup() {
   const [status, sendControl] = useFirmwareStatus();
@@ -24,7 +23,7 @@ export default function ParameterSetup() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ flexGrow: 1, gap: 48, paddingVertical: 16 }}
+      contentContainerStyle={{ flexGrow: 1, gap: 16, paddingVertical: 16 }}
       style={{ padding: 16, gap: 32 }}>
       <GroupBox title="Rampa de subida">
         <Text style={{ marginBottom: 8 }}>
@@ -100,6 +99,32 @@ export default function ParameterSetup() {
           />
         </View>
       </GroupBox>
+      <GroupBox title="Malha fechada - tempo após setpoint">
+        <Text>
+          Durante a etapa de malha fechada, o participante irá se apoiar nas barras conforme está
+          fadigando. Quando o peso medido for maior que o setpoint durante{" "}
+          {status.parameters.malhaFechadaAboveSetpointTime} ms, entraremos na rampa de descida.
+        </Text>
+        <View>
+          <Text style={{ paddingHorizontal: 16 }}>
+            {status.parameters.malhaFechadaAboveSetpointTime} ms
+          </Text>
+          <Slider
+            step={100}
+            minimumValue={1000}
+            maximumValue={10000}
+            value={status.parameters.malhaFechadaAboveSetpointTime}
+            onValueChange={(v) => {
+              hapticFeedbackControlLight();
+              sendControl({
+                controlCode: "ParameterSetup_SetMalhaFechadaAboveSetpointTime",
+                waitForResponse: false,
+                data: Math.floor(v / 100)
+              });
+            }}
+          />
+        </View>
+      </GroupBox>
       <GroupBox title="Rampa de descida">
         <Text style={{ marginBottom: 8 }}>
           No final da parte de operação, ao diminuir o PWM ao zero, especifique o intervalo entre as
@@ -139,7 +164,7 @@ export default function ParameterSetup() {
                 sendControl({
                   controlCode: "ParameterSetup_SetGradualDecreaseInterval",
                   waitForResponse: false,
-                  data: Math.floor(v / 100)
+                  data: Math.floor(v / 50)
                 });
               }}
             />

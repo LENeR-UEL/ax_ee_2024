@@ -17,8 +17,8 @@ export default function GroupBox(props: GroupBoxProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    borderWidth: 1,
     borderColor: "#ccc",
+    borderWidth: 1,
     padding: 12,
     paddingVertical: 18,
     position: "relative",

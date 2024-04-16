@@ -1,18 +1,17 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
 import { Text, FAB } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { WeightIndicationBar } from "./WeightIndicatorBar";
 import { useEffect, useRef } from "react";
 import { FirmwareState, useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
-import { useBluetoothConnection } from "../../bluetooth/Context";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
 import { run } from "../../utils/run";
 import { timeout } from "../../utils/timeout";
+import { useNavigation } from "../../hooks/useNavigation";
 
 export default function OperationView() {
-  const bt = useBluetoothConnection();
-
+  const navigator = useNavigation();
   const [status, sendControl] = useFirmwareStatus();
 
   async function updateMaxMese(operation: "+" | "-") {
@@ -45,10 +44,31 @@ export default function OperationView() {
   }
 
   useEffect(() => {
-    return () => {
+    const state = status.mainOperationState?.state ?? null;
+    const unsubscribe = navigator.addListener("beforeRemove", (e) => {
+      // Nessas situações, é inseguro permitir a mudança de estado no firmware.
+      if (
+        state === FirmwareState.OperationGradualIncrease ||
+        state === FirmwareState.OperationTransition ||
+        state === FirmwareState.OperationMalhaFechada ||
+        (state === FirmwareState.OperationStop && status.pwm > 0)
+      ) {
+        e.preventDefault();
+        ToastAndroid.showWithGravity(
+          "É preciso finalizar as etapas de operação primeiro.",
+          250,
+          ToastAndroid.BOTTOM
+        );
+        return;
+      }
+
       sendControl({ controlCode: "MainOperation_GoBackToMESECollecter", waitForResponse: true });
+    });
+
+    return () => {
+      unsubscribe();
     };
-  }, []);
+  }, [status.mainOperationState?.state, status.pwm]);
 
   useEffect(() => {
     hapticFeedbackControl()
@@ -123,15 +143,15 @@ export default function OperationView() {
               return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese}) (timer: ${state.pwmIncreaseTimeDelta} / ${status.parameters.gradualIncreaseInterval} ms)`;
             case FirmwareState.OperationTransition: {
               const timer = state.weightClass === 0 ? state.weightClassTimer : 0;
-              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / 2000 ms`;
+              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / ${status.parameters.transitionTime} ms`;
             }
             case FirmwareState.OperationMalhaFechada:
-              return `Malha fechada.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
+              return `Malha fechada.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / ${status.parameters.malhaFechadaAboveSetpointTime} ms`;
             case FirmwareState.OperationStop: {
               if (status.pwm === 0) {
                 return "Finalizado.";
               } else {
-                return `Decremento manual, até 0 (${status.pwm} / 0)`;
+                return `Decremento manual, até 0 (${status.pwm} / 0) (timer: ${state.pwmDecreaseTimeDelta} / ${status.parameters.gradualDecreaseInterval} ms)`;
               }
             }
             default:

@@ -32,6 +32,7 @@ public:
         uint16_t transitionTime;
         uint16_t gradualDecreaseInterval;
         uint8_t gradualDecreaseStep;
+        uint16_t malhaFechadaAboveSetpointTime;
     } parameterSetup;
 
     // Informar o app do estado atual da operação

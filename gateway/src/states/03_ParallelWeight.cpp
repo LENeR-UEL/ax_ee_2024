@@ -29,8 +29,7 @@ void onParallelWeightStateLoop()
     if (now - lastTwaiSendTime >= 100)
     {
         lastTwaiSendTime = now;
-        twaiSend(TwaiSendMessageKind::WeightL, scaleGetWeightL());
-        twaiSend(TwaiSendMessageKind::WeightR, scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
         twaiSend(TwaiSendMessageKind::Setpoint, 0);
         twaiSend(TwaiSendMessageKind::Mese, 0);

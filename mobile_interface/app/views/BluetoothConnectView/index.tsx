@@ -1,4 +1,4 @@
-import { Animated, ScrollView, StyleSheet, View } from "react-native";
+import { Animated, ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
 import { Button, Text, ActivityIndicator, Dialog, Portal } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useBluetoothConnection } from "../../bluetooth/Context";
@@ -105,12 +105,12 @@ export default function BluetoothConnectView() {
     await sendControl({ controlCode: "FirmwareInvokeReset", waitForResponse: false });
     hapticFeedbackControl();
     ble.disconnect();
-    alert("Gateway reiniciando...");
+    ToastAndroid.showWithGravity("Gateway reiniciando...", 1000, ToastAndroid.BOTTOM);
   };
 
   async function onStartProcessClick() {
     if (ble.status !== "CONNECTED") return;
-    await sendControl({ controlCode: "ParameterSetup_Complete", waitForResponse: true })
+    await sendControl({ controlCode: "ParameterSetup_Complete", waitForResponse: true });
     navigator.navigate("Paralela");
   }
 
