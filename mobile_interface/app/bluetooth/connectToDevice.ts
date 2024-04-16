@@ -12,6 +12,15 @@ export default async function connectToDevice(device: Device): Promise<Device | 
       refreshGatt: "OnConnected"
     });
 
+    device = await device.requestMTU(512);
+
+    console.log("Got MTU size: " + device.mtu);
+
+    if (device.mtu < 32) {
+      alert("Erro na conexão Bluetooth: dispositivo não suporta MTU maior que 32.");
+      throw new Error("Got insufficient MTU size: " + device.mtu);
+    }
+
     return await device.discoverAllServicesAndCharacteristics();
   } catch (error) {
     ToastAndroid.showWithGravity(

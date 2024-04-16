@@ -5,10 +5,43 @@
 #include "../Data.h"
 #include "../StateManager.h"
 #include "../Scale/Scale.h"
+#include "Preferences.h"
 
 static const char *TAG = "ParameterSetup";
 
 static unsigned long lastTwaiSendTime = 0;
+
+#define PARAMETERS_DEFAULT_GRADUAL_INCREASE_INTERVAL 100
+#define PARAMETERS_DEFAULT_GRADUAL_INCREASE_STEP 1
+#define PARAMETERS_DEFAULT_TRANSITION_TIME 1500
+#define PARAMETERS_DEFAULT_GRADUAL_DECREASE_INTERVAL 100
+#define PARAMETERS_DEFAULT_GRADUAL_DECREASE_STEP 1
+
+static Preferences preferences;
+
+void reloadData(bool resetToDefaults)
+{
+    preferences.begin("parameters", false);
+    if (resetToDefaults)
+        preferences.clear();
+    data.parameterSetup.gradualIncreaseInterval = preferences.getUShort("a", PARAMETERS_DEFAULT_GRADUAL_INCREASE_INTERVAL);
+    data.parameterSetup.gradualIncreaseStep = preferences.getUChar("b", PARAMETERS_DEFAULT_GRADUAL_INCREASE_STEP);
+    data.parameterSetup.transitionTime = preferences.getUShort("c", PARAMETERS_DEFAULT_TRANSITION_TIME);
+    data.parameterSetup.gradualDecreaseInterval = preferences.getUShort("d", PARAMETERS_DEFAULT_GRADUAL_DECREASE_INTERVAL);
+    data.parameterSetup.gradualDecreaseStep = preferences.getUChar("e", PARAMETERS_DEFAULT_GRADUAL_DECREASE_STEP);
+    preferences.end();
+}
+
+void saveData()
+{
+    preferences.begin("parameters", false);
+    preferences.putUShort("a", data.parameterSetup.gradualIncreaseInterval);
+    preferences.putUChar("b", data.parameterSetup.gradualIncreaseStep);
+    preferences.putUShort("c", data.parameterSetup.transitionTime);
+    preferences.putUShort("d", data.parameterSetup.gradualDecreaseInterval);
+    preferences.putUChar("e", data.parameterSetup.gradualDecreaseStep);
+    preferences.end();
+}
 
 void onParameterSetupStateEnter()
 {
@@ -16,6 +49,7 @@ void onParameterSetupStateEnter()
     data.meseMax = 0;
     data.setpoint = 0;
     data.collectedWeight = 0;
+    reloadData(false);
 }
 
 void onParameterSetupStateLoop()
@@ -55,6 +89,28 @@ void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraDat
 {
     switch (code)
     {
+    case BluetoothControlCode::ParameterSetup_SetGradualIncreaseStep:
+        data.parameterSetup.gradualIncreaseStep = extraData;
+        break;
+    case BluetoothControlCode::ParameterSetup_SetGradualIncreaseInterval:
+        data.parameterSetup.gradualIncreaseInterval = extraData * 50;
+        break;
+    case BluetoothControlCode::ParameterSetup_SetTransitionTime:
+        data.parameterSetup.transitionTime = extraData * 100;
+        break;
+    case BluetoothControlCode::ParameterSetup_SetGradualDecreaseInterval:
+        data.parameterSetup.gradualDecreaseInterval = extraData * 50;
+        break;
+    case BluetoothControlCode::ParameterSetup_SetGradualDecreaseStep:
+        data.parameterSetup.gradualDecreaseStep = extraData;
+        break;
+    case BluetoothControlCode::ParameterSetup_Reset:
+        reloadData(true);
+        break;
+    case BluetoothControlCode::ParameterSetup_Save:
+        // Salvar preferências na memória
+        saveData();
+        break;
     case BluetoothControlCode::ParameterSetup_Complete:
         stateManager.switchTo(StateKind::ParallelWeight);
         return;
@@ -64,4 +120,6 @@ void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraDat
     }
 }
 
-void onParameterSetupStateExit() {}
+void onParameterSetupStateExit()
+{
+}

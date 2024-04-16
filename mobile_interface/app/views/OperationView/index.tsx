@@ -102,14 +102,12 @@ export default function OperationView() {
               animated={false}
               size="small"
               icon={() => <MaterialCommunityIcons name="minus" size={24} />}
-              onPress={() => updateMaxMese("-")}
-            ></FAB>
+              onPress={() => updateMaxMese("-")}></FAB>
             <FAB
               animated={false}
               size="small"
               icon={() => <MaterialCommunityIcons name="plus" size={24} />}
-              onPress={() => updateMaxMese("+")}
-            ></FAB>
+              onPress={() => updateMaxMese("+")}></FAB>
           </View>
         </View>
         <View style={styles.statusDisplayWrapper}></View>
@@ -122,7 +120,7 @@ export default function OperationView() {
               return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
             }
             case FirmwareState.OperationGradualIncrease:
-              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese})`;
+              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese}) (timer: ${state.pwmIncreaseTimeDelta} / ${status.parameters.gradualIncreaseInterval} ms)`;
             case FirmwareState.OperationTransition: {
               const timer = state.weightClass === 0 ? state.weightClassTimer : 0;
               return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / 2000 ms`;
@@ -131,7 +129,7 @@ export default function OperationView() {
               return `Malha fechada.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / 2000 ms`;
             case FirmwareState.OperationStop: {
               if (status.pwm === 0) {
-                return "Finalizado."
+                return "Finalizado.";
               } else {
                 return `Decremento manual, até 0 (${status.pwm} / 0)`;
               }

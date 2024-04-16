@@ -9,9 +9,6 @@
 
 static const char *TAG = "OperationGradualIncrease";
 static unsigned long lastTwaiSendTime = 0;
-
-static const uint8_t PWM_STEP = 1;
-static const uint16_t PWM_STEP_INTERVAL_MS = 100;
 static unsigned long lastStepTime = 0;
 
 void onOperationGradualIncreaseEnter()
@@ -43,9 +40,10 @@ void onOperationGradualIncreaseLoop()
         return;
     }
 
-    if (now - lastStepTime >= PWM_STEP_INTERVAL_MS)
+    unsigned int pwmIncreaseTimeDelta = now - lastStepTime;
+    if (pwmIncreaseTimeDelta >= data.parameterSetup.gradualIncreaseInterval)
     {
-        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + PWM_STEP);
+        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + data.parameterSetup.gradualIncreaseStep);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
         lastStepTime = now;
     }
@@ -61,8 +59,8 @@ void onOperationGradualIncreaseLoop()
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-    data.mainOperationStateInformApp[1] = 0;
-    data.mainOperationStateInformApp[2] = 0;
+    data.mainOperationStateInformApp[1] = pwmIncreaseTimeDelta & 0xFF;
+    data.mainOperationStateInformApp[2] = (pwmIncreaseTimeDelta >> 8) & 0xFF;
     data.mainOperationStateInformApp[3] = 0;
     data.mainOperationStateInformApp[4] = 0;
     data.mainOperationStateInformApp[5] = 0;

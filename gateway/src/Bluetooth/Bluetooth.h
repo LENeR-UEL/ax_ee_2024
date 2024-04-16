@@ -15,8 +15,6 @@ enum class BluetoothControlCode
      */
     FirmwareInvokeReset = 0x00,
 
-    ParameterSetup_Complete = 0x2F,
-
     Parallel_GoBackToParameterSetup = 0x10,
     Parallel_RegisterWeight = 0x11,
     Parallel_Complete = 0x1f,
@@ -31,6 +29,15 @@ enum class BluetoothControlCode
     MainOperation_SetSetpoint = 0x31,
     MainOperation_IncreaseMESEMaxOnce = 0x32,
     MainOperation_DecreaseMESEMaxOnce = 0x33,
+
+    ParameterSetup_SetGradualIncreaseInterval = 0x61,
+    ParameterSetup_SetGradualIncreaseStep = 0x62,
+    ParameterSetup_SetTransitionTime = 0x63,
+    ParameterSetup_SetGradualDecreaseInterval = 0x64,
+    ParameterSetup_SetGradualDecreaseStep = 0x65,
+    ParameterSetup_Reset = 0x6D,
+    ParameterSetup_Save = 0x6E,
+    ParameterSetup_Complete = 0x6F,
 };
 
 typedef struct __attribute__((__packed__))
@@ -42,6 +49,15 @@ typedef struct __attribute__((__packed__))
     uint16_t mese;
     uint16_t meseMax;
     uint16_t setpoint;
+
+    struct __attribute__((__packed__))
+    {
+        uint16_t gradualIncreaseInterval;
+        uint8_t gradualIncreaseStep;
+        uint16_t transitionTime;
+        uint16_t gradualDecreaseInterval;
+        uint8_t gradualDecreaseStep;
+    } parameterSetup;
 
     // Informar o app do estado atual da operação
     uint8_t mainOperationStateInformApp[6];

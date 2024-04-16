@@ -33,7 +33,7 @@ interface StatusPacket {
     | {
         state: FirmwareState.OperationStart;
       }
-    | { state: FirmwareState.OperationGradualIncrease }
+    | { state: FirmwareState.OperationGradualIncrease; pwmIncreaseTimeDelta: number }
     | {
         state: FirmwareState.OperationTransition;
         weightClass: number;
@@ -45,6 +45,13 @@ interface StatusPacket {
         errorPositiveTimer: number;
       }
     | { state: FirmwareState.OperationStop };
+  parameters: {
+    gradualIncreaseInterval: number;
+    gradualIncreaseStep: number;
+    transitionTime: number;
+    gradualDecreaseInterval: number;
+    gradualDecreaseStep: number;
+  };
 }
 
 const ControlCodes = {
@@ -52,11 +59,6 @@ const ControlCodes = {
    * Invoca um reset no gateway e no estimulador.
    */
   FirmwareInvokeReset: 0x00,
-
-  /**
-   * Enviado pelo app ao salvar a parametrização para aquela sessão.
-   */
-  ParameterSetup_Complete: 0x2f,
 
   Parallel_GoBackToParameterSetup: 0x10,
   Parallel_RegisterWeight: 0x11,
@@ -71,7 +73,16 @@ const ControlCodes = {
   MainOperation_GoBackToMESECollecter: 0x30,
   MainOperation_SetSetpoint: 0x31,
   MainOperation_IncreaseMESEMaxOnce: 0x32,
-  MainOperation_DecreaseMESEMaxOnce: 0x33
+  MainOperation_DecreaseMESEMaxOnce: 0x33,
+
+  ParameterSetup_SetGradualIncreaseInterval: 0x61,
+  ParameterSetup_SetGradualIncreaseStep: 0x62,
+  ParameterSetup_SetTransitionTime: 0x63,
+  ParameterSetup_SetGradualDecreaseInterval: 0x64,
+  ParameterSetup_SetGradualDecreaseStep: 0x65,
+  ParameterSetup_Reset: 0x6d,
+  ParameterSetup_Save: 0x6e,
+  ParameterSetup_Complete: 0x6f
 } as const;
 
 type ControlCodeDispatcher = (options: {
@@ -81,6 +92,7 @@ type ControlCodeDispatcher = (options: {
 }) => Promise<boolean>;
 
 function parseStatusPacket(packet: Buffer): StatusPacket {
+  console.log(packet.byteLength + " bytes");
   const reader = new BufferReader(packet);
 
   const pwm = reader.readUnsignedShortLE();
@@ -90,8 +102,16 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   const mese = reader.readUnsignedShortLE();
   const meseMax = reader.readUnsignedShortLE();
   const setpoint = reader.readUnsignedShortLE();
-  const state = reader.readUnsignedChar() as FirmwareState;
 
+  const parameters: StatusPacket["parameters"] = {
+    gradualIncreaseInterval: reader.readUnsignedShortLE(),
+    gradualIncreaseStep: reader.readUnsignedChar(),
+    transitionTime: reader.readUnsignedShortLE(),
+    gradualDecreaseInterval: reader.readUnsignedShortLE(),
+    gradualDecreaseStep: reader.readUnsignedChar()
+  };
+
+  const state = reader.readUnsignedChar() as FirmwareState;
   let mainOpStateObj: StatusPacket["mainOperationState"];
 
   switch (state) {
@@ -103,7 +123,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     }
     case FirmwareState.OperationGradualIncrease: {
       mainOpStateObj = {
-        state: FirmwareState.OperationGradualIncrease
+        state: FirmwareState.OperationGradualIncrease,
+        pwmIncreaseTimeDelta: reader.readUnsignedShortLE()
       };
       break;
     }
@@ -141,6 +162,7 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     mese,
     meseMax,
     setpoint,
+    parameters,
     mainOperationState: mainOpStateObj
   };
 }
@@ -155,7 +177,14 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
     mese: 0,
     meseMax: 0,
     setpoint: 0,
-    mainOperationState: null
+    mainOperationState: null,
+    parameters: {
+      gradualIncreaseInterval: 0,
+      gradualIncreaseStep: 0,
+      transitionTime: 0,
+      gradualDecreaseInterval: 0,
+      gradualDecreaseStep: 0
+    }
   });
 
   useEffect(() => {

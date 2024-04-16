@@ -9,9 +9,6 @@
 
 static const char *TAG = "OperationStop";
 static unsigned long lastTwaiSendTime = 0;
-
-static const uint8_t DECREASE_PWM_STEP = 1;
-static const uint16_t PWM_STEP_INTERVAL_MS = 50;
 static unsigned long lastStepTime = 0;
 
 void onOperationStopEnter()
@@ -25,13 +22,13 @@ void onOperationStopLoop()
 
     ESP_LOGD(TAG, "PWM: %d/0", data.pwmFeedback, 0);
 
-    int requestedPwm = data.pwmFeedback - DECREASE_PWM_STEP;
+    int requestedPwm = data.pwmFeedback - data.parameterSetup.gradualDecreaseStep;
     if (requestedPwm < 0)
     {
         requestedPwm = 0;
     }
 
-    if (now - lastStepTime >= PWM_STEP_INTERVAL_MS)
+    if (now - lastStepTime >= data.parameterSetup.gradualDecreaseInterval)
     {
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, requestedPwm);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
