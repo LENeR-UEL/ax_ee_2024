@@ -28,6 +28,7 @@ interface StatusPacket {
   mese: number;
   meseMax: number;
   setpoint: number;
+  isOVBoxFlagSet: boolean;
   mainOperationState:
     | null
     | {
@@ -104,6 +105,7 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   const mese = reader.readUnsignedShortLE();
   const meseMax = reader.readUnsignedShortLE();
   const setpoint = reader.readUnsignedShortLE();
+  const isOVBoxFlagSet = reader.readUnsignedChar() === 1;
 
   const parameters: StatusPacket["parameters"] = {
     gradualIncreaseInterval: reader.readUnsignedShortLE(),
@@ -166,6 +168,7 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     mese,
     meseMax,
     setpoint,
+    isOVBoxFlagSet,
     parameters,
     mainOperationState: mainOpStateObj
   };
@@ -181,6 +184,7 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
     mese: 0,
     meseMax: 0,
     setpoint: 0,
+    isOVBoxFlagSet: false,
     mainOperationState: null,
     parameters: {
       gradualIncreaseInterval: 0,
