@@ -157,7 +157,10 @@ export default function OperationView() {
             default:
               return "";
           }
-        })}
+        }) +
+          run(() => {
+            return status.isOVBoxFlagSet ? "\n\nFLAG: TRUE" : "\n\nFLAG: FALSE";
+          })}
       </Text>
     </ScrollView>
   );
