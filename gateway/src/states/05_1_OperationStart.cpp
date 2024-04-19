@@ -40,7 +40,7 @@ void onOperationStartLoop()
         return;
     }
 
-    if (now - lastTwaiSendTime >= 100)
+    if (now - lastTwaiSendTime >= 40)
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);

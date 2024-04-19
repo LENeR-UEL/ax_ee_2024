@@ -66,7 +66,7 @@ void onParameterSetupStateLoop()
     ESP_LOGI(TAG, "Loop");
 
     long now = millis();
-    if (now - lastTwaiSendTime >= 100)
+    if (now - lastTwaiSendTime >= 40)
     {
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);

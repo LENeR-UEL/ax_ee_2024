@@ -8,7 +8,6 @@
 
 static const char *TAG = "MESECollecter";
 
-#define COLLECTOR_TWAI_SEND_INTERVAL_MS 100
 #define COLLECTOR_PWM_STEP 5
 #define WINDING_DOWN_PWM_STEP 5
 #define WINDING_DOWN_INTERVAL_MS 500
@@ -58,7 +57,7 @@ void onMESECollecterStateLoop()
         }
     }
 
-    if (now - lastTwaiSendTime >= COLLECTOR_TWAI_SEND_INTERVAL_MS)
+    if (now - lastTwaiSendTime >= 40)
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);

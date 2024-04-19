@@ -48,7 +48,7 @@ void onOperationGradualIncreaseLoop()
         lastStepTime = now;
     }
 
-    if (now - lastTwaiSendTime >= 100)
+    if (now - lastTwaiSendTime >= 40)
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
