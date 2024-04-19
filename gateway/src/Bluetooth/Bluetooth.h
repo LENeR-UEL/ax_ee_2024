@@ -50,6 +50,7 @@ typedef struct __attribute__((__packed__))
     uint16_t mese;
     uint16_t meseMax;
     uint16_t setpoint;
+    uint8_t isOVBoxFlagSet;
 
     struct __attribute__((__packed__))
     {

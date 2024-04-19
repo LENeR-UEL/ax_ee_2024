@@ -1,4 +1,4 @@
-
+#include <Arduino.h>
 #include "Data.h"
 #include "string.h"
 
@@ -8,6 +8,8 @@ static const char *TAG = "Data";
 
 Data::Data()
 {
+  pinMode(OVBOXPin, INPUT);
+  
   this->mese = 0;
   this->meseMax = 0;
   this->weightL = 0;
@@ -49,6 +51,7 @@ void Data::sendToBle(const Bluetooth &ble)
   status.weightR = data.weightR;
   status.collectedWeight = data.collectedWeight;
   status.setpoint = data.setpoint;
+  status.isOVBoxFlagSet = data.isOVBoxFlagSet() ? 1 : 0;
   memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp, sizeof(status.mainOperationStateInformApp));
   memcpy(&status.parameterSetup, &this->parameterSetup, sizeof(this->parameterSetup));
 
@@ -66,4 +69,8 @@ void Data::debugPrintAll()
   DEBUG(this->meseMax);
   DEBUG(this->setpoint);
   ESP_LOGI(TAG, "");
+}
+
+bool Data::isOVBoxFlagSet() {
+  return digitalRead(OVBOXPin) == HIGH;
 }

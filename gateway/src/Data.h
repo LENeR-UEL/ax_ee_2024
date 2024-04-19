@@ -4,6 +4,8 @@
 #include "Twai/Twai.h"
 #include "Bluetooth/Bluetooth.h"
 
+#define OVBOXPin 34
+
 enum class FlagTrigger
 {
     MalhaAberta,
@@ -43,6 +45,8 @@ public:
     void sendToBle(const Bluetooth &ble);
 
     void debugPrintAll();
+
+    bool isOVBoxFlagSet();
 };
 
 extern Data data;
