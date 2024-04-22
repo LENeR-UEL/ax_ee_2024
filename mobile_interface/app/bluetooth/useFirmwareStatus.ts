@@ -74,6 +74,7 @@ const ControlCodes = {
   MainOperation_SetSetpoint: 0x31,
   MainOperation_IncreaseMESEMaxOnce: 0x32,
   MainOperation_DecreaseMESEMaxOnce: 0x33,
+  MainOperation_EmergencyStop: 0x38,
 
   ParameterSetup_SetGradualIncreaseTime: 0x61,
   ParameterSetup_SetTransitionTime: 0x63,

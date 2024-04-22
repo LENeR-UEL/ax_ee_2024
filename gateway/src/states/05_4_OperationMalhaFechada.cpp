@@ -101,6 +101,9 @@ void onOperationMalhaFechadaBLEControl(BluetoothControlCode code, uint8_t extraD
     case BluetoothControlCode::MainOperation_GoBackToMESECollecter:
         stateManager.switchTo(StateKind::MESECollecter);
         return;
+    case BluetoothControlCode::MainOperation_EmergencyStop:
+        stateManager.switchTo(StateKind::OperationStop);
+        return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();
         return;

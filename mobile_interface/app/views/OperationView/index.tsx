@@ -1,11 +1,15 @@
 import { ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
-import { Text, FAB } from "react-native-paper";
+import { Text, FAB, Button } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { WeightIndicationBar } from "./WeightIndicatorBar";
 import { useEffect, useRef } from "react";
 import { FirmwareState, useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
-import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
+import {
+  hapticFeedbackControl,
+  hapticFeedbackControlLight,
+  hapticFeedbackProcessEnd
+} from "../../haptics/HapticFeedback";
 import { run } from "../../utils/run";
 import { timeout } from "../../utils/timeout";
 import { useNavigation } from "../../hooks/useNavigation";
@@ -28,6 +32,14 @@ export default function OperationView() {
     }
 
     await hapticFeedbackControl();
+  }
+
+  async function emergencyStop() {
+    sendControl({ controlCode: "MainOperation_EmergencyStop", waitForResponse: true });
+
+    ToastAndroid.showWithGravity("Parada de emergência acionada.", 1000, ToastAndroid.BOTTOM);
+
+    for (let i = 0; i < 4; i++) await hapticFeedbackProcessEnd();
   }
 
   const _setpointRef = useRef(status.setpoint);
@@ -109,6 +121,7 @@ export default function OperationView() {
       <View style={StyleSheet.compose(styles.group, styles.displaysGroup)}>
         <StatusDisplay textLeft="PWM" textMain={`${status.pwm}/${status.meseMax}`} textRight="µS" />
         <View style={styles.statusDisplayButtons}>
+          <Text>MESE máximo: </Text>
           <FAB
             animated={false}
             size="small"
@@ -121,15 +134,23 @@ export default function OperationView() {
             onPress={() => updateMaxMese("+")}></FAB>
         </View>
       </View>
+      <Button
+        mode="elevated"
+        style={{ marginHorizontal: 72, marginVertical: 32 }}
+        labelStyle={{ color: "#ff2222" }}
+        contentStyle={{ backgroundColor: "#ffcccc" }}
+        onPress={emergencyStop}>
+        Parada de emergência
+      </Button>
       <Text style={styles.statusText}>
         {run(() => {
           const state = status.mainOperationState;
           switch (state?.state) {
             case FirmwareState.OperationStart: {
-              return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
+              return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2} kg)`;
             }
             case FirmwareState.OperationGradualIncrease:
-              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese}) (timer: ${state.pwmIncreaseTimeDelta} ms)`;
+              return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs) (timer: ${state.pwmIncreaseTimeDelta} ms)`;
             case FirmwareState.OperationTransition: {
               const timer = state.weightClass === 0 ? state.weightClassTimer : 0;
               return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / ${status.parameters.transitionTime} ms`;
@@ -140,7 +161,7 @@ export default function OperationView() {
               if (status.pwm === 0) {
                 return "Finalizado.";
               } else {
-                return `Decremento manual, até 0 (${status.pwm} / 0) (timer: ${state.pwmDecreaseTimeDelta} ms)`;
+                return `Decremento manual, até 0 (${status.pwm} → 0 μs) (timer: ${state.pwmDecreaseTimeDelta} ms)`;
               }
             }
             default:
@@ -177,8 +198,9 @@ const styles = StyleSheet.create({
   },
   statusDisplayButtons: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "flex-end",
-    gap: 2,
+    gap: 8,
     marginTop: 4
   },
   lastGroup: {
@@ -196,7 +218,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     //@ts-expect-error
     width: "calc(100% - 96)",
-    marginHorizontal: 48,
-    marginTop: 16
+    marginHorizontal: 48
   }
 });

@@ -103,6 +103,9 @@ void onOperationGradualIncreaseBLEControl(BluetoothControlCode code, uint8_t ext
     case BluetoothControlCode::MainOperation_GoBackToMESECollecter:
         stateManager.switchTo(StateKind::MESECollecter);
         return;
+    case BluetoothControlCode::MainOperation_EmergencyStop:
+        stateManager.switchTo(StateKind::OperationStop);
+        return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();
         return;
