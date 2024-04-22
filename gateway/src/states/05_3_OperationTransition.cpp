@@ -90,6 +90,9 @@ void onOperationTransitionBLEControl(BluetoothControlCode code, uint8_t extraDat
     case BluetoothControlCode::MainOperation_GoBackToMESECollecter:
         stateManager.switchTo(StateKind::MESECollecter);
         return;
+    case BluetoothControlCode::MainOperation_EmergencyStop:
+        stateManager.switchTo(StateKind::OperationStop);
+        return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();
         return;

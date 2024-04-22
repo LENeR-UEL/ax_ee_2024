@@ -10,7 +10,7 @@ static const char *TAG = "MESECollecter";
 
 #define COLLECTOR_PWM_STEP 5
 #define WINDING_DOWN_PWM_STEP 5
-#define WINDING_DOWN_INTERVAL_MS 500
+#define WINDING_DOWN_INTERVAL_MS 200
 
 static unsigned long lastTwaiSendTime = 0;
 static long lastWindingDownTickTime = 0;
