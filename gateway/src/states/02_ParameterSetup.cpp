@@ -11,11 +11,9 @@ static const char *TAG = "ParameterSetup";
 
 static unsigned long lastTwaiSendTime = 0;
 
-#define PARAMETERS_DEFAULT_GRADUAL_INCREASE_INTERVAL 100
-#define PARAMETERS_DEFAULT_GRADUAL_INCREASE_STEP 1
+#define PARAMETERS_DEFAULT_GRADUAL_INCREASE_TIME 1500
 #define PARAMETERS_DEFAULT_TRANSITION_TIME 1500
-#define PARAMETERS_DEFAULT_GRADUAL_DECREASE_INTERVAL 100
-#define PARAMETERS_DEFAULT_GRADUAL_DECREASE_STEP 1
+#define PARAMETERS_DEFAULT_GRADUAL_DECREASE_TIME 1500
 #define PARAMETERS_DEFAULT_MALHA_FECHADA_ABOVE_SETPOINT_TIME 2000
 
 static Preferences preferences;
@@ -25,24 +23,20 @@ void reloadData(bool resetToDefaults)
     preferences.begin("parameters", false);
     if (resetToDefaults)
         preferences.clear();
-    data.parameterSetup.gradualIncreaseInterval = preferences.getUShort("a", PARAMETERS_DEFAULT_GRADUAL_INCREASE_INTERVAL);
-    data.parameterSetup.gradualIncreaseStep = preferences.getUChar("b", PARAMETERS_DEFAULT_GRADUAL_INCREASE_STEP);
-    data.parameterSetup.transitionTime = preferences.getUShort("c", PARAMETERS_DEFAULT_TRANSITION_TIME);
-    data.parameterSetup.gradualDecreaseInterval = preferences.getUShort("d", PARAMETERS_DEFAULT_GRADUAL_DECREASE_INTERVAL);
-    data.parameterSetup.gradualDecreaseStep = preferences.getUChar("e", PARAMETERS_DEFAULT_GRADUAL_DECREASE_STEP);
-    data.parameterSetup.malhaFechadaAboveSetpointTime = preferences.getUShort("f", PARAMETERS_DEFAULT_MALHA_FECHADA_ABOVE_SETPOINT_TIME);
+    data.parameterSetup.gradualIncreaseTime = preferences.getUShort("a", PARAMETERS_DEFAULT_GRADUAL_INCREASE_TIME);
+    data.parameterSetup.transitionTime = preferences.getUShort("b", PARAMETERS_DEFAULT_TRANSITION_TIME);
+    data.parameterSetup.gradualDecreaseTime = preferences.getUShort("c", PARAMETERS_DEFAULT_GRADUAL_DECREASE_TIME);
+    data.parameterSetup.malhaFechadaAboveSetpointTime = preferences.getUShort("d", PARAMETERS_DEFAULT_MALHA_FECHADA_ABOVE_SETPOINT_TIME);
     preferences.end();
 }
 
 void saveData()
 {
     preferences.begin("parameters", false);
-    preferences.putUShort("a", data.parameterSetup.gradualIncreaseInterval);
-    preferences.putUChar("b", data.parameterSetup.gradualIncreaseStep);
-    preferences.putUShort("c", data.parameterSetup.transitionTime);
-    preferences.putUShort("d", data.parameterSetup.gradualDecreaseInterval);
-    preferences.putUChar("e", data.parameterSetup.gradualDecreaseStep);
-    preferences.putUShort("f", data.parameterSetup.malhaFechadaAboveSetpointTime);
+    preferences.putUShort("a", data.parameterSetup.gradualIncreaseTime);
+    preferences.putUShort("b", data.parameterSetup.transitionTime);
+    preferences.putUShort("c", data.parameterSetup.gradualDecreaseTime);
+    preferences.putUShort("d", data.parameterSetup.malhaFechadaAboveSetpointTime);
     preferences.end();
 }
 
@@ -62,7 +56,7 @@ void onParameterSetupStateLoop()
     ESP_LOGI(TAG, "Loop");
 
     long now = millis();
-    if (now - lastTwaiSendTime >= 40)
+    if (now - lastTwaiSendTime >= 15)
     {
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
@@ -87,23 +81,17 @@ void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraDat
 {
     switch (code)
     {
-    case BluetoothControlCode::ParameterSetup_SetGradualIncreaseStep:
-        data.parameterSetup.gradualIncreaseStep = extraData;
-        break;
-    case BluetoothControlCode::ParameterSetup_SetGradualIncreaseInterval:
-        data.parameterSetup.gradualIncreaseInterval = extraData * 50;
+    case BluetoothControlCode::ParameterSetup_SetGradualIncreaseTime:
+        data.parameterSetup.gradualIncreaseTime = max(extraData * 100, 1);
         break;
     case BluetoothControlCode::ParameterSetup_SetTransitionTime:
-        data.parameterSetup.transitionTime = extraData * 100;
+        data.parameterSetup.transitionTime = max(extraData * 100, 1);
         break;
-    case BluetoothControlCode::ParameterSetup_SetGradualDecreaseInterval:
-        data.parameterSetup.gradualDecreaseInterval = extraData * 50;
-        break;
-    case BluetoothControlCode::ParameterSetup_SetGradualDecreaseStep:
-        data.parameterSetup.gradualDecreaseStep = extraData;
+    case BluetoothControlCode::ParameterSetup_SetGradualDecreaseTime:
+        data.parameterSetup.gradualDecreaseTime = max(extraData * 100, 1);
         break;
     case BluetoothControlCode::ParameterSetup_SetMalhaFechadaAboveSetpointTime:
-        data.parameterSetup.malhaFechadaAboveSetpointTime = extraData * 100;
+        data.parameterSetup.malhaFechadaAboveSetpointTime = max(extraData * 100, 1);
         break;
     case BluetoothControlCode::ParameterSetup_Reset:
         reloadData(true);

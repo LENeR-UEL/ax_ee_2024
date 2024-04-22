@@ -38,7 +38,7 @@ void onOperationTransitionLoop()
         return;
     }
 
-    if (now - lastTwaiSendTime >= 40)
+    if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.mese);
