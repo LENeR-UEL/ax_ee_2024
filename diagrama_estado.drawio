@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-04-09T13:12:45.124Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36" etag="S9dpW6TaT9iSodCYvBgD" version="24.2.3" type="device">
+<mxfile host="app.diagrams.net" modified="2024-04-19T19:07:38.814Z" agent="Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0" etag="2SK0tL6am6qc-Qqt6l_W" version="24.2.7" type="device">
   <diagram name="Page-1" id="7Bq0H3Z3bL5iUYbq2rVu">
-    <mxGraphModel dx="2284" dy="828" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1730" dy="491" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -175,7 +175,7 @@
         <mxCell id="c-Rq7uScd-FVR4qBjpjj-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" source="c-Rq7uScd-FVR4qBjpjj-63" target="c-Rq7uScd-FVR4qBjpjj-68" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c-Rq7uScd-FVR4qBjpjj-70" value="Quando&lt;br style=&quot;font-size: 9px;&quot;&gt;peso = setpoint" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-69" vertex="1" connectable="0">
+        <mxCell id="c-Rq7uScd-FVR4qBjpjj-70" value="Quando&lt;br style=&quot;font-size: 9px;&quot;&gt;&lt;div&gt;peso = setpoin&lt;/div&gt;&lt;div&gt;&amp;amp;&amp;amp; OVBoxTrigger = 1&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-69" vertex="1" connectable="0">
           <mxGeometry x="0.04" relative="1" as="geometry">
             <mxPoint x="-7" as="offset" />
           </mxGeometry>
