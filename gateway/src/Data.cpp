@@ -9,7 +9,12 @@ static const char *TAG = "Data";
 Data::Data()
 {
   pinMode(OVBOXPin, INPUT);
-  
+  this->lastBluetoothSendTime = 0;
+  this->reset();
+}
+
+void Data::reset()
+{
   this->mese = 0;
   this->meseMax = 0;
   this->weightL = 0;
@@ -17,9 +22,6 @@ Data::Data()
   this->collectedWeight = 0;
   this->setpoint = 0;
   this->pwmFeedback = 0;
-
-  this->lastBluetoothSendTime = 0;
-
   memset(this->mainOperationStateInformApp, 0, sizeof(this->mainOperationStateInformApp));
   memset(&this->parameterSetup, 0, sizeof(this->parameterSetup));
 }
@@ -71,6 +73,7 @@ void Data::debugPrintAll()
   ESP_LOGI(TAG, "");
 }
 
-bool Data::isOVBoxFlagSet() {
+bool Data::isOVBoxFlagSet()
+{
   return digitalRead(OVBOXPin) == HIGH;
 }

@@ -48,10 +48,6 @@ void saveData()
 
 void onParameterSetupStateEnter()
 {
-    data.mese = 0;
-    data.meseMax = 0;
-    data.setpoint = 0;
-    data.collectedWeight = 0;
     reloadData(false);
 }
 

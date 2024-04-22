@@ -11,6 +11,7 @@ static unsigned long lastTwaiSendTime = 0;
 
 void onDisconnectedStateEnter()
 {
+    data.reset();
 }
 
 void onDisconnectedStateLoop()

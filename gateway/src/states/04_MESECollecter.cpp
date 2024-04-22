@@ -23,10 +23,6 @@ void onMESECollecterStateEnter()
     requestedPwm = 0;
     lastWindingDownTickTime = 0;
     isWindingDown = false;
-
-    data.mese = 0;
-    data.meseMax = 0;
-    data.setpoint = 0;
 }
 
 void onMESECollecterStateLoop()

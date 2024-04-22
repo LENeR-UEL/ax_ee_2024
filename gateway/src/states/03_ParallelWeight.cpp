@@ -11,10 +11,6 @@ static unsigned long lastTwaiSendTime = 0;
 
 void onParallelWeightStateEnter()
 {
-    data.mese = 0;
-    data.meseMax = 0;
-    data.setpoint = 0;
-    data.collectedWeight = 0;
 }
 
 void onParallelWeightStateLoop()

@@ -42,6 +42,8 @@ public:
 
     unsigned long lastBluetoothSendTime;
 
+    void reset();
+
     void sendToBle(const Bluetooth &ble);
 
     void debugPrintAll();
