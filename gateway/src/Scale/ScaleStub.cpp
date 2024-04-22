@@ -13,10 +13,10 @@ static const char *TAG = "RealScale";
 float correctedReadingKg[] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 const float CORRECAO[] = {
-    1.3f, // A
+    1.0f, // A
     1.0f, // B
-    0.3f, // C
-    1.2f, // D
+    1.0f, // C
+    1.0f, // D
 };
 
 int random(int min, int max) // range : [min, max]

@@ -11,6 +11,7 @@ interface Props {
   setpointValue: number;
   onSetpointChange(newValue: number): void;
   setpointColor: string;
+  hideSetpointText: boolean;
   fillColor: string;
 }
 
@@ -41,15 +42,15 @@ export function WeightIndicationBar(props: Props) {
               bottom: `${setpointHeight}%`,
               backgroundColor: props.setpointColor
             })}
-            pointerEvents="none"
-          >
-            <Text
-              style={StyleSheet.compose(styles.setpointText, {
-                color: props.setpointColor
-              })}
-            >
-              {(Math.round(props.setpointValue * 100) / 100).toFixed(0)} kg
-            </Text>
+            pointerEvents="none">
+            {!props.hideSetpointText && (
+              <Text
+                style={StyleSheet.compose(styles.setpointText, {
+                  color: props.setpointColor
+                })}>
+                {(Math.round(props.setpointValue * 100) / 100).toFixed(0)} kg
+              </Text>
+            )}
           </View>
         );
       })}
@@ -64,11 +65,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#323232",
     elevation: 4,
     position: "relative",
-    height: 200,
+    height: 180,
     width: 72,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: 0,
     overflow: "hidden"
   },
   boxFill: {

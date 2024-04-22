@@ -87,6 +87,7 @@ export default function OperationView() {
           onSetpointChange={onSetpointChange}
           fillColor="#2E7D32"
           setpointColor="#C8E6C9"
+          hideSetpointText={true}
           style={styles.weightBar}
         />
         <WeightIndicationBar
@@ -97,40 +98,24 @@ export default function OperationView() {
           onSetpointChange={onSetpointChange}
           fillColor="#9E9D24"
           setpointColor="#F0F4C3"
+          hideSetpointText={false}
           style={styles.weightBar}
         />
       </View>
       <View style={StyleSheet.compose(styles.group, styles.displaysGroup)}>
-        <StatusDisplay textLeft="PWM" textMain={status.pwm.toString()} textRight="µS" />
-        <StatusDisplay
-          textLeft="MESE"
-          textMain={status.mese.toString()}
-          textRight="atual"
-          style={styles.display}
-        />
-      </View>
-      <View style={Object.assign({}, styles.group, styles.displaysGroup, styles.lastGroup)}>
-        <View style={styles.statusDisplayWrapper}>
-          <StatusDisplay
-            textLeft="MESE"
-            textMain={status.meseMax.toString()}
-            textRight="max"
-            style={styles.display}
-          />
-          <View style={styles.statusDisplayButtons}>
-            <FAB
-              animated={false}
-              size="small"
-              icon={() => <MaterialCommunityIcons name="minus" size={24} />}
-              onPress={() => updateMaxMese("-")}></FAB>
-            <FAB
-              animated={false}
-              size="small"
-              icon={() => <MaterialCommunityIcons name="plus" size={24} />}
-              onPress={() => updateMaxMese("+")}></FAB>
-          </View>
+        <StatusDisplay textLeft="PWM" textMain={`${status.pwm}/${status.meseMax}`} textRight="µS" />
+        <View style={styles.statusDisplayButtons}>
+          <FAB
+            animated={false}
+            size="small"
+            icon={() => <MaterialCommunityIcons name="minus" size={24} />}
+            onPress={() => updateMaxMese("-")}></FAB>
+          <FAB
+            animated={false}
+            size="small"
+            icon={() => <MaterialCommunityIcons name="plus" size={24} />}
+            onPress={() => updateMaxMese("+")}></FAB>
         </View>
-        <View style={styles.statusDisplayWrapper}></View>
       </View>
       <Text style={styles.statusText}>
         {run(() => {
@@ -173,7 +158,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginVertical: 2,
     marginHorizontal: 16,
-    padding: 16,
+    padding: 8,
     flexDirection: "row",
     alignItems: "center",
     gap: 16
@@ -183,17 +168,14 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     gap: 2
   },
-  statusDisplayWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8
-  },
   display: {
     flexGrow: 1
   },
   statusDisplayButtons: {
     flexDirection: "row",
-    gap: 2
+    justifyContent: "flex-end",
+    gap: 2,
+    marginTop: 4
   },
   lastGroup: {
     /* for scrolling */
@@ -204,7 +186,7 @@ const styles = StyleSheet.create({
   },
   weightBarsWrapper: {
     marginTop: 16,
-    gap: 2
+    gap: 0
   },
   statusText: {
     textAlign: "center",
