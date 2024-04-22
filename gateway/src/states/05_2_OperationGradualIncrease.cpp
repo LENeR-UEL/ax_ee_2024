@@ -11,11 +11,14 @@ static const char *TAG = "OperationGradualIncrease";
 static unsigned long lastTwaiSendTime = 0;
 static unsigned long lastStepTime = 0;
 
+static uint16_t gradualIncreaseInterval;
+
 void onOperationGradualIncreaseEnter()
 {
     lastWeightClassChangeTime = millis();
     weightClassTimer = 0;
     lastStepTime = millis();
+    gradualIncreaseInterval = data.parameterSetup.gradualIncreaseTime / data.mese;
 }
 
 void onOperationGradualIncreaseLoop()
@@ -40,15 +43,17 @@ void onOperationGradualIncreaseLoop()
         return;
     }
 
+    ESP_LOGI(TAG, "Interval: %d\n", gradualIncreaseInterval);
+
     unsigned int pwmIncreaseTimeDelta = now - lastStepTime;
-    if (pwmIncreaseTimeDelta >= data.parameterSetup.gradualIncreaseInterval)
+    if (pwmIncreaseTimeDelta >= gradualIncreaseInterval)
     {
-        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + data.parameterSetup.gradualIncreaseStep);
+        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + 1);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
         lastStepTime = now;
     }
 
-    if (now - lastTwaiSendTime >= 40)
+    if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());

@@ -47,11 +47,9 @@ interface StatusPacket {
       }
     | { state: FirmwareState.OperationStop; pwmDecreaseTimeDelta: number };
   parameters: {
-    gradualIncreaseInterval: number;
-    gradualIncreaseStep: number;
+    gradualIncreaseTime: number;
     transitionTime: number;
-    gradualDecreaseInterval: number;
-    gradualDecreaseStep: number;
+    gradualDecreaseTime: number;
     malhaFechadaAboveSetpointTime: number;
   };
 }
@@ -77,11 +75,9 @@ const ControlCodes = {
   MainOperation_IncreaseMESEMaxOnce: 0x32,
   MainOperation_DecreaseMESEMaxOnce: 0x33,
 
-  ParameterSetup_SetGradualIncreaseInterval: 0x61,
-  ParameterSetup_SetGradualIncreaseStep: 0x62,
+  ParameterSetup_SetGradualIncreaseTime: 0x61,
   ParameterSetup_SetTransitionTime: 0x63,
-  ParameterSetup_SetGradualDecreaseInterval: 0x64,
-  ParameterSetup_SetGradualDecreaseStep: 0x65,
+  ParameterSetup_SetGradualDecreaseTime: 0x64,
   ParameterSetup_SetMalhaFechadaAboveSetpointTime: 0x66,
   ParameterSetup_Reset: 0x6d,
   ParameterSetup_Save: 0x6e,
@@ -108,11 +104,9 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   const isOVBoxFlagSet = reader.readUnsignedChar() === 1;
 
   const parameters: StatusPacket["parameters"] = {
-    gradualIncreaseInterval: reader.readUnsignedShortLE(),
-    gradualIncreaseStep: reader.readUnsignedChar(),
+    gradualIncreaseTime: reader.readUnsignedShortLE(),
     transitionTime: reader.readUnsignedShortLE(),
-    gradualDecreaseInterval: reader.readUnsignedShortLE(),
-    gradualDecreaseStep: reader.readUnsignedChar(),
+    gradualDecreaseTime: reader.readUnsignedShortLE(),
     malhaFechadaAboveSetpointTime: reader.readUnsignedShortLE()
   };
 
@@ -187,11 +181,9 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
     isOVBoxFlagSet: false,
     mainOperationState: null,
     parameters: {
-      gradualIncreaseInterval: 0,
-      gradualIncreaseStep: 0,
+      gradualIncreaseTime: 0,
       transitionTime: 0,
-      gradualDecreaseInterval: 0,
-      gradualDecreaseStep: 0,
+      gradualDecreaseTime: 0,
       malhaFechadaAboveSetpointTime: 0
     }
   });

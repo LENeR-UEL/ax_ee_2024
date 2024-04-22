@@ -30,11 +30,9 @@ enum class BluetoothControlCode
     MainOperation_IncreaseMESEMaxOnce = 0x32,
     MainOperation_DecreaseMESEMaxOnce = 0x33,
 
-    ParameterSetup_SetGradualIncreaseInterval = 0x61,
-    ParameterSetup_SetGradualIncreaseStep = 0x62,
+    ParameterSetup_SetGradualIncreaseTime = 0x61,
     ParameterSetup_SetTransitionTime = 0x63,
-    ParameterSetup_SetGradualDecreaseInterval = 0x64,
-    ParameterSetup_SetGradualDecreaseStep = 0x65,
+    ParameterSetup_SetGradualDecreaseTime = 0x64,
     ParameterSetup_SetMalhaFechadaAboveSetpointTime = 0x66,
     ParameterSetup_Reset = 0x6D,
     ParameterSetup_Save = 0x6E,
@@ -54,11 +52,9 @@ typedef struct __attribute__((__packed__))
 
     struct __attribute__((__packed__))
     {
-        uint16_t gradualIncreaseInterval;
-        uint8_t gradualIncreaseStep;
+        uint16_t gradualIncreaseTime;
         uint16_t transitionTime;
-        uint16_t gradualDecreaseInterval;
-        uint8_t gradualDecreaseStep;
+        uint16_t gradualDecreaseTime;
         uint16_t malhaFechadaAboveSetpointTime;
     } parameterSetup;
 

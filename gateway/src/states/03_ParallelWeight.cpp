@@ -22,7 +22,7 @@ void onParallelWeightStateLoop()
     }
 
     long now = millis();
-    if (now - lastTwaiSendTime >= 40)
+    if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());

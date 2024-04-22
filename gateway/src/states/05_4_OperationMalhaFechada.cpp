@@ -47,7 +47,7 @@ void onOperationMalhaFechadaLoop()
         return;
     }
 
-    if (now - lastTwaiSendTime >= 40)
+    if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
         // Malha fechada; PWM enviado não importa; é calculado pelo firmware do estimulador

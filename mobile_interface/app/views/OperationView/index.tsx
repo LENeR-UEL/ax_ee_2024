@@ -78,7 +78,11 @@ export default function OperationView() {
 
   return (
     <ScrollView>
-      <View style={StyleSheet.compose(styles.group, styles.weightBarsWrapper)}>
+      <View
+        style={StyleSheet.compose(
+          { flexDirection: "row", marginHorizontal: 26, marginBottom: 16 },
+          styles.weightBarsWrapper
+        )}>
         <WeightIndicationBar
           textTop="ESQ"
           maximumValue={status.collectedWeight}
@@ -125,7 +129,7 @@ export default function OperationView() {
               return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2})`;
             }
             case FirmwareState.OperationGradualIncrease:
-              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese}) (timer: ${state.pwmIncreaseTimeDelta} / ${status.parameters.gradualIncreaseInterval} ms)`;
+              return `Incremento manual, de 0 até MESE (${status.pwm} / ${status.mese}) (timer: ${state.pwmIncreaseTimeDelta} ms)`;
             case FirmwareState.OperationTransition: {
               const timer = state.weightClass === 0 ? state.weightClassTimer : 0;
               return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / ${status.parameters.transitionTime} ms`;
@@ -136,7 +140,7 @@ export default function OperationView() {
               if (status.pwm === 0) {
                 return "Finalizado.";
               } else {
-                return `Decremento manual, até 0 (${status.pwm} / 0) (timer: ${state.pwmDecreaseTimeDelta} / ${status.parameters.gradualDecreaseInterval} ms)`;
+                return `Decremento manual, até 0 (${status.pwm} / 0) (timer: ${state.pwmDecreaseTimeDelta} ms)`;
               }
             }
             default:
@@ -192,6 +196,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     //@ts-expect-error
     width: "calc(100% - 96)",
-    marginHorizontal: 48
+    marginHorizontal: 48,
+    marginTop: 16
   }
 });

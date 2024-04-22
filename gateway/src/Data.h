@@ -29,11 +29,9 @@ public:
 
     struct __attribute__((__packed__))
     {
-        uint16_t gradualIncreaseInterval;
-        uint8_t gradualIncreaseStep;
+        uint16_t gradualIncreaseTime;
         uint16_t transitionTime;
-        uint16_t gradualDecreaseInterval;
-        uint8_t gradualDecreaseStep;
+        uint16_t gradualDecreaseTime;
         uint16_t malhaFechadaAboveSetpointTime;
     } parameterSetup;
 

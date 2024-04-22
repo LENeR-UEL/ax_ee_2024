@@ -25,55 +25,31 @@ export default function ParameterSetup() {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1, gap: 16, paddingVertical: 16 }}
       style={{ padding: 16, gap: 32 }}>
-      <GroupBox title="Rampa de subida">
+      <GroupBox title="Curva de subida">
         <Text style={{ marginBottom: 8 }}>
-          No início da parte de operação, ao aumentar o PWM até MESE, especifique o intervalo entre
-          as etapas.
+          No início da parte de operação, ao aumentar o PWM até MESE, especifique o tempo total de
+          curva.
         </Text>
-        <View style={{ flexDirection: "row" }}>
-          <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>
-              {status.parameters.gradualIncreaseStep} µS
-            </Text>
-            <Slider
-              step={1}
-              minimumValue={1}
-              maximumValue={25}
-              value={status.parameters.gradualIncreaseStep}
-              onValueChange={(v) => {
-                hapticFeedbackControlLight();
-                sendControl({
-                  controlCode: "ParameterSetup_SetGradualIncreaseStep",
-                  waitForResponse: false,
-                  data: Math.floor(v)
-                });
-              }}
-            />
-          </View>
-          <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>
-              {status.parameters.gradualIncreaseInterval} ms
-            </Text>
-            <Slider
-              step={50}
-              minimumValue={100}
-              maximumValue={1000}
-              value={status.parameters.gradualIncreaseInterval}
-              onValueChange={(v) => {
-                hapticFeedbackControlLight();
-                sendControl({
-                  controlCode: "ParameterSetup_SetGradualIncreaseInterval",
-                  waitForResponse: false,
-                  data: Math.floor(v / 50)
-                });
-              }}
-            />
-          </View>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={{ paddingHorizontal: 16 }}>{status.parameters.gradualIncreaseTime} ms</Text>
+          <Slider
+            step={100}
+            minimumValue={1}
+            maximumValue={5000}
+            value={status.parameters.gradualIncreaseTime}
+            onValueChange={(v) => {
+              hapticFeedbackControlLight();
+              sendControl({
+                controlCode: "ParameterSetup_SetGradualIncreaseTime",
+                waitForResponse: false,
+                data: Math.floor(v / 100)
+              });
+            }}
+          />
         </View>
         <Text>
-          Durante a curva de subida, o PWM aumentará de {status.parameters.gradualIncreaseStep} em{" "}
-          {status.parameters.gradualIncreaseStep} µS, com{" "}
-          {status.parameters.gradualIncreaseInterval} ms de intervalo, até chegar no valor de MESE.
+          Durante a curva de subida, o PWM aumentará até o MESE em{" "}
+          {status.parameters.gradualIncreaseTime} ms.
         </Text>
       </GroupBox>
       <GroupBox title="Transição">
@@ -125,55 +101,31 @@ export default function ParameterSetup() {
           />
         </View>
       </GroupBox>
-      <GroupBox title="Rampa de descida">
+      <GroupBox title="Curva de descida (finalização)">
         <Text style={{ marginBottom: 8 }}>
-          No final da parte de operação, ao diminuir o PWM ao zero, especifique o intervalo entre as
-          etapas.
+          No final da parte de operação, ao diminuir o PWM até zerar, especifique o tempo total de
+          curva.
         </Text>
-        <View style={{ flexDirection: "row" }}>
-          <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>
-              {status.parameters.gradualDecreaseStep} µS
-            </Text>
-            <Slider
-              step={1}
-              minimumValue={1}
-              maximumValue={25}
-              value={status.parameters.gradualDecreaseStep}
-              onValueChange={(v) => {
-                hapticFeedbackControlLight();
-                sendControl({
-                  controlCode: "ParameterSetup_SetGradualDecreaseStep",
-                  waitForResponse: false,
-                  data: Math.floor(v)
-                });
-              }}
-            />
-          </View>
-          <View style={{ width: "50%" }}>
-            <Text style={{ paddingHorizontal: 16 }}>
-              {status.parameters.gradualDecreaseInterval} ms
-            </Text>
-            <Slider
-              step={50}
-              minimumValue={100}
-              maximumValue={1000}
-              value={status.parameters.gradualDecreaseInterval}
-              onValueChange={(v) => {
-                hapticFeedbackControlLight();
-                sendControl({
-                  controlCode: "ParameterSetup_SetGradualDecreaseInterval",
-                  waitForResponse: false,
-                  data: Math.floor(v / 50)
-                });
-              }}
-            />
-          </View>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={{ paddingHorizontal: 16 }}>{status.parameters.gradualDecreaseTime} ms</Text>
+          <Slider
+            step={100}
+            minimumValue={1}
+            maximumValue={5000}
+            value={status.parameters.gradualDecreaseTime}
+            onValueChange={(v) => {
+              hapticFeedbackControlLight();
+              sendControl({
+                controlCode: "ParameterSetup_SetGradualDecreaseTime",
+                waitForResponse: false,
+                data: Math.floor(v / 100)
+              });
+            }}
+          />
         </View>
         <Text>
-          Durante a curva de descida, o PWM diminuirá de {status.parameters.gradualDecreaseStep} em{" "}
-          {status.parameters.gradualDecreaseStep} µS, com{" "}
-          {status.parameters.gradualDecreaseInterval} ms de intervalo, até zerar.
+          Durante a curva de subida, o PWM diminuirá até 0 em até
+          {status.parameters.gradualDecreaseTime} ms.
         </Text>
       </GroupBox>
       <Text style={{ paddingHorizontal: 12 }}>

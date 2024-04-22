@@ -101,8 +101,6 @@ int calculatePulseWidth()
     pi = meseMax;
   }
 
-  Serial.printf("Original: %d\tApós saturar: %d\n", pi_original, pi);
-
   // pi = min(pi, (int)meseMax);
 
   return pi;
@@ -138,9 +136,6 @@ void modulate(int pwm)
 
 void loop()
 {
-  // Clear linux console
-  // Serial.print("\e[1;1H\e[2J");
-
   readEverythingFromTwai();
 
   int pulseWidth = 0;
@@ -166,7 +161,7 @@ void loop()
   }
 
   unsigned long now_ms = millis();
-  if (now_ms - lastTwaiSendTime > 10)
+  if (now_ms - lastTwaiSendTime > 5)
   {
     lastTwaiSendTime = now_ms;
 

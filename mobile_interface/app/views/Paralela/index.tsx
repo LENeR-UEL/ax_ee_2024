@@ -28,7 +28,7 @@ export default function ParalelaView() {
   }, 1000);
 
   const startCountdown = () => {
-    countdown.setCount(5);
+    countdown.setCount(3);
   };
 
   const shownWeight = countdown.isCounting
@@ -81,8 +81,7 @@ export default function ParalelaView() {
         mode="elevated"
         icon={() => countdown.isCounting && <MaterialCommunityIcons name="timer-sand" size={24} />}
         onPress={startCountdown}
-        disabled={countdown.isCounting}
-      >
+        disabled={countdown.isCounting}>
         {countdown.isCounting ? `${countdown.count}s` : `Iniciar`}
       </Button>
       <NextViewButton
