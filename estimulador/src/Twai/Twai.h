@@ -16,6 +16,7 @@ enum TwaiSendMessageKind : uint8_t
 enum TwaiReceivedMessageKind : uint8_t
 {
     WeightTotal = 0x51,
+    ResidualWeightTotal = 0x52,
     SetRequestedPwm = 0x61,
     Mese = 0x71,
     MeseMax = 0x72,

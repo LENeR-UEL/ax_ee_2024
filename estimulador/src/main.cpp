@@ -15,14 +15,12 @@ enum class FlagTrigger
 };
 
 uint16_t weightTotal;
+uint16_t residualWeightTotal;
 uint16_t requestedPwm;
 uint16_t mese;
 uint16_t meseMax;
 uint16_t setpointKg;
 FlagTrigger flagTrigger;
-
-const float KP = 1.4;
-const float KI = 0.f;
 
 int integralErro = 0;
 
@@ -57,6 +55,9 @@ void readEverythingFromTwai()
     case TwaiReceivedMessageKind::WeightTotal:
       weightTotal = latestMessage.ExtraData;
       break;
+    case TwaiReceivedMessageKind::ResidualWeightTotal:
+      residualWeightTotal = latestMessage.ExtraData;
+      break;
     case TwaiReceivedMessageKind::SetRequestedPwm:
       requestedPwm = latestMessage.ExtraData;
       break;
@@ -86,184 +87,8 @@ int calculatePulseWidth()
   // Não deixar integralErro passar de -50 e 50
   integralErro = max(-50, min(50, integralErro));
 
-
-  int pi = requestedPwm + 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  weightTotal * 0.5f;
+  int controlWeight = weightTotal - residualWeightTotal;
+  int pi = mese + controlWeight * 0.5f;
 
   // Não deixar pi passar de meseMax
   if (pi < mese) pi = mese;
@@ -348,4 +173,5 @@ void loop()
   DEBUG(meseMax);
   DEBUG(setpointKg);
   DEBUG(flagTrigger);
+  DEBUG(residualWeightTotal);
 }
