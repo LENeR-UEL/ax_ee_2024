@@ -48,7 +48,7 @@ export default function ParameterSetup() {
           />
         </View>
         <Text>
-          Durante a curva de subida, o PWM aumentará até o MESE em{" "}
+          Durante a curva de descida, o PWM aumentará até o MESE em{" "}
           {status.parameters.gradualIncreaseTime} ms.
         </Text>
       </GroupBox>
