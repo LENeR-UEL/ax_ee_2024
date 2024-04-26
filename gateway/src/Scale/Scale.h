@@ -15,7 +15,8 @@ enum Scale
 
 void scaleBeginOrDie();
 void scaleUpdate();
-int scaleGetMeasurement(Scale whichOne);
+
+// Public API
 int scaleGetWeightL();
 int scaleGetWeightR();
 int scaleGetTotalWeight();

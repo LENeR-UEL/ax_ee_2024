@@ -174,4 +174,5 @@ void loop()
   DEBUG(meseMax);
   DEBUG(setpointKg);
   DEBUG(flagTrigger);
+  Serial.println();
 }

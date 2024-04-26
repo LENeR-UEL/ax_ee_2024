@@ -43,8 +43,8 @@ void loop()
 {
   // Coletar dados das balanças
   scaleUpdate();
-  data.weightL = scaleGetMeasurement(Scale::C) + scaleGetMeasurement(Scale::D);
-  data.weightR = scaleGetMeasurement(Scale::A) + scaleGetMeasurement(Scale::B);
+  data.weightL = scaleGetWeightL();
+  data.weightR = scaleGetWeightR();
 
   espBle.Update();
   digitalWrite(ONBOARD_LED, espBle.isConnected() ? HIGH : LOW);
