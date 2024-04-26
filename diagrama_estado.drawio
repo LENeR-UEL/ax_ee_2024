@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-04-26T13:00:36.454Z" agent="Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0" etag="foeDQFDWhj8rsvD7hMID" version="24.2.7" type="device">
+<mxfile host="app.diagrams.net" modified="2024-04-26T17:20:07.975Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36" etag="NjX6NmRuL0B2sHYwYvWm" version="24.2.3" type="device">
   <diagram name="Page-1" id="7Bq0H3Z3bL5iUYbq2rVu">
-    <mxGraphModel dx="1269" dy="234" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2537" dy="934" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -175,7 +175,7 @@
         <mxCell id="c-Rq7uScd-FVR4qBjpjj-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" source="c-Rq7uScd-FVR4qBjpjj-63" target="c-Rq7uScd-FVR4qBjpjj-68" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c-Rq7uScd-FVR4qBjpjj-70" value="Quando&lt;br style=&quot;font-size: 9px;&quot;&gt;&lt;div&gt;peso = setpoint&lt;/div&gt;&lt;div&gt;&amp;amp;&amp;amp; EEGTrigger = 1&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-69" vertex="1" connectable="0">
+        <mxCell id="c-Rq7uScd-FVR4qBjpjj-70" value="Quando&lt;br style=&quot;font-size: 9px;&quot;&gt;&lt;div&gt;peso &amp;gt;= setpoint&lt;/div&gt;&lt;div&gt;&amp;amp;&amp;amp; EEGTrigger = 1&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-69" vertex="1" connectable="0">
           <mxGeometry x="0.04" relative="1" as="geometry">
             <mxPoint x="-7" as="offset" />
           </mxGeometry>
@@ -214,7 +214,7 @@
             <mxPoint x="-2" y="-2" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c-Rq7uScd-FVR4qBjpjj-68" value="Aumento gradual do PWM, de 0 até MESE, etapas=5uS durante 3s" style="ellipse;whiteSpace=wrap;html=1;align=center;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" vertex="1">
+        <mxCell id="c-Rq7uScd-FVR4qBjpjj-68" value="Aumento gradual do PWM, de 0 até MESE, durante 1500ms" style="ellipse;whiteSpace=wrap;html=1;align=center;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" vertex="1">
           <mxGeometry x="220" y="65" width="100" height="70" as="geometry" />
         </mxCell>
         <mxCell id="c-Rq7uScd-FVR4qBjpjj-76" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" source="c-Rq7uScd-FVR4qBjpjj-71" target="c-Rq7uScd-FVR4qBjpjj-75" edge="1">
@@ -270,7 +270,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c-Rq7uScd-FVR4qBjpjj-79" value="Decremento gradual&lt;br&gt;do PWM, do valor atual até 0, etapas=5uS&lt;br&gt;durante 3s" style="ellipse;whiteSpace=wrap;html=1;align=center;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" vertex="1">
+        <mxCell id="c-Rq7uScd-FVR4qBjpjj-79" value="Decremento gradual&lt;br&gt;do PWM, do valor atual até 0 durante 1500ms" style="ellipse;whiteSpace=wrap;html=1;align=center;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" vertex="1">
           <mxGeometry x="820" y="65" width="100" height="70" as="geometry" />
         </mxCell>
         <mxCell id="c-Rq7uScd-FVR4qBjpjj-92" value="Stop" style="ellipse;whiteSpace=wrap;html=1;align=center;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" vertex="1">
@@ -298,6 +298,15 @@
         </mxCell>
         <mxCell id="c-Rq7uScd-FVR4qBjpjj-104" value="&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;Voluntário sentado,&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;sem peso nas barras&lt;br style=&quot;font-size: 9px;&quot;&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=2;fontSize=9;" parent="c-Rq7uScd-FVR4qBjpjj-62" vertex="1">
           <mxGeometry x="20" y="30" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="oe5mHgNCDCShOcJy-L9z-1" value="" style="endArrow=none;html=1;rounded=0;dashed=1;" edge="1" parent="c-Rq7uScd-FVR4qBjpjj-62">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="616" y="125" as="sourcePoint" />
+            <mxPoint x="616" y="75" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oe5mHgNCDCShOcJy-L9z-2" value="coleta do peso residual" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=2;fontSize=9;labelBorderColor=none;" vertex="1" parent="c-Rq7uScd-FVR4qBjpjj-62">
+          <mxGeometry x="596" y="125" width="40" height="30" as="geometry" />
         </mxCell>
         <mxCell id="c-Rq7uScd-FVR4qBjpjj-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=9;" parent="1" source="c-Rq7uScd-FVR4qBjpjj-46" target="c-Rq7uScd-FVR4qBjpjj-63" edge="1">
           <mxGeometry relative="1" as="geometry" />
