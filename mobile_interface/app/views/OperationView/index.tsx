@@ -168,7 +168,7 @@ export default function OperationView() {
           }
         }) +
           run(() => {
-            return "Trigger EEG: " + status.isOVBoxFlagSet ? "Ativo" : "Inativo";
+            return "\n\nTrigger EEG: " + status.isOVBoxFlagSet ? "Ativo" : "Inativo";
           })}
       </Text>
     </ScrollView>

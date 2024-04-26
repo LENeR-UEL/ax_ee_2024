@@ -54,7 +54,7 @@ export default function ParameterSetup() {
       </GroupBox>
       <GroupBox title="Transição">
         <Text>
-          Durante a etapa de transição, o participante deverá ficar em pé sem segurar as barras por{" "}
+          Durante a etapa de transição, o participante deverá ficar em pé por{" "}
           {status.parameters.transitionTime} ms, antes de entrar na etapa de malha fechada.
         </Text>
         <View>
