@@ -37,8 +37,7 @@ interface StatusPacket {
     | { state: FirmwareState.OperationGradualIncrease; pwmIncreaseTimeDelta: number }
     | {
         state: FirmwareState.OperationTransition;
-        weightClass: number;
-        weightClassTimer: number;
+        timeDelta: number;
       }
     | {
         state: FirmwareState.OperationMalhaFechada;
@@ -131,8 +130,7 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     case FirmwareState.OperationTransition: {
       mainOpStateObj = {
         state: FirmwareState.OperationTransition,
-        weightClass: reader.readUnsignedChar(),
-        weightClassTimer: reader.readShortLE()
+        timeDelta: reader.readUnsignedShortLE()
       };
       break;
     }

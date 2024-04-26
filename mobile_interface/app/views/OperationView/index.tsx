@@ -152,8 +152,7 @@ export default function OperationView() {
             case FirmwareState.OperationGradualIncrease:
               return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs) (timer: ${state.pwmIncreaseTimeDelta} ms)`;
             case FirmwareState.OperationTransition: {
-              const timer = state.weightClass === 0 ? state.weightClassTimer : 0;
-              return `Transição. Aguardando liberação do peso nas barras (classe 0)\nClasse atual: ${state.weightClass}\nTimer: ${timer} / ${status.parameters.transitionTime} ms`;
+              return `Transição. Aguardando tempo...\n${state.timeDelta} / ${status.parameters.transitionTime} ms`;
             }
             case FirmwareState.OperationMalhaFechada:
               return `Malha fechada.\nErro: ${state.currentErrorValue} kg\nTimer: ${state.errorPositiveTimer} / ${status.parameters.malhaFechadaAboveSetpointTime} ms`;
@@ -169,7 +168,7 @@ export default function OperationView() {
           }
         }) +
           run(() => {
-            return status.isOVBoxFlagSet ? "\n\nFLAG: TRUE" : "\n\nFLAG: FALSE";
+            return "Trigger EEG: " + status.isOVBoxFlagSet ? "Ativo" : "Inativo";
           })}
       </Text>
     </ScrollView>
