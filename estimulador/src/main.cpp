@@ -77,6 +77,7 @@ void readEverythingFromTwai()
   }
 }
 
+int largerPi = 0;
 int calculatePulseWidth()
 {
   int erro = weightTotal - setpointKg * 2;
@@ -85,25 +86,196 @@ int calculatePulseWidth()
   // Não deixar integralErro passar de -50 e 50
   integralErro = max(-50, min(50, integralErro));
 
-  int pi = KP * erro + KI * integralErro;
+
+  int pi = requestedPwm + 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  weightTotal * 0.5f;
 
   // Não deixar pi passar de meseMax
+  if (pi < mese) pi = mese;
+  if (pi > meseMax) pi = meseMax;
+  if (largerPi < mese) largerPi = mese;
+  if (largerPi > meseMax) largerPi = meseMax;
 
-  int pi_original = pi;
-
-  if (pi < mese)
-  {
-    pi = mese;
+  if (pi > largerPi) {
+    largerPi = pi;
   }
 
-  if (pi > meseMax)
-  {
-    pi = meseMax;
-  }
-
-  // pi = min(pi, (int)meseMax);
-
-  return pi;
+  return largerPi;
 }
 
 void modulate(int pwm)
@@ -142,6 +314,8 @@ void loop()
   if (flagTrigger == FlagTrigger::MalhaAberta)
   {
     pulseWidth = requestedPwm;
+    // Limpar PI de qualquer operação em malha fechada anterior
+    largerPi = 0;
   }
   else if (flagTrigger == FlagTrigger::MalhaFechadaOperacao)
   {
@@ -174,5 +348,4 @@ void loop()
   DEBUG(meseMax);
   DEBUG(setpointKg);
   DEBUG(flagTrigger);
-  Serial.println();
 }
