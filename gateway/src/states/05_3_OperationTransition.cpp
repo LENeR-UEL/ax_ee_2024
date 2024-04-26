@@ -41,9 +41,15 @@ void onOperationTransitionLoop()
     if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
+
+        // Peso residual: peso coletado no final da etapa de transição
+        // Mandamos a todo instante durante a etapa de transição, e ao mudar para o próximo estado,
+        // teremos o peso residual do final da etapa de transição
+        twaiSend(TwaiSendMessageKind::ResidualWeightTotal, scaleGetTotalWeight());
+
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.mese);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
-        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetTotalWeight());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
         twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
