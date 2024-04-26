@@ -9,11 +9,11 @@
 
 static const char *TAG = "OperationTransition";
 static unsigned long lastTwaiSendTime = 0;
+static unsigned long timer;
 
 void onOperationTransitionEnter()
 {
-    lastWeightClassChangeTime = 0;
-    weightClassTimer = 0;
+    timer = millis();
 }
 
 void onOperationTransitionLoop()
@@ -29,9 +29,9 @@ void onOperationTransitionLoop()
 
     updateCurrentWeightClass();
 
-    ESP_LOGD(TAG, "Transição... Aguardando classe de peso 0 durante %dms. Timer: %d Classe atual: %d", data.parameterSetup.transitionTime, weightClassTimer, weightClass);
-
-    if (weightClass == 0 && weightClassTimer >= data.parameterSetup.transitionTime)
+    unsigned long delta = now - timer;
+    ESP_LOGD(TAG, "Transição... Aguardando %dms. Timer: %d", data.parameterSetup.transitionTime, delta);
+    if (delta >= data.parameterSetup.transitionTime)
     {
         ESP_LOGD(TAG, "Condição atingida.");
         stateManager.switchTo(StateKind::OperationMalhaFechada);
@@ -50,9 +50,9 @@ void onOperationTransitionLoop()
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-    data.mainOperationStateInformApp[1] = weightClass;
-    data.mainOperationStateInformApp[2] = weightClassTimer & 0xFF;
-    data.mainOperationStateInformApp[3] = (weightClassTimer >> 8) & 0xFF;
+    data.mainOperationStateInformApp[1] = delta & 0xFF;
+    data.mainOperationStateInformApp[2] = (delta >> 8) & 0xFF;
+    data.mainOperationStateInformApp[3] = 0;
     data.mainOperationStateInformApp[4] = 0;
     data.mainOperationStateInformApp[5] = 0;
 }
