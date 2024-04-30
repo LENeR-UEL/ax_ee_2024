@@ -2,16 +2,19 @@
 #include <Arduino.h>
 #include "Twai.h"
 
-const char *TAG = "Twai";
+static const char *TAG = "Twai";
 
-static const twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(WIRESS_GPIO_TX, WIRESS_GPIO_RX, TWAI_MODE_NORMAL);
+static const twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(WIRESS_GPIO_TX, WIRESS_GPIO_RX,
+                                                                          TWAI_MODE_NORMAL);
 static const twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
 static const twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
 twai_message_t lastReceivedMessage;
+bool hasReceivedMessageOnce = false;
 
 void twaiStart()
 {
+    hasReceivedMessageOnce = false;
     memset(&lastReceivedMessage, 0, sizeof(twai_message_t));
 
     // Install TWAI driver
@@ -53,11 +56,11 @@ void twaiSend(TwaiSendMessageKind kind, uint16_t extraData)
     // Fila de transmissão
     if (twai_transmit(&message, pdMS_TO_TICKS(0)) == ESP_OK)
     {
-        // ESP_LOGD(TAG, "Message (Kind=%0X, Data=%0X) queued for transmission", kind, extraData);
+        //  ESP_LOGD(TAG, "Message (Kind=%0X, Data=%0X) queued for transmission", kind, extraData);
     }
     else
     {
-        // ESP_LOGD(TAG, "Failed to queue message (Kind=%0X, Data=%0X) for transmission", kind, extraData);
+        //  ESP_LOGD(TAG, "Failed to queue message (Kind=%0X, Data=%0X) for transmission", kind, extraData);
     }
 }
 
@@ -70,7 +73,6 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
     if (statusCode == ESP_OK)
     {
         // Received OK!
-
         uint8_t octet1 = lastReceivedMessage.data[0];
         uint8_t octet2 = lastReceivedMessage.data[1];
         uint16_t data = (octet1 << 8) | octet2;
@@ -78,7 +80,9 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
         received->Kind = (TwaiReceivedMessageKind)lastReceivedMessage.identifier;
         received->ExtraData = data;
 
-        // ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
+        hasReceivedMessageOnce = true;
+
+        ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
     }
     else
     {
@@ -86,4 +90,16 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
     }
 
     return statusCode;
+}
+
+bool twaiIsAvailable()
+{
+    twai_status_info_t status;
+
+    if (twai_get_status_info(&status) != ESP_OK)
+    {
+        return false;
+    }
+
+    return status.state == twai_state_t::TWAI_STATE_RUNNING && hasReceivedMessageOnce;
 }

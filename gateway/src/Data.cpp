@@ -55,7 +55,8 @@ void Data::sendToBle(const Bluetooth &ble)
   status.weightR = data.weightR;
   status.collectedWeight = data.collectedWeight;
   status.setpoint = data.setpoint;
-  status.isOVBoxFlagSet = data.isOVBoxFlagSet() ? 1 : 0;
+  status.status_flags.isEEGFlagSet = data.isOVBoxFlagSet() ? 1 : 0;
+  status.status_flags.isCANAvailable = twaiIsAvailable() ? 1 : 0;
   memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp, sizeof(status.mainOperationStateInformApp));
   memcpy(&status.parameterSetup, &this->parameterSetup, sizeof(this->parameterSetup));
 

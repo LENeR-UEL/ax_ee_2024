@@ -33,3 +33,4 @@ struct TwaiReceivedMessage
 void twaiStart();
 void twaiSend(TwaiSendMessageKind kind, uint16_t extraData);
 esp_err_t twaiReceive(TwaiReceivedMessage *received);
+bool twaiIsAvailable();

@@ -28,7 +28,10 @@ interface StatusPacket {
   mese: number;
   meseMax: number;
   setpoint: number;
-  isOVBoxFlagSet: boolean;
+  statusFlags: {
+    isEEGFlagSet: boolean;
+    isCANAvailable: boolean;
+  };
   mainOperationState:
     | null
     | {
@@ -101,7 +104,14 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   const mese = reader.readUnsignedShortLE();
   const meseMax = reader.readUnsignedShortLE();
   const setpoint = reader.readUnsignedShortLE();
-  const isOVBoxFlagSet = reader.readUnsignedChar() === 1;
+
+  const statusFlagsByte = reader.readUnsignedChar();
+  const statusFlags: StatusPacket["statusFlags"] = {
+    isEEGFlagSet: (statusFlagsByte & 0b00000001) > 0,
+    isCANAvailable: (statusFlagsByte & 0b00000010) > 0
+  };
+
+  console.log(statusFlagsByte);
 
   const parameters: StatusPacket["parameters"] = {
     gradualIncreaseTime: reader.readUnsignedShortLE(),
@@ -161,7 +171,7 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     mese,
     meseMax,
     setpoint,
-    isOVBoxFlagSet,
+    statusFlags,
     parameters,
     mainOperationState: mainOpStateObj
   };
@@ -177,7 +187,10 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
     mese: 0,
     meseMax: 0,
     setpoint: 0,
-    isOVBoxFlagSet: false,
+    statusFlags: {
+      isEEGFlagSet: false,
+      isCANAvailable: false
+    },
     mainOperationState: null,
     parameters: {
       gradualIncreaseTime: 0,

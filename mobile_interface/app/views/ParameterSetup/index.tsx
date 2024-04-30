@@ -62,7 +62,7 @@ export default function ParameterSetup() {
           <Slider
             step={100}
             minimumValue={100}
-            maximumValue={5000}
+            maximumValue={20000}
             value={status.parameters.transitionTime}
             onValueChange={(v) => {
               hapticFeedbackControlLight();

@@ -49,7 +49,18 @@ typedef struct __attribute__((__packed__))
     uint16_t mese;
     uint16_t meseMax;
     uint16_t setpoint;
-    uint8_t isOVBoxFlagSet;
+
+    struct __attribute__((__packed__))
+    {
+        unsigned isEEGFlagSet : 1;
+        unsigned isCANAvailable : 1;
+        unsigned reserved6 : 1;
+        unsigned reserved5 : 1;
+        unsigned reserved4 : 1;
+        unsigned reserved3 : 1;
+        unsigned reserved2 : 1;
+        unsigned reserved1 : 1;
+    } status_flags;
 
     struct __attribute__((__packed__))
     {

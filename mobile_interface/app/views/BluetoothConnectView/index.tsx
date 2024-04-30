@@ -11,9 +11,11 @@ import {
   hapticFeedbackProcessError
 } from "../../haptics/HapticFeedback";
 import { run } from "../../utils/run";
-import { NextViewButton } from "../../components/NextViewButton";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { useNavigation } from "../../hooks/useNavigation";
+import { Image } from "expo-image";
+import StatusCANUp from "../../../assets/OnlineStatusAvailable.svg";
+import StatusCANDown from "../../../assets/OnlineStatusBusy.svg";
 
 export default function BluetoothConnectView() {
   const navigator = useNavigation();
@@ -82,6 +84,7 @@ export default function BluetoothConnectView() {
     dismissConnectionModal();
     hapticFeedbackControl();
     setConnecting(true);
+    ble.stopScan();
     ble.connect(device).then(() => {
       setConnecting(false);
       hapticFeedbackProcessEnd();
@@ -167,11 +170,44 @@ export default function BluetoothConnectView() {
                 <Button
                   onPress={onStartProcessClick}
                   mode="contained"
-                  contentStyle={styles.startButtonInner}>
+                  contentStyle={styles.startButtonInner}
+                  disabled={!firmwareStatus.statusFlags.isCANAvailable}>
                   <MaterialCommunityIcons name="weight-kilogram" color="#fff" size={16} />
                   {"    "}
                   Iniciar processo
                 </Button>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 8,
+                    justifyContent: "flex-start",
+                    alignItems: "center"
+                  }}>
+                  {run(() => {
+                    if (firmwareStatus.statusFlags.isCANAvailable) {
+                      return (
+                        <>
+                          <StatusCANUp width={16} height={16} />
+                          <Text>Barramento disponível</Text>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <>
+                          <StatusCANDown width={24} height={24} />
+                          <Text
+                            style={{
+                              fontWeight: "bold",
+                              marginRight: 30
+                            }}>
+                            Barramento indisponível - não é possível operar o aplicativo. Reinicie
+                            os hardwares Gateway e Estimulador manualmente.
+                          </Text>
+                        </>
+                      );
+                    }
+                  })}
+                </View>
               </>
             );
           } else {

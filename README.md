@@ -1,12 +1,6 @@
 # Interface EE LENeR
 
-## TODO
-
-- Na etapa de operação: botão de cancelar
-
 ## Aplicativo
-
-- Construído usando React Native
 
 ### Compilação
 
