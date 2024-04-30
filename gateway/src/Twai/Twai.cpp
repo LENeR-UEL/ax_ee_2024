@@ -10,11 +10,11 @@ static const twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
 static const twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
 twai_message_t lastReceivedMessage;
-bool hasReceivedMessageOnce = false;
+unsigned long lastReceivedMessageTime;
 
 void twaiStart()
 {
-  hasReceivedMessageOnce = false;
+  lastReceivedMessageTime = millis();
   memset(&lastReceivedMessage, 0, sizeof(twai_message_t));
 
   // Install TWAI driver
@@ -80,7 +80,7 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
     received->Kind = (TwaiReceivedMessageKind)lastReceivedMessage.identifier;
     received->ExtraData = data;
 
-    hasReceivedMessageOnce = true;
+    lastReceivedMessageTime = millis();
 
     ESP_LOGD(TAG, "Received message Kind=%0X Data=%000X", received->Kind, received->ExtraData);
   }
@@ -94,6 +94,8 @@ esp_err_t twaiReceive(TwaiReceivedMessage *received)
 
 bool twaiIsAvailable()
 {
+  unsigned long timeSinceLastMessage = millis() - lastReceivedMessageTime;
+
   twai_status_info_t status;
 
   if (twai_get_status_info(&status) != ESP_OK)
@@ -101,5 +103,5 @@ bool twaiIsAvailable()
     return false;
   }
 
-  return status.state == twai_state_t::TWAI_STATE_RUNNING && hasReceivedMessageOnce;
+  return status.state == twai_state_t::TWAI_STATE_RUNNING && (timeSinceLastMessage < 500);
 }
