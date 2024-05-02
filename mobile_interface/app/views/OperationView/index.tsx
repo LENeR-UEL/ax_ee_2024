@@ -142,7 +142,7 @@ export default function OperationView() {
         onPress={emergencyStop}>
         Parada de emergência
       </Button>
-      <Text style={styles.statusText}>
+      <Text style={styles.statusText2}>
         {run(() => {
           const state = status.mainOperationState;
           switch (state?.state) {
@@ -150,7 +150,7 @@ export default function OperationView() {
               return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2} kg)`;
             }
             case FirmwareState.OperationGradualIncrease:
-              return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs) (timer: ${state.pwmIncreaseTimeDelta} ms)`;
+              return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs)\nTimer: ${state.pwmIncreaseTimeDelta} ms`;
             case FirmwareState.OperationTransition: {
               return `Transição. Aguardando tempo...\n${state.timeDelta} / ${status.parameters.transitionTime} ms`;
             }
@@ -160,16 +160,13 @@ export default function OperationView() {
               if (status.pwm === 0) {
                 return "Finalizado.";
               } else {
-                return `Decremento manual, até 0 (${status.pwm} → 0 μs) (timer: ${state.pwmDecreaseTimeDelta} ms)`;
+                return `Decremento manual, até 0 (${status.pwm} → 0 μs)\nTimer: ${state.pwmDecreaseTimeDelta} ms`;
               }
             }
             default:
               return "";
           }
-        }) +
-          run(() => {
-            return "\n\nTrigger EEG: " + status.statusFlags.isEEGFlagSet ? "Ativo" : "Inativo";
-          })}
+        }) + `\n\nTrigger EEG: ${status.statusFlags.isEEGFlagSet ? "Ativo" : "Inativo"}`}
       </Text>
     </ScrollView>
   );
@@ -213,7 +210,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     gap: 0
   },
-  statusText: {
+  statusText2: {
     textAlign: "center",
     //@ts-expect-error
     width: "calc(100% - 96)",
