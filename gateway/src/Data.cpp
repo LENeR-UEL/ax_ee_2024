@@ -1,22 +1,20 @@
-#include <Arduino.h>
 #include "Data.h"
 #include "string.h"
+#include <Arduino.h>
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d", variable)
 
-#define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
+// #define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
 
 static const char *TAG = "Data";
 
-Data::Data()
-{
+Data::Data() {
   pinMode(OVBOXPin, INPUT);
   this->lastBluetoothSendTime = 0;
   this->reset();
 }
 
-void Data::reset()
-{
+void Data::reset() {
   this->mese = 0;
   this->meseMax = 0;
   this->weightL = 0;
@@ -24,22 +22,21 @@ void Data::reset()
   this->collectedWeight = 0;
   this->setpoint = 0;
   this->pwmFeedback = 0;
-  memset(this->mainOperationStateInformApp, 0, sizeof(this->mainOperationStateInformApp));
+  memset(this->mainOperationStateInformApp, 0,
+         sizeof(this->mainOperationStateInformApp));
   memset(&this->parameterSetup, 0, sizeof(this->parameterSetup));
 }
 
-void Data::sendToBle(const Bluetooth &ble)
-{
-  if (!espBle.isConnected())
-  {
+void Data::sendToBle(const Bluetooth &ble) {
+  if (!espBle.isConnected()) {
     return;
   }
 
-  // Se enviarmos o payload pelo Bluetooth tod0 instante, o frontend ficará sobrecarregado
-  // Enviamos o payload com o status mais recente a cada N milissegundos.
+  // Se enviarmos o payload pelo Bluetooth tod0 instante, o frontend ficará
+  // sobrecarregado Enviamos o payload com o status mais recente a cada N
+  // milissegundos.
   unsigned long now = millis();
-  if (now - data.lastBluetoothSendTime < 120)
-  {
+  if (now - data.lastBluetoothSendTime < 120) {
     return;
   }
 
@@ -57,14 +54,15 @@ void Data::sendToBle(const Bluetooth &ble)
   status.setpoint = data.setpoint;
   status.status_flags.isEEGFlagSet = data.isOVBoxFlagSet() ? 1 : 0;
   status.status_flags.isCANAvailable = twaiIsAvailable() ? 1 : 0;
-  memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp, sizeof(status.mainOperationStateInformApp));
-  memcpy(&status.parameterSetup, &this->parameterSetup, sizeof(this->parameterSetup));
+  memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp,
+         sizeof(status.mainOperationStateInformApp));
+  memcpy(&status.parameterSetup, &this->parameterSetup,
+         sizeof(this->parameterSetup));
 
   espBle.writeStatusData(&status);
 }
 
-void Data::debugPrintAll()
-{
+void Data::debugPrintAll() {
   ESP_LOGI(TAG, "");
   DEBUG(this->weightL);
   DEBUG(this->weightR);
@@ -76,8 +74,7 @@ void Data::debugPrintAll()
   ESP_LOGI(TAG, "");
 }
 
-bool Data::isOVBoxFlagSet()
-{
+bool Data::isOVBoxFlagSet() {
 #ifdef DEVELOPMENT_OVERRIDE_OVBOX_INPUT
   return true;
 #endif
