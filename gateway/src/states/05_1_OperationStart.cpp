@@ -30,7 +30,7 @@ void onOperationStartLoop()
 
   updateCurrentWeightClass();
 
-  const unsigned short targetWeight = data.collectedWeight * 1.5f;
+  const unsigned short targetWeight = data.collectedWeight * 0.5f;
 
   ESP_LOGD(TAG, "Peso: %d/%d && isOVBoxFlagSet = %s", scaleGetTotalWeight(), targetWeight, data.isOVBoxFlagSet() ? "sim" : "não");
 

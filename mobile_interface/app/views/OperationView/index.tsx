@@ -13,10 +13,13 @@ import {
 import { run } from "../../utils/run";
 import { timeout } from "../../utils/timeout";
 import { useNavigation } from "../../hooks/useNavigation";
+import { useBeepSound } from "./useBeepSound/useBeepSound";
+import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 
 export default function OperationView() {
   const navigator = useNavigation();
   const [status, sendControl] = useFirmwareStatus();
+  const beeper = useBeepSound();
 
   async function updateMaxMese(operation: "+" | "-") {
     if (operation === "+") {
@@ -81,6 +84,14 @@ export default function OperationView() {
       unsubscribe();
     };
   }, [status.mainOperationState?.state, status.pwm]);
+
+  useUpdateEffect(() => {
+    if (status.weightL + status.weightR >= status.setpoint * 2) {
+      beeper.play();
+    } else {
+      beeper.stop();
+    }
+  }, [status.weightL, status.weightR, status.setpoint]);
 
   useEffect(() => {
     hapticFeedbackControl()
@@ -147,7 +158,7 @@ export default function OperationView() {
           const state = status.mainOperationState;
           switch (state?.state) {
             case FirmwareState.OperationStart: {
-              return `Aguardando peso atingir 150% do peso coletado (${status.weightL + status.weightR} / ${state.targetWeight} kg)`;
+              return `Aguardando peso atingir 50% do peso registrado (${status.weightL + status.weightR} / ${state.targetWeight} kg)`;
             }
             case FirmwareState.OperationGradualIncrease:
               return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs)\nTimer: ${state.pwmIncreaseTimeDelta} ms`;
