@@ -36,6 +36,7 @@ interface StatusPacket {
     | null
     | {
         state: FirmwareState.OperationStart;
+        targetWeight: number;
       }
     | { state: FirmwareState.OperationGradualIncrease; pwmIncreaseTimeDelta: number }
     | {
@@ -126,7 +127,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
   switch (state) {
     case FirmwareState.OperationStart: {
       mainOpStateObj = {
-        state: FirmwareState.OperationStart
+        state: FirmwareState.OperationStart,
+        targetWeight: reader.readUnsignedShortLE()
       };
       break;
     }

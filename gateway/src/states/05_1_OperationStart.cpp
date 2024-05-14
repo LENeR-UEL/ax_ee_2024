@@ -30,11 +30,11 @@ void onOperationStartLoop()
 
   updateCurrentWeightClass();
 
-  ESP_LOGD(TAG, "Peso: %d/%d && isOVBoxFlagSet = %s", scaleGetTotalWeight(),
-           data.setpoint * 2, data.isOVBoxFlagSet() ? "sim" : "não");
+  const unsigned short targetWeight = data.collectedWeight * 1.5f;
 
-  // Aguardar peso total = setpoint * 2
-  if (scaleGetTotalWeight() >= data.setpoint * 2 && data.isOVBoxFlagSet())
+  ESP_LOGD(TAG, "Peso: %d/%d && isOVBoxFlagSet = %s", scaleGetTotalWeight(), targetWeight, data.isOVBoxFlagSet() ? "sim" : "não");
+
+  if (scaleGetTotalWeight() >= targetWeight && data.isOVBoxFlagSet())
   {
     ESP_LOGD(TAG, "Condição atingida.");
     stateManager.switchTo(StateKind::OperationGradualIncrease);
@@ -46,16 +46,15 @@ void onOperationStartLoop()
     lastTwaiSendTime = now;
     twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
     twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
-    twaiSend(TwaiSendMessageKind::WeightTotal,
-             scaleGetWeightL() + scaleGetWeightR());
+    twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
     twaiSend(TwaiSendMessageKind::Setpoint, 0);
     twaiSend(TwaiSendMessageKind::Mese, 0);
     twaiSend(TwaiSendMessageKind::MeseMax, 0);
   }
 
   data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-  data.mainOperationStateInformApp[1] = 0;
-  data.mainOperationStateInformApp[2] = 0;
+  data.mainOperationStateInformApp[1] = targetWeight & 0xFF;
+  data.mainOperationStateInformApp[2] = (targetWeight >> 8) & 0xFF;
   data.mainOperationStateInformApp[3] = 0;
   data.mainOperationStateInformApp[4] = 0;
   data.mainOperationStateInformApp[5] = 0;

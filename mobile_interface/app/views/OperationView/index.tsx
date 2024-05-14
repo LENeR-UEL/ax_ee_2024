@@ -147,7 +147,7 @@ export default function OperationView() {
           const state = status.mainOperationState;
           switch (state?.state) {
             case FirmwareState.OperationStart: {
-              return `Aguardando peso atingir o setpoint (${status.weightL + status.weightR} / ${status.setpoint * 2} kg)`;
+              return `Aguardando peso atingir 150% do peso coletado (${status.weightL + status.weightR} / ${state.targetWeight} kg)`;
             }
             case FirmwareState.OperationGradualIncrease:
               return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs)\nTimer: ${state.pwmIncreaseTimeDelta} ms`;
