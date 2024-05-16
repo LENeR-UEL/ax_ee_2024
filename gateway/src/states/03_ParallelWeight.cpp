@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <esp_log.h>
+#include <Preferences.h>
 #include "../Bluetooth/Bluetooth.h"
 #include "../Twai/Twai.h"
 #include "../Data.h"
@@ -9,8 +10,28 @@
 static const char *TAG = "ParallelWeight";
 static unsigned long lastTwaiSendTime = 0;
 
+static Preferences preferences;
+
+void loadStoredWeight()
+{
+    preferences.begin("parameters", true);
+    if (preferences.isKey("03weight"))
+    {
+        data.collectedWeight = preferences.getUShort("03weight", 0);
+    }
+    preferences.end();
+}
+
+void storeWeight()
+{
+    preferences.begin("parameters", false);
+    preferences.putUShort("03weight", data.collectedWeight);
+    preferences.end();
+}
+
 void onParallelWeightStateEnter()
 {
+    loadStoredWeight();
 }
 
 void onParallelWeightStateLoop()
@@ -64,4 +85,7 @@ void onParallelWeightStateBLEControl(BluetoothControlCode code, uint8_t extraDat
     }
 }
 
-void onParallelWeightStateExit() {}
+void onParallelWeightStateExit()
+{
+    storeWeight();
+}

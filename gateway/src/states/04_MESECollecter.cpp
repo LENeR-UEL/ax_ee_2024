@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <esp_log.h>
+#include <Preferences.h>
 #include "../Bluetooth/Bluetooth.h"
 #include "../Twai/Twai.h"
 #include "../Data.h"
@@ -12,6 +13,26 @@ static const char *TAG = "MESECollecter";
 #define WINDING_DOWN_PWM_STEP 5
 #define WINDING_DOWN_INTERVAL_MS 200
 
+static Preferences preferences;
+
+void loadStoredMESE()
+{
+    preferences.begin("parameters", true);
+    if (preferences.isKey("04mese"))
+        data.mese = preferences.getUShort("04mese", 0);
+    if (preferences.isKey("04mesemax"))
+        data.meseMax = preferences.getUShort("04mesemax", 0);
+    preferences.end();
+}
+
+void storeMESE()
+{
+    preferences.begin("parameters", false);
+    preferences.putUShort("04mese", data.mese);
+    preferences.putUShort("04mesemax", data.meseMax);
+    preferences.end();
+}
+
 static unsigned long lastTwaiSendTime = 0;
 static long lastWindingDownTickTime = 0;
 static bool isWindingDown = false;
@@ -23,6 +44,7 @@ void onMESECollecterStateEnter()
     requestedPwm = 0;
     lastWindingDownTickTime = 0;
     isWindingDown = false;
+    loadStoredMESE();
 }
 
 void onMESECollecterStateLoop()
@@ -118,4 +140,9 @@ void onMESECollecterStateBLEControl(BluetoothControlCode code, uint8_t extraData
     }
 }
 
-void onMESECollecterStateExit() {}
+void onMESECollecterStateExit()
+{
+    storeMESE();
+    data.meseMax = data.mese * 1.2f;
+    data.setpoint = data.mese * 0.5f;
+}
