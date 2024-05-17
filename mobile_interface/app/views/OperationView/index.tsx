@@ -19,7 +19,6 @@ import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 export default function OperationView() {
   const navigator = useNavigation();
   const [status, sendControl] = useFirmwareStatus();
-  const beeper = useBeepSound();
 
   async function updateMaxMese(operation: "+" | "-") {
     if (operation === "+") {
@@ -85,13 +84,38 @@ export default function OperationView() {
     };
   }, [status.mainOperationState?.state, status.pwm]);
 
+  const beeper_PercentualEEGAtingido = useBeepSound("PercentualEEGAtingido");
+  const beeper_FESAtivado_hl2 = useBeepSound("FESAtivado_hl2");
+  const beeper_FESDesligada = useBeepSound("FESDesligada");
+
+  // resetar buzzers no início
+  useEffect(() => {
+    beeper_PercentualEEGAtingido.stop();
+    beeper_FESAtivado_hl2.stop();
+    beeper_FESDesligada.stop();
+    return () => {
+      beeper_PercentualEEGAtingido.stop();
+      beeper_FESAtivado_hl2.stop();
+      beeper_FESDesligada.stop();
+    };
+  }, []);
+
+  // buzzer ao entrar na curva de subida
   useUpdateEffect(() => {
-    if (status.weightL + status.weightR >= status.setpoint * 2) {
-      beeper.play();
+    if (status.mainOperationState?.state === FirmwareState.OperationGradualIncrease) {
+      beeper_FESAtivado_hl2.play();
     } else {
-      beeper.stop();
+      beeper_FESAtivado_hl2.stop();
     }
-  }, [status.weightL, status.weightR, status.setpoint]);
+  }, [status.mainOperationState?.state]);
+
+  useUpdateEffect(() => {
+    if (status.mainOperationState?.state === FirmwareState.OperationStop) {
+      beeper_FESDesligada.play();
+    } else {
+      beeper_FESDesligada.stop();
+    }
+  }, [status.mainOperationState?.state]);
 
   useEffect(() => {
     hapticFeedbackControl()
