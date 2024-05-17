@@ -103,7 +103,7 @@ export default function OperationView() {
   // buzzer ao entrar na curva de subida
   useUpdateEffect(() => {
     if (status.mainOperationState?.state === FirmwareState.OperationGradualIncrease) {
-      beeper_FESAtivado_hl2.play();
+      beeper_FESAtivado_hl2.play(true);
     } else {
       beeper_FESAtivado_hl2.stop();
     }
@@ -111,7 +111,7 @@ export default function OperationView() {
 
   useUpdateEffect(() => {
     if (status.mainOperationState?.state === FirmwareState.OperationStop) {
-      beeper_FESDesligada.play();
+      beeper_FESDesligada.play(true);
     } else {
       beeper_FESDesligada.stop();
     }

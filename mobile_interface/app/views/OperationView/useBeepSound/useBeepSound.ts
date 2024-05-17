@@ -1,49 +1,83 @@
 import { useEffect, useRef } from "react";
-import { Audio } from "expo-av";
+import { AVPlaybackStatusSuccess, Audio as ExpoAudio } from "expo-av";
+
+interface MyAudioOptions {
+  requiredAudioFile: any;
+  willLoopAutomatically: boolean;
+}
+
+class MyAudio {
+  private snd: ExpoAudio.Sound | null;
+
+  public isCurrentlyPlaying: boolean;
+
+  constructor(options: MyAudioOptions) {
+    this.snd = null;
+    this.isCurrentlyPlaying = false;
+
+    ExpoAudio.Sound.createAsync(options.requiredAudioFile, {}, null, true).then(
+      async ({ sound }) => {
+        await sound.setIsLoopingAsync(options.willLoopAutomatically);
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (!status.isLoaded) return;
+          this.onStatusUpdate(status);
+        });
+        this.snd = sound;
+        this.onCreated();
+      }
+    );
+  }
+
+  private onCreated() {}
+
+  private onStatusUpdate(status: AVPlaybackStatusSuccess) {
+    this.isCurrentlyPlaying = status.isPlaying;
+  }
+
+  public play(forceReset: boolean) {
+    if (this.isCurrentlyPlaying && !forceReset) {
+      return;
+    }
+
+    this.snd!.playFromPositionAsync(0);
+  }
+
+  public stop() {
+    if (!this.isCurrentlyPlaying) {
+      return;
+    }
+
+    this.snd!.stopAsync();
+  }
+}
 
 type SFX = "PercentualEEGAtingido" | "FESAtivado_hl2" | "FESDesligada";
-const Soundboard: Map<SFX, Audio.Sound> = new Map();
+const Soundboard: Map<SFX, MyAudio> = new Map();
 
-Audio.Sound.createAsync(require("./fesativado_hl2.ogg.wav"), {}, null, true).then(({ sound }) => {
-  sound.setIsLoopingAsync(false);
-  Soundboard.set("FESAtivado_hl2", sound);
-});
+Soundboard.set(
+  "FESAtivado_hl2",
+  new MyAudio({
+    requiredAudioFile: require("./fesativado_hl2.ogg.wav"),
+    willLoopAutomatically: false
+  })
+);
 
-Audio.Sound.createAsync(require("./fesdesativado.ogg.wav"), {}, null, true).then(({ sound }) => {
-  sound.setIsLoopingAsync(false);
-  Soundboard.set("FESDesligada", sound);
-});
+Soundboard.set(
+  "FESDesligada",
+  new MyAudio({
+    requiredAudioFile: require("./fesdesativado.ogg.wav"),
+    willLoopAutomatically: false
+  })
+);
 
-Audio.Sound.createAsync(require("./percentualEEGatingido.ogg.wav"), {}, null, true).then(
-  ({ sound }) => {
-    sound.setIsLoopingAsync(false);
-    Soundboard.set("PercentualEEGAtingido", sound);
-  }
+Soundboard.set(
+  "PercentualEEGAtingido",
+  new MyAudio({
+    requiredAudioFile: require("./percentualEEGatingido.ogg.wav"),
+    willLoopAutomatically: false
+  })
 );
 
 export function useBeepSound(id: SFX) {
-  const isAlreadyPlaying = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      if (!Soundboard.has(id)) return;
-      Soundboard.get(id)!.stopAsync();
-    };
-  }, []);
-
-  function play(immediate = false) {
-    if (!Soundboard.has(id)) return;
-    if (isAlreadyPlaying.current && immediate === false) return;
-
-    isAlreadyPlaying.current = true;
-    Soundboard.get(id)!.playFromPositionAsync(0);
-  }
-
-  function stop() {
-    if (!Soundboard.has(id)) return;
-    isAlreadyPlaying.current = false;
-    Soundboard.get(id)!.stopAsync();
-  }
-
-  return { play, stop };
+  return Soundboard.get(id)!;
 }
