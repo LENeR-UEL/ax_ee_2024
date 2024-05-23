@@ -16,6 +16,7 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { Image } from "expo-image";
 import StatusCANUp from "../../../assets/OnlineStatusAvailable.svg";
 import StatusCANDown from "../../../assets/OnlineStatusBusy.svg";
+import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 
 export default function BluetoothConnectView() {
   const navigator = useNavigation();
@@ -29,6 +30,8 @@ export default function BluetoothConnectView() {
   const [connectionModalShown, setConnectionModalShown] = useState(false);
 
   const pulseAnim = useRef(new Animated.Value(0));
+
+  const sfxControl = useBeepSound("control");
 
   useEffect(() => {
     Animated.timing(pulseAnim.current, {
@@ -81,6 +84,7 @@ export default function BluetoothConnectView() {
       return;
     }
 
+    sfxControl.play(true);
     dismissConnectionModal();
     hapticFeedbackControl();
     setConnecting(true);
@@ -96,8 +100,9 @@ export default function BluetoothConnectView() {
       return;
     }
 
-    await ble.disconnect();
+    sfxControl.play(true);
     hapticFeedbackControl();
+    await ble.disconnect();
   };
 
   const invokeReset = async () => {
@@ -105,8 +110,9 @@ export default function BluetoothConnectView() {
       return;
     }
 
-    await sendControl({ controlCode: "FirmwareInvokeReset", waitForResponse: false });
+    sfxControl.play(true);
     hapticFeedbackControl();
+    await sendControl({ controlCode: "FirmwareInvokeReset", waitForResponse: false });
     ble.disconnect();
     ToastAndroid.showWithGravity("Gateway reiniciando...", 1000, ToastAndroid.BOTTOM);
   };

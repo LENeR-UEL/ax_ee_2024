@@ -12,12 +12,20 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lucasbortolisantos.interfaceeelener"
     },
     "android": {
-      "package": "com.lucasbortolisantos.interfaceeelener"
+      "package": "com.lucasbortolisantos.interfaceeelener",
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT"
+      ]
     },
     "plugins": [
       "expo-router",

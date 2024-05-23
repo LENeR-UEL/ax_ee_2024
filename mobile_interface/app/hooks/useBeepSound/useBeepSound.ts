@@ -34,7 +34,7 @@ class MyAudio {
     this.isCurrentlyPlaying = status.isPlaying;
   }
 
-  public play(forceReset: boolean) {
+  public play(forceReset: boolean = false) {
     if (this.isCurrentlyPlaying && !forceReset) {
       return;
     }
@@ -51,13 +51,34 @@ class MyAudio {
   }
 }
 
-type SFX = "PercentualEEGAtingido" | "FESAtivado_hl2" | "FESDesligada";
+type SFX =
+  | "control"
+  | "EstimulacaoContinua"
+  | "PercentualEEGAtingido"
+  | "FESAtivado_hl2"
+  | "FESDesligada";
 const Soundboard: Map<SFX, MyAudio> = new Map();
+
+Soundboard.set(
+  "control",
+  new MyAudio({
+    requiredAudioFile: require("./control.mp3"),
+    willLoopAutomatically: false
+  })
+);
+
+Soundboard.set(
+  "EstimulacaoContinua",
+  new MyAudio({
+    requiredAudioFile: require("./EstimulacaoContinua.wav"),
+    willLoopAutomatically: true
+  })
+);
 
 Soundboard.set(
   "FESAtivado_hl2",
   new MyAudio({
-    requiredAudioFile: require("./fesativado_hl2.ogg.wav"),
+    requiredAudioFile: require("./FESAtivado.wav"),
     willLoopAutomatically: false
   })
 );
@@ -65,7 +86,7 @@ Soundboard.set(
 Soundboard.set(
   "FESDesligada",
   new MyAudio({
-    requiredAudioFile: require("./fesdesativado.ogg.wav"),
+    requiredAudioFile: require("./FESDesativado.wav"),
     willLoopAutomatically: false
   })
 );
@@ -73,7 +94,7 @@ Soundboard.set(
 Soundboard.set(
   "PercentualEEGAtingido",
   new MyAudio({
-    requiredAudioFile: require("./percentualEEGatingido.ogg.wav"),
+    requiredAudioFile: require("./PercentualEEGatingido.wav"),
     willLoopAutomatically: false
   })
 );

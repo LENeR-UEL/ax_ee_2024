@@ -13,14 +13,17 @@ import {
 import { run } from "../../utils/run";
 import { timeout } from "../../utils/timeout";
 import { useNavigation } from "../../hooks/useNavigation";
-import { useBeepSound } from "./useBeepSound/useBeepSound";
+import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 
 export default function OperationView() {
   const navigator = useNavigation();
   const [status, sendControl] = useFirmwareStatus();
+  const sfxControl = useBeepSound("control");
 
   async function updateMaxMese(operation: "+" | "-") {
+    sfxControl.play(true);
+
     if (operation === "+") {
       await sendControl({
         controlCode: "MainOperation_IncreaseMESEMaxOnce",
@@ -39,6 +42,7 @@ export default function OperationView() {
   async function emergencyStop() {
     sendControl({ controlCode: "MainOperation_EmergencyStop", waitForResponse: true });
 
+    sfxControl.play(true);
     ToastAndroid.showWithGravity("Parada de emergência acionada.", 1000, ToastAndroid.BOTTOM);
 
     for (let i = 0; i < 4; i++) await hapticFeedbackProcessEnd();
@@ -86,6 +90,7 @@ export default function OperationView() {
 
   const beeper_PercentualEEGAtingido = useBeepSound("PercentualEEGAtingido");
   const beeper_FESAtivado_hl2 = useBeepSound("FESAtivado_hl2");
+  const beeper_EstimulacaoContinua = useBeepSound("EstimulacaoContinua");
   const beeper_FESDesligada = useBeepSound("FESDesligada");
 
   // resetar buzzers no início
@@ -102,20 +107,24 @@ export default function OperationView() {
 
   // buzzer ao entrar na curva de subida
   useUpdateEffect(() => {
-    if (status.mainOperationState?.state === FirmwareState.OperationGradualIncrease) {
+    const { state } = status.mainOperationState!;
+    if (state === FirmwareState.OperationGradualIncrease) {
       beeper_FESAtivado_hl2.play(true);
-    } else {
+    }
+
+    if (state === FirmwareState.OperationStop) {
       beeper_FESAtivado_hl2.stop();
+      beeper_FESDesligada.play(true);
     }
   }, [status.mainOperationState?.state]);
 
   useUpdateEffect(() => {
-    if (status.mainOperationState?.state === FirmwareState.OperationStop) {
-      beeper_FESDesligada.play(true);
+    if (status.pwm !== 0) {
+      beeper_EstimulacaoContinua.play(false);
     } else {
-      beeper_FESDesligada.stop();
+      beeper_EstimulacaoContinua.stop();
     }
-  }, [status.mainOperationState?.state]);
+  }, [status.pwm]);
 
   useEffect(() => {
     hapticFeedbackControl()
@@ -182,7 +191,7 @@ export default function OperationView() {
           const state = status.mainOperationState;
           switch (state?.state) {
             case FirmwareState.OperationStart: {
-              return `Aguardando peso atingir 50% do peso registrado (${status.weightL + status.weightR} / ${state.targetWeight} kg)`;
+              return `Aguardando peso atingir 20% do setpoint (${status.weightL + status.weightR} / ${state.targetWeight} kg)`;
             }
             case FirmwareState.OperationGradualIncrease:
               return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs)\nTimer: ${state.pwmIncreaseTimeDelta} ms`;

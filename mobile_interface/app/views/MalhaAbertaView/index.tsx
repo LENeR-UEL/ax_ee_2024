@@ -13,12 +13,14 @@ import { useEffect } from "react";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { NextViewButton } from "../../components/NextViewButton";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
+import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 
 export default function MalhaAbertaView() {
   const isOperating = useBoolean();
   const isWindingDown = useBoolean();
 
   const [status, sendControl] = useFirmwareStatus();
+  const sfxControl = useBeepSound("control");
 
   const handleStartOperation = () => {
     if (isOperating.value === true) {
@@ -26,7 +28,7 @@ export default function MalhaAbertaView() {
     }
 
     hapticFeedbackProcessStart();
-
+    sfxControl.play(true);
     isOperating.setTrue();
     isWindingDown.setFalse();
   };
@@ -38,6 +40,7 @@ export default function MalhaAbertaView() {
     }
 
     hapticFeedbackProcessEnd();
+    sfxControl.play(true);
     isOperating.setFalse();
     isWindingDown.setTrue();
 
@@ -49,6 +52,7 @@ export default function MalhaAbertaView() {
       return;
     }
 
+    sfxControl.play(true);
     await sendControl({
       controlCode: sign === "+" ? "MESECollecter_IncreaseOnce" : "MESECollecter_DecreaseOnce",
       waitForResponse: true
@@ -87,15 +91,13 @@ export default function MalhaAbertaView() {
           mode="elevated"
           icon={() => <MaterialCommunityIcons name="minus" size={24} />}
           onPress={() => changeMese("-")}
-          disabled={isOperating.value === false}
-        ></FAB>
+          disabled={isOperating.value === false}></FAB>
         <FAB
           animated={false}
           mode="elevated"
           icon={() => <MaterialCommunityIcons name="plus" size={24} />}
           onPress={() => changeMese("+")}
-          disabled={isOperating.value === false}
-        ></FAB>
+          disabled={isOperating.value === false}></FAB>
       </View>
       {run(() => {
         if (isOperating.value === true || isWindingDown.value === true) {
@@ -105,8 +107,7 @@ export default function MalhaAbertaView() {
               mode="elevated"
               onPress={handleRegisterPwmValue}
               disabled={isWindingDown.value === true}
-              icon={() => <MaterialCommunityIcons name="content-save" size={24} />}
-            >
+              icon={() => <MaterialCommunityIcons name="content-save" size={24} />}>
               Registrar valor PWM
             </Button>
           );
