@@ -5,17 +5,21 @@ import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import GroupBox from "./GroupBox";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
 import { ScrollView } from "react-native-gesture-handler";
+import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 
 export default function ParameterSetup() {
   const [status, sendControl] = useFirmwareStatus();
+  const sfxControl = useBeepSound("control");
 
   async function saveParameters() {
+    sfxControl.play(true);
     hapticFeedbackControl();
     await sendControl({ controlCode: "ParameterSetup_Save", waitForResponse: true });
     ToastAndroid.showWithGravity("Dados salvos no Gateway.", 1000, ToastAndroid.BOTTOM);
   }
 
   async function resetParameters() {
+    sfxControl.play(true);
     hapticFeedbackControl();
     await sendControl({ controlCode: "ParameterSetup_Reset", waitForResponse: true });
     ToastAndroid.showWithGravity("Dados redefinidos no Gateway.", 1000, ToastAndroid.BOTTOM);

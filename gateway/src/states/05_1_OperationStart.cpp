@@ -10,16 +10,19 @@
 static const char *TAG = "OperationStart";
 static unsigned long lastTwaiSendTime = 0;
 
-void onOperationStartEnter() {
+void onOperationStartEnter()
+{
   lastWeightClassChangeTime = millis();
   weightClassTimer = 0;
   data.meseMax = data.mese * 1.2f;
 }
 
-void onOperationStartLoop() {
+void onOperationStartLoop()
+{
   long now = millis();
 
-  if (!espBle.isConnected()) {
+  if (!espBle.isConnected())
+  {
     ESP_LOGE(TAG, "Conexão Bluetooth perdida!");
     stateManager.switchTo(StateKind::OperationStop);
     return;
@@ -27,18 +30,20 @@ void onOperationStartLoop() {
 
   updateCurrentWeightClass();
 
-  const unsigned short targetWeight = data.setpoint * 0.2f;
+  const unsigned short targetWeight = (data.setpoint * 2) * 0.2f;
 
   ESP_LOGD(TAG, "Peso: %d/%d && isOVBoxFlagSet = %s", scaleGetTotalWeight(),
            targetWeight, data.isOVBoxFlagSet() ? "sim" : "não");
 
-  if (scaleGetTotalWeight() >= targetWeight && data.isOVBoxFlagSet()) {
+  if (scaleGetTotalWeight() >= targetWeight && data.isOVBoxFlagSet())
+  {
     ESP_LOGD(TAG, "Condição atingida.");
     stateManager.switchTo(StateKind::OperationGradualIncrease);
     return;
   }
 
-  if (now - lastTwaiSendTime >= 15) {
+  if (now - lastTwaiSendTime >= 15)
+  {
     lastTwaiSendTime = now;
     twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
     twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
@@ -57,16 +62,20 @@ void onOperationStartLoop() {
   data.mainOperationStateInformApp[5] = 0;
 }
 
-void onOperationStartTWAIMessage(TwaiReceivedMessage *receivedMessage) {
-  switch (receivedMessage->Kind) {
+void onOperationStartTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+  switch (receivedMessage->Kind)
+  {
   case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
     data.pwmFeedback = receivedMessage->ExtraData;
     break;
   }
 }
 
-void onOperationStartBLEControl(BluetoothControlCode code, uint8_t extraData) {
-  switch (code) {
+void onOperationStartBLEControl(BluetoothControlCode code, uint8_t extraData)
+{
+  switch (code)
+  {
   case BluetoothControlCode::MainOperation_SetSetpoint:
     data.setpoint = extraData;
     break;
@@ -74,9 +83,12 @@ void onOperationStartBLEControl(BluetoothControlCode code, uint8_t extraData) {
     data.meseMax += OPERATION_MESE_MAX_CHANGE_STEP;
     break;
   case BluetoothControlCode::MainOperation_DecreaseMESEMaxOnce:
-    if (data.meseMax <= OPERATION_MESE_MAX_CHANGE_STEP) {
+    if (data.meseMax <= OPERATION_MESE_MAX_CHANGE_STEP)
+    {
       data.meseMax = 0;
-    } else {
+    }
+    else
+    {
       data.meseMax -= OPERATION_MESE_MAX_CHANGE_STEP;
     }
     break;
