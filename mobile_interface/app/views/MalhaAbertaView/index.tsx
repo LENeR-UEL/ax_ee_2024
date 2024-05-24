@@ -13,14 +13,12 @@ import { useEffect } from "react";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { NextViewButton } from "../../components/NextViewButton";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
-import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 
 export default function MalhaAbertaView() {
   const isOperating = useBoolean();
   const isWindingDown = useBoolean();
 
   const [status, sendControl] = useFirmwareStatus();
-  const sfxControl = useBeepSound("control");
 
   const handleStartOperation = () => {
     if (isOperating.value === true) {
@@ -28,7 +26,6 @@ export default function MalhaAbertaView() {
     }
 
     hapticFeedbackProcessStart();
-    sfxControl.play(true);
     isOperating.setTrue();
     isWindingDown.setFalse();
   };
@@ -40,7 +37,6 @@ export default function MalhaAbertaView() {
     }
 
     hapticFeedbackProcessEnd();
-    sfxControl.play(true);
     isOperating.setFalse();
     isWindingDown.setTrue();
 
@@ -52,7 +48,6 @@ export default function MalhaAbertaView() {
       return;
     }
 
-    sfxControl.play(true);
     await sendControl({
       controlCode: sign === "+" ? "MESECollecter_IncreaseOnce" : "MESECollecter_DecreaseOnce",
       waitForResponse: true
