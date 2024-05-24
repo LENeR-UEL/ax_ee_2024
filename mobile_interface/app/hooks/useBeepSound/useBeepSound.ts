@@ -1,9 +1,12 @@
-import { useEffect, useRef } from "react";
 import { AVPlaybackStatusSuccess, Audio as ExpoAudio } from "expo-av";
 
 interface MyAudioOptions {
   requiredAudioFile: any;
   willLoopAutomatically: boolean;
+  /**
+   * Número entre 0.0 (silêncio) e 1.0 (volume máximo)
+   */
+  volume?: number;
 }
 
 class MyAudio {
@@ -18,6 +21,9 @@ class MyAudio {
     ExpoAudio.Sound.createAsync(options.requiredAudioFile, {}, null, true).then(
       async ({ sound }) => {
         await sound.setIsLoopingAsync(options.willLoopAutomatically);
+        if (options.volume !== undefined) {
+          await sound.setVolumeAsync(options.volume);
+        }
         sound.setOnPlaybackStatusUpdate((status) => {
           if (!status.isLoaded) return;
           this.onStatusUpdate(status);
@@ -52,7 +58,7 @@ class MyAudio {
 }
 
 type SFX =
-  | "control"
+  | "PesoAcimaSetpoint"
   | "EstimulacaoContinua"
   | "PercentualEEGAtingido"
   | "FESAtivado_hl2"
@@ -60,10 +66,11 @@ type SFX =
 const Soundboard: Map<SFX, MyAudio> = new Map();
 
 Soundboard.set(
-  "control",
+  "PesoAcimaSetpoint",
   new MyAudio({
-    requiredAudioFile: require("./control.mp3"),
-    willLoopAutomatically: false
+    requiredAudioFile: require("./beep.wav"),
+    willLoopAutomatically: true,
+    volume: 0.01
   })
 );
 

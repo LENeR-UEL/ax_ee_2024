@@ -5,16 +5,12 @@ import { useEffect, useRef } from "react";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { hapticFeedbackControl } from "../../haptics/HapticFeedback";
-import { useBluetoothConnection } from "../../bluetooth/Context";
 import { NextViewButton } from "../../components/NextViewButton";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
-import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 
 export default function ParalelaView() {
-  const ble = useBluetoothConnection();
   const [status, sendControl] = useFirmwareStatus();
-  const sfxControl = useBeepSound("control");
 
   const weightLRef = useRef<number>();
   const weightRRef = useRef<number>();
@@ -29,7 +25,6 @@ export default function ParalelaView() {
   }, 1000);
 
   const startCountdown = () => {
-    sfxControl.play(true);
     countdown.setCount(3);
   };
 

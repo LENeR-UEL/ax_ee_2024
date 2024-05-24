@@ -19,11 +19,10 @@ import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 export default function OperationView() {
   const navigator = useNavigation();
   const [status, sendControl] = useFirmwareStatus();
-  const sfxControl = useBeepSound("control");
+
+  const weightTotal = status.weightL + status.weightR;
 
   async function updateMaxMese(operation: "+" | "-") {
-    sfxControl.play(true);
-
     if (operation === "+") {
       await sendControl({
         controlCode: "MainOperation_IncreaseMESEMaxOnce",
@@ -42,7 +41,6 @@ export default function OperationView() {
   async function emergencyStop() {
     sendControl({ controlCode: "MainOperation_EmergencyStop", waitForResponse: true });
 
-    sfxControl.play(true);
     ToastAndroid.showWithGravity("Parada de emergência acionada.", 1000, ToastAndroid.BOTTOM);
 
     for (let i = 0; i < 4; i++) await hapticFeedbackProcessEnd();
@@ -88,6 +86,7 @@ export default function OperationView() {
     };
   }, [status.mainOperationState?.state, status.pwm]);
 
+  const beeper_setpointWeight = useBeepSound("PesoAcimaSetpoint");
   const beeper_PercentualEEGAtingido = useBeepSound("PercentualEEGAtingido");
   const beeper_FESAtivado_hl2 = useBeepSound("FESAtivado_hl2");
   const beeper_EstimulacaoContinua = useBeepSound("EstimulacaoContinua");
@@ -95,15 +94,31 @@ export default function OperationView() {
 
   // resetar buzzers no início
   useEffect(() => {
+    beeper_setpointWeight.stop();
     beeper_PercentualEEGAtingido.stop();
     beeper_FESAtivado_hl2.stop();
     beeper_FESDesligada.stop();
+    beeper_EstimulacaoContinua.stop();
     return () => {
+      beeper_setpointWeight.stop();
       beeper_PercentualEEGAtingido.stop();
       beeper_FESAtivado_hl2.stop();
       beeper_FESDesligada.stop();
+      beeper_EstimulacaoContinua.stop();
     };
   }, []);
+
+  // buzzer ao iniciar a operação, indicando ao usuário pressionar as barras
+  useUpdateEffect(() => {
+    const { state } = status.mainOperationState!;
+    const { isEEGFlagSet } = status.statusFlags;
+
+    if (state === FirmwareState.OperationStart && isEEGFlagSet) {
+      beeper_PercentualEEGAtingido.play(true);
+    } else {
+      beeper_PercentualEEGAtingido.stop();
+    }
+  }, [status.mainOperationState?.state, status.statusFlags.isEEGFlagSet]);
 
   // buzzer ao entrar na curva de subida
   useUpdateEffect(() => {
@@ -118,6 +133,7 @@ export default function OperationView() {
     }
   }, [status.mainOperationState?.state]);
 
+  // buzzer constante enquanto estiver estimulando
   useUpdateEffect(() => {
     if (status.pwm !== 0) {
       beeper_EstimulacaoContinua.play(false);
@@ -125,6 +141,15 @@ export default function OperationView() {
       beeper_EstimulacaoContinua.stop();
     }
   }, [status.pwm]);
+
+  // buzzer constante enquanto peso >= setpoint
+  useUpdateEffect(() => {
+    if (weightTotal >= status.setpoint * 2) {
+      beeper_setpointWeight.play(false);
+    } else {
+      beeper_setpointWeight.stop();
+    }
+  }, [weightTotal, status.setpoint]);
 
   useEffect(() => {
     hapticFeedbackControl()
@@ -191,7 +216,7 @@ export default function OperationView() {
           const state = status.mainOperationState;
           switch (state?.state) {
             case FirmwareState.OperationStart: {
-              return `Aguardando peso atingir 20% do setpoint (${status.weightL + status.weightR} / ${state.targetWeight} kg)`;
+              return `Aguardando peso atingir 20% do setpoint (${weightTotal} / ${state.targetWeight} kg)`;
             }
             case FirmwareState.OperationGradualIncrease:
               return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs)\nTimer: ${state.pwmIncreaseTimeDelta} ms`;
