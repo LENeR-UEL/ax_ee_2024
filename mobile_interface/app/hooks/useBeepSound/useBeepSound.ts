@@ -70,7 +70,7 @@ Soundboard.set(
   new MyAudio({
     requiredAudioFile: require("./beep.wav"),
     willLoopAutomatically: true,
-    volume: 0.01
+    volume: 0.1
   })
 );
 
