@@ -3,15 +3,9 @@
 // balança física presente.
 //
 // Comente-o caso for usar as balanças reais.
-#define SCALE_USE_STUB 1
+// #define SCALE_USE_STUB 1
 
-enum Scale
-{
-    A,
-    B,
-    C,
-    D
-};
+enum Scale { A, B, C, D };
 
 void scaleBeginOrDie();
 void scaleUpdate();
