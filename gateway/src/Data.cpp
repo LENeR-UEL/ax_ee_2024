@@ -4,7 +4,7 @@
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d", variable)
 
-#define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
+// #define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
 
 static const char *TAG = "Data";
 
