@@ -61,8 +61,8 @@ void onOperationStopBLEControl(BluetoothControlCode code, uint8_t extraData)
 {
     switch (code)
     {
-    case BluetoothControlCode::MainOperation_GoBackToMESECollecter:
-        stateManager.switchTo(StateKind::MESECollecter);
+    case BluetoothControlCode::MainOperation_GoBackToParallel:
+        stateManager.switchTo(StateKind::ParallelWeight);
         return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();

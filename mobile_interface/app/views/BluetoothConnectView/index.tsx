@@ -13,9 +13,9 @@ import {
 import { run } from "../../utils/run";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { useNavigation } from "../../hooks/useNavigation";
-import { Image } from "expo-image";
 import StatusCANUp from "../../../assets/OnlineStatusAvailable.svg";
 import StatusCANDown from "../../../assets/OnlineStatusBusy.svg";
+import { Image } from "react-native";
 
 export default function BluetoothConnectView() {
   const navigator = useNavigation();
@@ -114,7 +114,7 @@ export default function BluetoothConnectView() {
   async function onStartProcessClick() {
     if (ble.status !== "CONNECTED") return;
     await sendControl({ controlCode: "ParameterSetup_Complete", waitForResponse: true });
-    navigator.navigate("Paralela");
+    navigator.navigate("Malha Aberta");
   }
 
   console.log(`Encontrado ${$foundDevices.current.length} dispositivos distintos`);
@@ -222,6 +222,13 @@ export default function BluetoothConnectView() {
             );
           }
         })}
+        <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Image
+            resizeMode="contain"
+            source={require("../../../assets/LogoLENeR.png")}
+            style={{ width: "50%", borderRadius: 16, marginTop: 16, marginHorizontal: "auto" }}
+          />
+        </View>
       </View>
       <Portal>
         <Dialog visible={connectionModalShown} onDismiss={dismissConnectionModal}>

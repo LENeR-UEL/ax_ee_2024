@@ -63,17 +63,17 @@ const ControlCodes = {
    */
   FirmwareInvokeReset: 0x00,
 
-  Parallel_GoBackToParameterSetup: 0x10,
-  Parallel_RegisterWeight: 0x11,
-  Parallel_Complete: 0x1f,
-
-  MESECollecter_GoBackToParallel: 0x20,
+  MESECollecter_GoBackToParameterSetup: 0x20,
   MESECollecter_IncreaseOnce: 0x21,
   MESECollecter_DecreaseOnce: 0x22,
   MESECollecter_RegisterMESE: 0x24,
   MESECollecter_Complete: 0x2f,
 
-  MainOperation_GoBackToMESECollecter: 0x30,
+  Parallel_GoBackToMESECollecter: 0x10,
+  Parallel_RegisterWeight: 0x11,
+  Parallel_Complete: 0x1f,
+
+  MainOperation_GoBackToParallel: 0x30,
   MainOperation_SetSetpoint: 0x31,
   MainOperation_IncreaseMESEMaxOnce: 0x32,
   MainOperation_DecreaseMESEMaxOnce: 0x33,

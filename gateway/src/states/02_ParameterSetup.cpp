@@ -101,7 +101,7 @@ void onParameterSetupStateBLEControl(BluetoothControlCode code, uint8_t extraDat
         saveData();
         break;
     case BluetoothControlCode::ParameterSetup_Complete:
-        stateManager.switchTo(StateKind::ParallelWeight);
+        stateManager.switchTo(StateKind::MESECollecter);
         return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();
