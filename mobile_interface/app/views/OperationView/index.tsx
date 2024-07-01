@@ -78,7 +78,7 @@ export default function OperationView() {
         return;
       }
 
-      sendControl({ controlCode: "MainOperation_GoBackToMESECollecter", waitForResponse: true });
+      sendControl({ controlCode: "MainOperation_GoBackToParallel", waitForResponse: true });
     });
 
     return () => {

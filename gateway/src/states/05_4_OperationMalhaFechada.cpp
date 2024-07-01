@@ -98,8 +98,8 @@ void onOperationMalhaFechadaBLEControl(BluetoothControlCode code, uint8_t extraD
             data.meseMax -= OPERATION_MESE_MAX_CHANGE_STEP;
         }
         break;
-    case BluetoothControlCode::MainOperation_GoBackToMESECollecter:
-        stateManager.switchTo(StateKind::MESECollecter);
+    case BluetoothControlCode::MainOperation_GoBackToParallel:
+        stateManager.switchTo(StateKind::ParallelWeight);
         return;
     case BluetoothControlCode::MainOperation_EmergencyStop:
         stateManager.switchTo(StateKind::OperationStop);

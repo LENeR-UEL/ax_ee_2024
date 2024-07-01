@@ -129,10 +129,10 @@ void onMESECollecterStateBLEControl(BluetoothControlCode code, uint8_t extraData
         data.setpoint = requestedPwm * 0.5f;
         break;
     case BluetoothControlCode::MESECollecter_Complete:
-        stateManager.switchTo(StateKind::OperationStart);
-        break;
-    case BluetoothControlCode::MESECollecter_GoBackToParallel:
         stateManager.switchTo(StateKind::ParallelWeight);
+        break;
+    case BluetoothControlCode::MESECollecter_GoBackToParameterSetup:
+        stateManager.switchTo(StateKind::ParameterSetup);
         return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();

@@ -60,13 +60,13 @@ export default function MalhaAbertaView() {
     }
   }, [isWindingDown, status.pwm]);
 
-  async function goToOperation() {
+  async function goToParallel() {
     await sendControl({ controlCode: "MESECollecter_Complete", waitForResponse: true });
   }
 
   useEffect(() => {
     return () => {
-      sendControl({ controlCode: "MESECollecter_GoBackToParallel", waitForResponse: true });
+      sendControl({ controlCode: "MESECollecter_GoBackToParameterSetup", waitForResponse: true });
     };
   }, []);
 
@@ -116,10 +116,10 @@ export default function MalhaAbertaView() {
       })}
       <NextViewButton
         icon="seat-legroom-extra"
-        label={'Ir para "Operação"'}
-        target="Operação"
+        label={'Ir para "Paralela"'}
+        target="Paralela"
         visible={isWindingDown.value === false && isOperating.value === false && status.mese > 0}
-        onClick={goToOperation}
+        onClick={goToParallel}
       />
     </View>
   );

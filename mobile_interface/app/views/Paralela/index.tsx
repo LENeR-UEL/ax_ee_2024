@@ -38,13 +38,13 @@ export default function ParalelaView() {
     hapticFeedbackControl();
   }, [status.collectedWeight]);
 
-  async function goToMESECollecter() {
+  async function goToOperation() {
     await sendControl({ controlCode: "Parallel_Complete", waitForResponse: true });
   }
 
   useEffect(() => {
     return () => {
-      sendControl({ controlCode: "Parallel_GoBackToParameterSetup", waitForResponse: true });
+      sendControl({ controlCode: "Parallel_GoBackToMESECollecter", waitForResponse: true });
     };
   }, []);
 
@@ -83,10 +83,10 @@ export default function ParalelaView() {
       </Button>
       <NextViewButton
         icon="seat-legroom-extra"
-        label={'Ir para "Malha aberta"'}
-        target="Malha Aberta"
+        label={'Ir para "Operação"'}
+        target="Operação"
         visible={status.collectedWeight > 0}
-        onClick={goToMESECollecter}
+        onClick={goToOperation}
       />
     </View>
   );

@@ -74,10 +74,10 @@ void onParallelWeightStateBLEControl(BluetoothControlCode code, uint8_t extraDat
         data.collectedWeight = data.weightL + data.weightR;
         return;
     case BluetoothControlCode::Parallel_Complete:
-        stateManager.switchTo(StateKind::MESECollecter);
+        stateManager.switchTo(StateKind::OperationMalhaFechada);
         return;
-    case BluetoothControlCode::Parallel_GoBackToParameterSetup:
-        stateManager.switchTo(StateKind::ParameterSetup);
+    case BluetoothControlCode::Parallel_GoBackToMESECollecter:
+        stateManager.switchTo(StateKind::MESECollecter);
         return;
     case BluetoothControlCode::FirmwareInvokeReset:
         esp_restart();
