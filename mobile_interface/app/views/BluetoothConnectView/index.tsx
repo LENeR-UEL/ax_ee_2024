@@ -228,6 +228,11 @@ export default function BluetoothConnectView() {
             source={require("../../../assets/LogoLENeR.png")}
             style={{ width: "50%", borderRadius: 16, marginTop: 16, marginHorizontal: "auto" }}
           />
+          <Image
+            resizeMode="contain"
+            source={require("../../../assets/LogoSENAI150px.png")}
+            style={{ width: "50%", borderRadius: 16, marginHorizontal: "auto" }}
+          />
         </View>
       </View>
       <Portal>

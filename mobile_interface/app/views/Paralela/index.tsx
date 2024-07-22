@@ -1,13 +1,14 @@
 import { StyleSheet, View } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, FAB } from "react-native-paper";
 import { useCountdown } from "../../hooks/useCountdown";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StatusDisplay } from "../../components/StatusDisplay";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { hapticFeedbackControl } from "../../haptics/HapticFeedback";
 import { NextViewButton } from "../../components/NextViewButton";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
+import { WeightInputDialog } from "./WeightInputDialog";
 
 export default function ParalelaView() {
   const [status, sendControl] = useFirmwareStatus();
@@ -28,25 +29,34 @@ export default function ParalelaView() {
     countdown.setCount(3);
   };
 
-  const shownWeight = countdown.isCounting
-    ? status.weightL + status.weightR
-    : status.collectedWeight;
-
   // Vibrar quando o dado de peso médio é coletado do Gateway, sem vibrar na primeira render
   useUpdateEffect(() => {
     console.log("Peso médio coletado!");
     hapticFeedbackControl();
   }, [status.collectedWeight]);
 
-  async function goToOperation() {
-    await sendControl({ controlCode: "Parallel_Complete", waitForResponse: true });
-  }
-
   useEffect(() => {
     return () => {
       sendControl({ controlCode: "Parallel_GoBackToMESECollecter", waitForResponse: true });
     };
   }, []);
+
+  async function goToOperation() {
+    await sendControl({ controlCode: "Parallel_Complete", waitForResponse: true });
+  }
+
+  const [isWeightInputDialogShown, setWeightInputDialogShown] = useState(false);
+  async function setWeightRemote(weight: number) {
+    await sendControl({
+      controlCode: "Parallel_SetWeightFromArgument",
+      data: weight & 0xff,
+      waitForResponse: true
+    });
+  }
+
+  const shownWeight = countdown.isCounting
+    ? status.weightL + status.weightR
+    : status.collectedWeight;
 
   return (
     <View style={{ flex: 1 }}>
@@ -71,6 +81,11 @@ export default function ParalelaView() {
           textMain={shownWeight.toFixed(0)}
           textRight="kg"
         />
+        <FAB
+          animated={false}
+          size="small"
+          icon={() => <MaterialCommunityIcons name="pencil" size={24} />}
+          onPress={() => setWeightInputDialogShown(true)}></FAB>
       </View>
       <Button
         style={styles.actionButton}
@@ -88,6 +103,16 @@ export default function ParalelaView() {
         visible={status.collectedWeight > 0}
         onClick={goToOperation}
       />
+      <WeightInputDialog
+        visible={isWeightInputDialogShown}
+        onDismiss={() => {
+          setWeightInputDialogShown(false);
+        }}
+        onConfirm={(weight) => {
+          setWeightRemote(weight);
+          setWeightInputDialogShown(false);
+        }}
+      />
     </View>
   );
 }
@@ -96,7 +121,8 @@ const styles = StyleSheet.create({
   barRow: {
     flexDirection: "row",
     marginHorizontal: 16,
-    gap: 4
+    gap: 4,
+    alignItems: "center"
   },
   bar: {
     flexGrow: 1

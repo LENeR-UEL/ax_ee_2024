@@ -14,8 +14,7 @@ export function StatusDisplay(props: Props) {
     <View style={StyleSheet.compose(styles.box, props.style)}>
       <Text style={styles.labelLeft}>{props.textLeft}</Text>
       <Text
-        style={StyleSheet.compose(styles.label, { textAlign: props.textMainAlign ?? "center" })}
-      >
+        style={StyleSheet.compose(styles.label, { textAlign: props.textMainAlign ?? "center" })}>
         {props.textMain}
       </Text>
       <Text style={styles.labelRight}>{props.textRight}</Text>

@@ -12,15 +12,18 @@ static unsigned long lastTwaiSendTime = 0;
 
 static Preferences preferences;
 
-void loadStoredWeight() {
+void loadStoredWeight()
+{
   preferences.begin("parameters", true);
-  if (preferences.isKey("03weight")) {
+  if (preferences.isKey("03weight"))
+  {
     data.collectedWeight = preferences.getUShort("03weight", 0);
   }
   preferences.end();
 }
 
-void storeWeight() {
+void storeWeight()
+{
   preferences.begin("parameters", false);
   preferences.putUShort("03weight", data.collectedWeight);
   preferences.end();
@@ -28,14 +31,17 @@ void storeWeight() {
 
 void onParallelWeightStateEnter() { loadStoredWeight(); }
 
-void onParallelWeightStateLoop() {
-  if (!espBle.isConnected()) {
+void onParallelWeightStateLoop()
+{
+  if (!espBle.isConnected())
+  {
     stateManager.switchTo(StateKind::Disconnected);
     return;
   }
 
   long now = millis();
-  if (now - lastTwaiSendTime >= 15) {
+  if (now - lastTwaiSendTime >= 15)
+  {
     lastTwaiSendTime = now;
     twaiSend(TwaiSendMessageKind::WeightTotal,
              scaleGetWeightL() + scaleGetWeightR());
@@ -47,8 +53,10 @@ void onParallelWeightStateLoop() {
   }
 }
 
-void onParallelWeightStateTWAIMessage(TwaiReceivedMessage *receivedMessage) {
-  switch (receivedMessage->Kind) {
+void onParallelWeightStateTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+  switch (receivedMessage->Kind)
+  {
   case TwaiReceivedMessageKind::PwmFeedbackEstimulador:
     data.pwmFeedback = receivedMessage->ExtraData;
     break;
@@ -56,8 +64,10 @@ void onParallelWeightStateTWAIMessage(TwaiReceivedMessage *receivedMessage) {
 }
 
 void onParallelWeightStateBLEControl(BluetoothControlCode code,
-                                     uint8_t extraData) {
-  switch (code) {
+                                     uint8_t extraData)
+{
+  switch (code)
+  {
   case BluetoothControlCode::Parallel_RegisterWeight:
     ESP_LOGI(TAG, "Peso corporal coletado");
     data.collectedWeight = data.weightL + data.weightR;
@@ -67,6 +77,10 @@ void onParallelWeightStateBLEControl(BluetoothControlCode code,
     return;
   case BluetoothControlCode::Parallel_GoBackToMESECollecter:
     stateManager.switchTo(StateKind::MESECollecter);
+    return;
+  case BluetoothControlCode::Parallel_SetWeightFromArgument:
+    ESP_LOGI(TAG, "Peso corporal definido pelo aplicativo");
+    data.collectedWeight = extraData;
     return;
   case BluetoothControlCode::FirmwareInvokeReset:
     esp_restart();
