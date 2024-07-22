@@ -23,6 +23,7 @@ enum class BluetoothControlCode
 
     Parallel_GoBackToMESECollecter = 0x10,
     Parallel_RegisterWeight = 0x11,
+    Parallel_SetWeightFromArgument = 0x16,
     Parallel_Complete = 0x1f,
 
     MainOperation_GoBackToParallel = 0x30,
