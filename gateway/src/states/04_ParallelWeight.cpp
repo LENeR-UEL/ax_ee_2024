@@ -50,6 +50,7 @@ void onParallelWeightStateLoop()
     twaiSend(TwaiSendMessageKind::Mese, 0);
     twaiSend(TwaiSendMessageKind::MeseMax, 0);
     twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+    twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
   }
 }
 

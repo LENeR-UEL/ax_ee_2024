@@ -33,6 +33,9 @@ public:
         uint16_t transitionTime;
         uint16_t gradualDecreaseTime;
         uint16_t malhaFechadaAboveSetpointTime;
+
+        // Coeficiente de ganho enviado ao estimulador. Range [0, 100], inteiro. No estimulador, é dividido por 100.
+        uint8_t gainCoefficient;
     } parameterSetup;
 
     // Informar o app do estado atual da operação

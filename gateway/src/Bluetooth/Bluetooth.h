@@ -36,6 +36,7 @@ enum class BluetoothControlCode
     ParameterSetup_SetTransitionTime = 0x63,
     ParameterSetup_SetGradualDecreaseTime = 0x64,
     ParameterSetup_SetMalhaFechadaAboveSetpointTime = 0x66,
+    ParameterSetup_SetGainCoefficient = 0x67,
     ParameterSetup_Reset = 0x6D,
     ParameterSetup_Save = 0x6E,
     ParameterSetup_Complete = 0x6F,
@@ -69,6 +70,9 @@ typedef struct __attribute__((__packed__))
         uint16_t transitionTime;
         uint16_t gradualDecreaseTime;
         uint16_t malhaFechadaAboveSetpointTime;
+
+        // Coeficiente de ganho enviado ao estimulador. Range [0, 100], inteiro. No estimulador, é dividido por 100.
+        uint8_t gainCoefficient;
     } parameterSetup;
 
     // Informar o app do estado atual da operação

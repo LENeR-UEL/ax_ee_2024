@@ -84,6 +84,7 @@ void onMESECollecterStateLoop()
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
         twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
+        twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
     }
 }
 
