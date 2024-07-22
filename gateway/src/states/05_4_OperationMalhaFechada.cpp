@@ -57,6 +57,7 @@ void onOperationMalhaFechadaLoop()
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
+        twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;

@@ -36,6 +36,7 @@ void onOperationStopLoop()
     {
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, requestedPwm);
         twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+        twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
         lastStepTime = now;
     }
 

@@ -11,19 +11,25 @@
 #define WIRESS_GPIO_TX GPIO_NUM_16
 #define WIRESS_GPIO_RX GPIO_NUM_25
 
-enum TwaiSendMessageKind : uint8_t {
+enum TwaiSendMessageKind : uint8_t
+{
   WeightTotal = 0x51,
   ResidualWeightTotal = 0x52,
   SetRequestedPwm = 0x61,
   Mese = 0x71,
   MeseMax = 0x72,
   Setpoint = 0x81,
-  Trigger = 0x82
+  Trigger = 0x82,
+  SetGainCoefficient = 0xA1
 };
 
-enum TwaiReceivedMessageKind : uint8_t { PwmFeedbackEstimulador = 0x6A };
+enum TwaiReceivedMessageKind : uint8_t
+{
+  PwmFeedbackEstimulador = 0x6A
+};
 
-struct TwaiReceivedMessage {
+struct TwaiReceivedMessage
+{
   TwaiReceivedMessageKind Kind;
   uint16_t ExtraData;
 };

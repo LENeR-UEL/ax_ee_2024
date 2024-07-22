@@ -52,6 +52,7 @@ void onOperationStartLoop()
     twaiSend(TwaiSendMessageKind::Setpoint, 0);
     twaiSend(TwaiSendMessageKind::Mese, 0);
     twaiSend(TwaiSendMessageKind::MeseMax, 0);
+    twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
   }
 
   data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;

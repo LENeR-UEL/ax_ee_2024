@@ -54,6 +54,11 @@ interface StatusPacket {
     transitionTime: number;
     gradualDecreaseTime: number;
     malhaFechadaAboveSetpointTime: number;
+
+    /**
+     * Coeficiente de ganho enviado ao estimulador. Range [0, 100], inteiro. No estimulador, é dividido por 100.
+     */
+    gainCoefficient: number;
   };
 }
 
@@ -84,6 +89,7 @@ const ControlCodes = {
   ParameterSetup_SetTransitionTime: 0x63,
   ParameterSetup_SetGradualDecreaseTime: 0x64,
   ParameterSetup_SetMalhaFechadaAboveSetpointTime: 0x66,
+  ParameterSetup_SetGainCoefficient: 0x67,
   ParameterSetup_Reset: 0x6d,
   ParameterSetup_Save: 0x6e,
   ParameterSetup_Complete: 0x6f
@@ -119,7 +125,8 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     gradualIncreaseTime: reader.readUnsignedShortLE(),
     transitionTime: reader.readUnsignedShortLE(),
     gradualDecreaseTime: reader.readUnsignedShortLE(),
-    malhaFechadaAboveSetpointTime: reader.readUnsignedShortLE()
+    malhaFechadaAboveSetpointTime: reader.readUnsignedShortLE(),
+    gainCoefficient: reader.readUnsignedChar()
   };
 
   const state = reader.readUnsignedChar() as FirmwareState;
@@ -199,7 +206,8 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
       gradualIncreaseTime: 0,
       transitionTime: 0,
       gradualDecreaseTime: 0,
-      malhaFechadaAboveSetpointTime: 0
+      malhaFechadaAboveSetpointTime: 0,
+      gainCoefficient: 1.0
     }
   });
 
