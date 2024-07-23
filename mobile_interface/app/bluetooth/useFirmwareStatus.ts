@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { fullUUID, BleError, BleErrorCode, Characteristic } from "react-native-ble-plx";
+import { BleError, BleErrorCode, Characteristic } from "react-native-ble-plx";
 import { Buffer } from "buffer";
-import { useBluetoothConnection } from "./Context";
+import { CONTROL_UUID, SERVICE_UUID, STATUS_UUID, useBluetoothConnection } from "./Context";
 import { BufferReader } from "./bufferReader";
-
-const SERVICE_UUID = fullUUID("ab04");
-const STATUS_UUID = fullUUID("ff01");
-const CONTROL_UUID = fullUUID("ff0f");
 
 export enum FirmwareState {
   Disconnected,
@@ -68,6 +64,12 @@ const ControlCodes = {
    */
   FirmwareInvokeReset: 0x00,
 
+  /**
+   * Enviado pelo aplicativo constantemente (50 hz).
+   * O gateway deve considerar a conexão perdida caso a última mensagem StillAlive tenha ocorrido a mais de 1000ms.
+   */
+  StillAlive: 0x01,
+
   MESECollecter_GoBackToParameterSetup: 0x20,
   MESECollecter_IncreaseOnce: 0x21,
   MESECollecter_DecreaseOnce: 0x22,
@@ -102,7 +104,6 @@ type ControlCodeDispatcher = (options: {
 }) => Promise<boolean>;
 
 function parseStatusPacket(packet: Buffer): StatusPacket {
-  console.log(packet.byteLength + " bytes");
   const reader = new BufferReader(packet);
 
   const pwm = reader.readUnsignedShortLE();
@@ -118,8 +119,6 @@ function parseStatusPacket(packet: Buffer): StatusPacket {
     isEEGFlagSet: (statusFlagsByte & 0b00000001) > 0,
     isCANAvailable: (statusFlagsByte & 0b00000010) > 0
   };
-
-  console.log(statusFlagsByte);
 
   const parameters: StatusPacket["parameters"] = {
     gradualIncreaseTime: reader.readUnsignedShortLE(),
@@ -241,8 +240,7 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
       const payload = Buffer.from(characteristic.value, "base64");
       const parsed = parseStatusPacket(payload);
 
-      console.debug("Firmware Status: " + payload.toString("hex"));
-      console.debug(parsed.mainOperationState);
+      // console.debug("Firmware Status: " + payload.toString("hex"));
 
       _setValue(parsed);
     }

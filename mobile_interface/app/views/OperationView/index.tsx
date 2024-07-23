@@ -15,9 +15,11 @@ import { timeout } from "../../utils/timeout";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
+import { useBluetoothConnection } from "../../bluetooth/Context";
 
 export default function OperationView() {
   const navigator = useNavigation();
+  const ble = useBluetoothConnection();
   const [status, sendControl] = useFirmwareStatus();
 
   const weightTotal = status.weightL + status.weightR;
@@ -61,14 +63,20 @@ export default function OperationView() {
 
   useEffect(() => {
     const state = status.mainOperationState?.state ?? null;
-    const unsubscribe = navigator.addListener("beforeRemove", (e) => {
-      // Nessas situações, é inseguro permitir a mudança de estado no firmware.
-      if (
+    const unsubscribe = navigator.addListener("beforeRemove", async (e) => {
+      // Em BluetoothContext, há um handler em device disconnected que seta o valor de device para null
+      const connected = ble.deviceRef.current !== null;
+
+      const isCriticalState =
         state === FirmwareState.OperationGradualIncrease ||
         state === FirmwareState.OperationTransition ||
         state === FirmwareState.OperationMalhaFechada ||
-        (state === FirmwareState.OperationStop && status.pwm > 0)
-      ) {
+        (state === FirmwareState.OperationStop && status.pwm > 0);
+
+      console.log({ connected, isCriticalState, state });
+
+      // Nessas situações, é inseguro permitir a mudança de estado no firmware.
+      if (connected && isCriticalState) {
         e.preventDefault();
         ToastAndroid.showWithGravity(
           "É preciso finalizar as etapas de operação primeiro.",
@@ -110,7 +118,9 @@ export default function OperationView() {
 
   // buzzer ao iniciar a operação, indicando ao usuário pressionar as barras
   useUpdateEffect(() => {
-    const { state } = status.mainOperationState!;
+    if (status.mainOperationState === null || status.statusFlags === null) return;
+
+    const { state } = status.mainOperationState;
     const { isEEGFlagSet } = status.statusFlags;
 
     if (state === FirmwareState.OperationStart && isEEGFlagSet) {
@@ -122,6 +132,8 @@ export default function OperationView() {
 
   // buzzer ao entrar na curva de subida
   useUpdateEffect(() => {
+    if (status.mainOperationState === null) return;
+
     const { state } = status.mainOperationState!;
     if (state === FirmwareState.OperationGradualIncrease) {
       beeper_FESAtivado_hl2.play(true);
