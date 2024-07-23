@@ -21,6 +21,7 @@ uint16_t mese;
 uint16_t meseMax;
 uint16_t setpointKg;
 FlagTrigger flagTrigger;
+float gainCoefficient = 0.5f;
 
 int integralErro = 0;
 
@@ -74,6 +75,9 @@ void readEverythingFromTwai()
     case TwaiReceivedMessageKind::Mese:
       mese = latestMessage.ExtraData;
       break;
+    case TwaiReceivedMessageKind::SetGainCoefficient:
+      gainCoefficient = latestMessage.ExtraData / 100.0f;
+      break;
     }
   }
 }
@@ -84,19 +88,25 @@ int calculatePulseWidth()
   int erro = weightTotal - setpointKg * 2;
   integralErro += erro;
 
-  // Não deixar integralErro passar de -50 e 50
+  // Saturar integralErro em [-50 e 50]
   integralErro = max(-50, min(50, integralErro));
 
   int controlWeight = weightTotal - residualWeightTotal;
-  int pi = mese + controlWeight * 0.5f;
+  int pi = mese + controlWeight * gainCoefficient;
 
-  // Não deixar pi passar de meseMax
-  if (pi < mese) pi = mese;
-  if (pi > meseMax) pi = meseMax;
-  if (largerPi < mese) largerPi = mese;
-  if (largerPi > meseMax) largerPi = meseMax;
+  // Saturar pi em [mese, meseMax]
+  if (pi < mese)
+    pi = mese;
+  if (pi > meseMax)
+    pi = meseMax;
+  if (largerPi < mese)
+    largerPi = mese;
+  if (largerPi > meseMax)
+    largerPi = meseMax;
 
-  if (pi > largerPi) {
+  // O PWM nunca será reduzido, apenas aumentado
+  if (pi > largerPi)
+  {
     largerPi = pi;
   }
 
