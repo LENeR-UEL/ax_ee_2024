@@ -1,13 +1,26 @@
-import { PropsWithChildren, createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  MutableRefObject,
+  PropsWithChildren,
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import requestBluetoothPermission from "./requestPermission";
-import { BleManager, Device, ScanMode, State } from "react-native-ble-plx";
+import { BleManager, Device, ScanMode, State, fullUUID } from "react-native-ble-plx";
 import connectToDevice from "./connectToDevice";
 import { ToastAndroid } from "react-native";
+
+export const SERVICE_UUID = fullUUID("ab04");
+export const STATUS_UUID = fullUUID("ff01");
+export const CONTROL_UUID = fullUUID("ff0f");
 
 interface BTDisconnected {
   bleManager: BleManager | null;
   status: "DISCONNECTED";
   device: null;
+  deviceRef: MutableRefObject<Device | null>;
   connect(device: Device): Promise<boolean>;
   beginScan(callbackDeviceFound: (device: Device) => void): Promise<boolean>;
   stopScan(): void;
@@ -17,6 +30,7 @@ interface BTConnected {
   bleManager: BleManager;
   status: "CONNECTED";
   device: Device;
+  deviceRef: MutableRefObject<Device | null>;
   disconnect(): Promise<void>;
 }
 
@@ -43,6 +57,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
   }, []);
 
   const [btDevice, setBtDevice] = useState<Device | null>(null);
+  const deviceRef = useRef<Device | null>(null);
 
   let btObject: BluetoothContext;
 
@@ -51,10 +66,12 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
       bleManager: bleManager,
       status: "DISCONNECTED",
       device: null,
+      deviceRef,
       connect: async (device) => {
         const fail = (message: string) => {
           ToastAndroid.showWithGravity(message, 3000, ToastAndroid.BOTTOM);
           setBtDevice(null);
+          deviceRef.current = null;
           return false;
         };
 
@@ -62,13 +79,25 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
 
         if (!connectedDevice) return fail("Dispositivo não encontrado.");
 
+        // Enviar StillAlive periódico para que o hardware não considere que a conexão foi perdida
+        const timer = setInterval(() => {
+          device.writeCharacteristicWithoutResponseForService(
+            SERVICE_UUID,
+            CONTROL_UUID,
+            "AQA=" // 0x0100, code=StillAlive extraData=00
+          );
+        }, 250);
+
         device.onDisconnected((error, device) => {
           console.info(`Bluetooth device ${device.id} disconnected, error=`, error);
 
+          clearInterval(timer);
           setBtDevice(null);
+          deviceRef.current = null;
         });
 
         setBtDevice(device);
+        deviceRef.current = device;
 
         return true;
       },
@@ -76,6 +105,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
         const fail = (message: string) => {
           ToastAndroid.showWithGravity(message, 3000, ToastAndroid.BOTTOM);
           setBtDevice(null);
+          deviceRef.current = null;
           return false;
         };
 
@@ -112,9 +142,11 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
       bleManager: bleManager!,
       status: "CONNECTED",
       device: btDevice,
+      deviceRef,
       disconnect: async () => {
         await btDevice?.cancelConnection();
         setBtDevice(null);
+        deviceRef.current = null;
       }
     };
   }
