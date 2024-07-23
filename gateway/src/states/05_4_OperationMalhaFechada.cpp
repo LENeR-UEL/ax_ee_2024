@@ -23,7 +23,7 @@ void onOperationMalhaFechadaLoop()
 {
     long now = millis();
 
-    if (!espBle.isConnected())
+    if (!bluetoothIsConnected())
     {
         ESP_LOGE(TAG, "Conexão Bluetooth perdida!");
         stateManager.switchTo(StateKind::OperationStop);

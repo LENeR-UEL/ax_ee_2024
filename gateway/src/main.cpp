@@ -17,26 +17,19 @@ StateManager stateManager;
 FlagTrigger trigger;
 Data data;
 
-void onBluetoothControl(uint16_t fullPayload)
-{
-  BluetoothControlCode code = (BluetoothControlCode)(fullPayload & 0x00FF);
-  uint8_t extraData = (fullPayload & 0xFF00) >> 8;
-
-  ESP_LOGI(TAG, "Control! Code=%X ExtraData=%d\n", code, extraData);
-
-  stateManager.onBLEControl(code, extraData);
-}
-
 void setup()
 {
-  espBle.onControlReceivedCallback = &onBluetoothControl;
-
   Serial.begin(115200);
   scaleBeginOrDie();
-  espBle.startOrDie();
+  bluetoothSetup();
   twaiStart();
 
   stateManager.setup(StateKind::Disconnected);
+
+  bluetoothSetControlCallback([](BluetoothControlCode code, uint8_t extraData)
+                              {
+    ESP_LOGI(TAG, "Control! Code=%X ExtraData=%d\n", code, extraData);
+    stateManager.onBLEControl(code, extraData); });
 }
 
 void loop()
@@ -46,8 +39,8 @@ void loop()
   data.weightL = scaleGetWeightL();
   data.weightR = scaleGetWeightR();
 
-  espBle.Update();
-  digitalWrite(ONBOARD_LED, espBle.isConnected() ? HIGH : LOW);
+  bluetoothLoop();
+  digitalWrite(ONBOARD_LED, bluetoothIsConnected() ? HIGH : LOW);
 
   // Decodar todas as mensagens na fila do CAN
   TwaiReceivedMessage twaiMessage;
@@ -60,5 +53,5 @@ void loop()
   stateManager.loop();
 
   // Feedback para o telefone
-  data.sendToBle(espBle);
+  data.sendToBle();
 }

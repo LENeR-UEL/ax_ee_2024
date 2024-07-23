@@ -46,6 +46,12 @@ void onOperationStopLoop()
     data.mainOperationStateInformApp[3] = 0;
     data.mainOperationStateInformApp[4] = 0;
     data.mainOperationStateInformApp[5] = 0;
+
+    if (!bluetoothIsConnected() && data.pwmFeedback == 0)
+    {
+        ESP_LOGI(TAG, "Bluetooth desconectado e PWM = 0, saindo da etapa de parada.");
+        stateManager.switchTo(StateKind::Disconnected);
+    }
 }
 
 void onOperationStopTWAIMessage(TwaiReceivedMessage *receivedMessage)
