@@ -125,8 +125,34 @@ export default function ParameterSetup() {
         </View>
         <Text>
           Durante a curva de subida, o PWM diminuirá até 0 em até
-          {status.parameters.gradualDecreaseTime} ms.
+          {" " + status.parameters.gradualDecreaseTime} ms.
         </Text>
+      </GroupBox>
+      <GroupBox title="Ganho do estimulador">
+        <Text style={{ marginBottom: 8 }}>
+          No final da parte de operação, ao diminuir o PWM até zerar, especifique o tempo total de
+          curva.
+        </Text>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={{ paddingHorizontal: 16 }}>
+            {(status.parameters.gainCoefficient / 100).toFixed(2)}
+          </Text>
+          <Slider
+            step={5}
+            minimumValue={20}
+            maximumValue={120}
+            value={status.parameters.gainCoefficient}
+            onValueChange={(v) => {
+              hapticFeedbackControlLight();
+              sendControl({
+                controlCode: "ParameterSetup_SetGainCoefficient",
+                waitForResponse: false,
+                data: Math.floor(v & 0xff)
+              });
+            }}
+          />
+        </View>
+        <Text style={{ fontWeight: "bold" }}>Configuração crítica.</Text>
       </GroupBox>
       <Text style={{ paddingHorizontal: 12 }}>
         Os parâmetros serão salvos na memória do hardware Gateway.
