@@ -3,17 +3,18 @@
 #include <cstdint>
 #include <ArduinoBLE.h>
 
-extern BLEService service;
-
-extern BLECharacteristic characteristicStatusFeedback;
-extern BLEShortCharacteristic characteristicControl;
-
 enum class BluetoothControlCode
 {
     /**
      * Invoca um reset no gateway e no estimulador.
      */
     FirmwareInvokeReset = 0x00,
+
+    /**
+     * Enviado pelo aplicativo constantemente (50 hz).
+     * O gateway deve considerar a conexão perdida caso a última mensagem StillAlive tenha ocorrido a mais de 1000ms.
+     */
+    StillAlive = 0x01,
 
     MESECollecter_GoBackToParameterSetup = 0x20,
     MESECollecter_IncreaseOnce = 0x21,
@@ -79,30 +80,10 @@ typedef struct __attribute__((__packed__))
     uint8_t mainOperationStateInformApp[6];
 } BleStatusPacket;
 
-/// Bluetooth class for handling Bluetooth operations
-class Bluetooth
-{
-private:
-    const char *AdvertisingName; ///< Advertising name for Bluetooth device
+typedef void (*BluetoothControlCallback)(BluetoothControlCode code, uint8_t extraData);
 
-public:
-    /// Callback when the phone writes to the Control characteristic.
-    void (*onControlReceivedCallback)(uint16_t fullPayload);
-
-    static void Update();
-
-    /// Method to start the Bluetooth service
-    /// \return True if it started successfully
-    void startOrDie();
-
-    /// Method to check if the Bluetooth device is connected
-    /// \return True if connected, false otherwise
-    static bool isConnected();
-
-    /// Method to write status data to the Bluetooth device
-    void writeStatusData(BleStatusPacket *packet);
-
-    explicit Bluetooth(const char *advertisingName);
-};
-
-extern Bluetooth espBle;
+void bluetoothSetup();
+void bluetoothLoop();
+bool bluetoothIsConnected();
+void bluetoothWriteStatusData(BleStatusPacket *packet);
+void bluetoothSetControlCallback(BluetoothControlCallback callback);

@@ -1,10 +1,11 @@
 #include "Data.h"
 #include "string.h"
 #include <Arduino.h>
+#include "Bluetooth/Bluetooth.h"
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d", variable)
 
-// #define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
+#define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
 
 static const char *TAG = "Data";
 
@@ -30,9 +31,9 @@ void Data::reset()
   this->parameterSetup.gainCoefficient = 100;
 }
 
-void Data::sendToBle(const Bluetooth &ble)
+void Data::sendToBle()
 {
-  if (!espBle.isConnected())
+  if (!bluetoothIsConnected())
   {
     return;
   }
@@ -65,7 +66,7 @@ void Data::sendToBle(const Bluetooth &ble)
   memcpy(&status.parameterSetup, &this->parameterSetup,
          sizeof(this->parameterSetup));
 
-  espBle.writeStatusData(&status);
+  bluetoothWriteStatusData(&status);
 }
 
 void Data::debugPrintAll()

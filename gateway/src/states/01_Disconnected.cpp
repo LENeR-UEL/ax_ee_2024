@@ -17,7 +17,7 @@ void onDisconnectedStateEnter()
 void onDisconnectedStateLoop()
 {
     // Ao conectar, sair do estado Disconnected
-    if (espBle.isConnected())
+    if (bluetoothIsConnected())
     {
         ESP_LOGI(TAG, "Conexão Bluetooth obtida!");
         stateManager.switchTo(StateKind::ParameterSetup);

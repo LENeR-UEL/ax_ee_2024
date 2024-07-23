@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include "Twai/Twai.h"
-#include "Bluetooth/Bluetooth.h"
 
 #define OVBOXPin 34
 
@@ -45,7 +44,7 @@ public:
 
     void reset();
 
-    void sendToBle(const Bluetooth &ble);
+    void sendToBle();
 
     void debugPrintAll();
 

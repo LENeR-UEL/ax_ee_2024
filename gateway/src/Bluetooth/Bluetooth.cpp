@@ -2,36 +2,70 @@
 #include <esp_log.h>
 
 static const char *TAG = "Bluetooth";
+static const uint8_t completeRawAdvertisingData[] = {0x02, 0x01, 0x06};
+static BLEService service("ab04");
+static BLECharacteristic characteristicStatusFeedback("ff01", BLERead | BLENotify,
+                                                      sizeof(BleStatusPacket));
+static BLEShortCharacteristic characteristicControl("ff0f", BLEWriteWithoutResponse |
+                                                                BLEWrite | BLENotify);
 
-BLEService service("ab04");
-BLECharacteristic characteristicStatusFeedback("ff01", BLERead | BLENotify,
-                                               sizeof(BleStatusPacket));
-BLEShortCharacteristic characteristicControl("ff0f", BLEWriteWithoutResponse |
-                                                         BLEWrite | BLENotify);
+static BluetoothControlCallback controlCallback = nullptr;
 
-Bluetooth espBle("Gateway LENeR");
+static unsigned long lastAlivePacketTime = 0;
+static const unsigned long TIMEOUT = 3000;
+static bool deviceReady = false;
 
-// Advertising parameters should have a global scope. Do NOT define them in
-// 'setup' or in 'loop'
-const uint8_t completeRawAdvertisingData[] = {0x02, 0x01, 0x06};
-
-Bluetooth::Bluetooth(const char *advertisingName) {
-  this->AdvertisingName = advertisingName;
-  this->onControlReceivedCallback = nullptr;
+void onDeviceConnected(BLEDevice device)
+{
+  ESP_LOGI(TAG, "Conexão Bluetooth estabelecida!");
+  lastAlivePacketTime = millis() + 5000;
+  deviceReady = false;
 }
 
-void Bluetooth::Update() { BLE.poll(); }
+void onControlWritten(BLEDevice device, BLECharacteristic characteristic)
+{
+  uint16_t fullPayload = characteristicControl.value();
 
-bool Bluetooth::isConnected() { return BLE.connected(); }
+  BluetoothControlCode code = (BluetoothControlCode)(fullPayload & 0x00FF);
+  uint8_t extraData = (fullPayload & 0xFF00) >> 8;
 
-void Bluetooth::startOrDie() {
+  unsigned long now = millis();
+
+  if (deviceReady && now - lastAlivePacketTime >= TIMEOUT)
+  {
+    // Tarde demais, a conexão já está considerada terminada. Não notificar o resto do firmware.
+    ESP_LOGE(TAG, "Aplicativo enviou um comando após timeout de conexão (%lu ms após timeout). A conexão já foi considerada terminada.", now - lastAlivePacketTime);
+    return;
+  }
+
+  if (code == BluetoothControlCode::StillAlive)
+  {
+    lastAlivePacketTime = now;
+    deviceReady = true;
+  }
+
+  if (controlCallback != nullptr)
+  {
+    controlCallback(code, extraData);
+  }
+}
+
+void bluetoothSetup()
+{
   ESP_LOGI(TAG, "BLE setup");
-
-  while (!BLE.begin()) {
+  while (!BLE.begin())
+  {
     Serial.println("failed to initialize BLE!");
   }
 
-  ESP_LOGI(TAG, "BLE begin OK");
+  // O tempo de conexão é o tempo entre um evento de rádio numa determinada ligação e o próximo
+  // evento de rádio na mesma ligação. Os dispositivos BLE acordam neste intervalo no início da
+  // conexão (e podem renegociá-lo mais tarde). Isto significa que, em cada intervalo de
+  // ligação, a central envia um pacote (mesmo que seja um pacote vazio) e o periférico liga o seu
+  // rádio e fica à escuta. Se houver dados, os pacotes são enviados durante algum tempo, depois o
+  // rádio desliga-se até ao início do próximo evento de rádio (que é um intervalo de ligação após
+  // o início do último).
+  BLE.setConnectionInterval(9, 12); // Taxa de atualizaçao entre 9 e 12 ms.
 
   service.addCharacteristic(characteristicStatusFeedback);
   service.addCharacteristic(characteristicControl);
@@ -51,26 +85,45 @@ void Bluetooth::startOrDie() {
 
   // Build scan response data packet
   BLEAdvertisingData scanData;
-  scanData.setLocalName(this->AdvertisingName);
+  scanData.setLocalName("LENeR Gateway");
 
   BLE.setScanResponseData(scanData);
   BLE.advertise();
-
   ESP_LOGI(TAG, "Advertising! Bluetooth service UUID is %s", service.uuid());
 
-  characteristicControl.setEventHandler(
-      BLECharacteristicEvent::BLEWritten,
-      [](BLEDevice device, BLECharacteristic characteristic) {
-        uint16_t fullPayload = characteristicControl.value();
-
-        if (espBle.onControlReceivedCallback != nullptr) {
-          espBle.onControlReceivedCallback(fullPayload);
-        }
-      });
-
+  BLE.setEventHandler(BLEDeviceEvent::BLEConnected, onDeviceConnected);
+  characteristicControl.setEventHandler(BLECharacteristicEvent::BLEWritten, onControlWritten);
   characteristicControl.subscribe();
 }
 
-void Bluetooth::writeStatusData(BleStatusPacket *packet) {
+bool libConnected = false;
+
+void bluetoothLoop()
+{
+  BLE.poll();
+  libConnected = BLE.connected();
+
+  unsigned long now = millis();
+  if (libConnected && deviceReady && now - lastAlivePacketTime >= TIMEOUT)
+  {
+    ESP_LOGW(TAG, "O dispositivo continua conectado para a ArduinoBLE, mas passou o tempo de timeout de StillAlive. Desconectando...");
+    BLE.disconnect();
+  }
+}
+
+bool bluetoothIsConnected()
+{
+  unsigned long now = millis();
+  return libConnected && deviceReady && now - lastAlivePacketTime < TIMEOUT;
+}
+
+void bluetoothWriteStatusData(BleStatusPacket *packet)
+{
+
   characteristicStatusFeedback.writeValue(packet, sizeof(BleStatusPacket));
+}
+
+void bluetoothSetControlCallback(BluetoothControlCallback callback)
+{
+  controlCallback = callback;
 }

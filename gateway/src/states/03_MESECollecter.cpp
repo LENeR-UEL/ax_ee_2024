@@ -49,9 +49,9 @@ void onMESECollecterStateEnter()
 
 void onMESECollecterStateLoop()
 {
-
-    if (!espBle.isConnected())
+    if (!bluetoothIsConnected())
     {
+        ESP_LOGE(TAG, "Conexão Bluetooth perdida!");
         stateManager.switchTo(StateKind::Disconnected);
         return;
     }

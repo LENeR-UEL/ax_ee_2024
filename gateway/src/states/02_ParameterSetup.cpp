@@ -50,13 +50,12 @@ void onParameterSetupStateEnter()
 
 void onParameterSetupStateLoop()
 {
-    if (!espBle.isConnected())
+    if (!bluetoothIsConnected())
     {
+        ESP_LOGE(TAG, "Conexão Bluetooth perdida!");
         stateManager.switchTo(StateKind::Disconnected);
         return;
     }
-
-    ESP_LOGI(TAG, "Loop");
 
     long now = millis();
     if (now - lastTwaiSendTime >= 15)
