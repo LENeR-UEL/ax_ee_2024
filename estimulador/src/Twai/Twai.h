@@ -21,7 +21,8 @@ enum TwaiReceivedMessageKind : uint8_t
     Mese = 0x71,
     MeseMax = 0x72,
     Setpoint = 0x81,
-    Trigger = 0x82
+    Trigger = 0x82,
+    SetGainCoefficient = 0xA1
 };
 
 struct TwaiReceivedMessage

@@ -28,7 +28,7 @@ void Data::reset()
   memset(this->mainOperationStateInformApp, 0,
          sizeof(this->mainOperationStateInformApp));
   memset(&this->parameterSetup, 0, sizeof(this->parameterSetup));
-  this->parameterSetup.gainCoefficient = 100;
+  this->parameterSetup.gainCoefficient = 50;
 }
 
 void Data::sendToBle()
