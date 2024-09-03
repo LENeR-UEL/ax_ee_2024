@@ -1,10 +1,10 @@
-import { ToastAndroid, View } from "react-native";
 import Slider from "@react-native-community/slider";
+import { ToastAndroid, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { Button, Text } from "react-native-paper";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
-import GroupBox from "./GroupBox";
 import { hapticFeedbackControl, hapticFeedbackControlLight } from "../../haptics/HapticFeedback";
-import { ScrollView } from "react-native-gesture-handler";
+import GroupBox from "./GroupBox";
 
 export default function ParameterSetup() {
   const [status, sendControl] = useFirmwareStatus();
@@ -129,10 +129,7 @@ export default function ParameterSetup() {
         </Text>
       </GroupBox>
       <GroupBox title="Ganho do estimulador">
-        <Text style={{ marginBottom: 8 }}>
-          No final da parte de operação, ao diminuir o PWM até zerar, especifique o tempo total de
-          curva.
-        </Text>
+        <Text style={{ marginBottom: 8 }}>Indica o coeficiente de ganho do estimulador.</Text>
         <View style={{ flexDirection: "column" }}>
           <Text style={{ paddingHorizontal: 16 }}>
             {(status.parameters.gainCoefficient / 100).toFixed(2)}
