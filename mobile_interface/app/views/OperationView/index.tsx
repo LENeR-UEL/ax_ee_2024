@@ -16,6 +16,7 @@ import { useNavigation } from "../../hooks/useNavigation";
 import { useBeepSound } from "../../hooks/useBeepSound/useBeepSound";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 import { useBluetoothConnection } from "../../bluetooth/Context";
+import TriggerStatus from "./TriggerStatus";
 
 export default function OperationView() {
   const navigator = useNavigation();
@@ -258,8 +259,9 @@ export default function OperationView() {
             default:
               return "";
           }
-        }) + `\n\nTrigger EEG: ${status.statusFlags.isEEGFlagSet ? "Ativo" : "Inativo"}`}
+        })}
       </Text>
+      <TriggerStatus active={status.statusFlags.isEEGFlagSet} />
     </ScrollView>
   );
 }
