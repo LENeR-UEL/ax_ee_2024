@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
 import { Text, FAB, Button } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
-import { WeightIndicationBar } from "./WeightIndicatorBar";
+import { OverlayBar, WeightIndicationBar } from "./WeightIndicatorBar";
 import { useEffect, useRef } from "react";
 import { FirmwareState, useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import {
@@ -169,6 +169,18 @@ export default function OperationView() {
       .then(() => hapticFeedbackControl());
   }, [status.mainOperationState?.state]);
 
+  const indicatorBars: OverlayBar[] = [
+    { label: "Setpoint", showAtWeight: status.setpoint, color: "#C8E6C9" }
+  ];
+
+  if (status.mainOperationState?.state === FirmwareState.OperationStart) {
+    indicatorBars.push({
+      label: "Início",
+      showAtWeight: status.setpoint * 0.2,
+      color: "#ff0000"
+    });
+  }
+
   return (
     <ScrollView>
       <View
@@ -183,9 +195,9 @@ export default function OperationView() {
           setpointValue={status.setpoint}
           onSetpointChange={onSetpointChange}
           fillColor="#2E7D32"
-          setpointColor="#C8E6C9"
-          hideSetpointText={true}
+          hideBarText
           style={styles.weightBar}
+          bars={indicatorBars}
         />
         <WeightIndicationBar
           textTop="DIR"
@@ -194,9 +206,8 @@ export default function OperationView() {
           setpointValue={status.setpoint}
           onSetpointChange={onSetpointChange}
           fillColor="#9E9D24"
-          setpointColor="#F0F4C3"
-          hideSetpointText={false}
           style={styles.weightBar}
+          bars={indicatorBars}
         />
       </View>
       <View style={StyleSheet.compose(styles.group, styles.displaysGroup)}>
@@ -228,7 +239,7 @@ export default function OperationView() {
           const state = status.mainOperationState;
           switch (state?.state) {
             case FirmwareState.OperationStart: {
-              return `Aguardando peso atingir 20% do setpoint (${weightTotal} / ${state.targetWeight} kg)`;
+              return `Aguardando peso atingir a barra de início`;
             }
             case FirmwareState.OperationGradualIncrease:
               return `Incremento manual, de 0 até MESE (${status.pwm} → ${status.mese} μs)\nTimer: ${state.pwmIncreaseTimeDelta} ms`;
@@ -289,7 +300,7 @@ const styles = StyleSheet.create({
   },
   weightBarsWrapper: {
     marginTop: 16,
-    gap: 0
+    gap: 4
   },
   statusText2: {
     textAlign: "center",

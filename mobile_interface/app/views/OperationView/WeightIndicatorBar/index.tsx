@@ -3,15 +3,21 @@ import { Text } from "react-native-paper";
 import { run } from "../../../utils/run";
 import { useSlideGesture } from "./useSlideGesture";
 
+export interface OverlayBar {
+  label?: string;
+  showAtWeight: number;
+  color: string;
+}
+
 interface Props {
   style?: StyleProp<ViewStyle> | StyleProp<ViewStyle>[];
   textTop?: string;
   maximumValue: number;
   value: number;
+  bars: OverlayBar[];
   setpointValue: number;
   onSetpointChange(newValue: number): void;
-  setpointColor: string;
-  hideSetpointText: boolean;
+  hideBarText?: boolean;
   fillColor: string;
 }
 
@@ -33,22 +39,31 @@ export function WeightIndicationBar(props: Props) {
         })}
         pointerEvents="none"
       />
-      {run(() => {
-        const setpointHeight = (props.setpointValue / props.maximumValue) * 100;
+      {props.bars.map((bar, index) => {
+        const setpointHeight = (bar.showAtWeight / props.maximumValue) * 100;
 
         return (
           <View
-            style={StyleSheet.compose(styles.setpointBar, {
+            key={index}
+            style={StyleSheet.compose(styles.bar, {
               bottom: `${setpointHeight}%`,
-              backgroundColor: props.setpointColor
+              backgroundColor: bar.color
             })}
             pointerEvents="none">
-            {!props.hideSetpointText && (
+            {props.hideBarText && bar.label && (
               <Text
-                style={StyleSheet.compose(styles.setpointText, {
-                  color: props.setpointColor
+                style={StyleSheet.compose(styles.setpointLabelText, {
+                  color: bar.color
                 })}>
-                {(Math.round(props.setpointValue * 100) / 100).toFixed(0)} kg
+                {bar.label}
+              </Text>
+            )}
+            {!props.hideBarText && (
+              <Text
+                style={StyleSheet.compose(styles.setpointValueText, {
+                  color: bar.color
+                })}>
+                {(Math.round(bar.showAtWeight * 100) / 100).toFixed(0)} kg
               </Text>
             )}
           </View>
@@ -69,7 +84,7 @@ const styles = StyleSheet.create({
     width: 72,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 0,
+    borderRadius: 8,
     overflow: "hidden"
   },
   boxFill: {
@@ -80,7 +95,7 @@ const styles = StyleSheet.create({
     height: 0,
     backgroundColor: "darkred"
   },
-  setpointBar: {
+  bar: {
     position: "absolute",
     left: 0,
     bottom: 0,
@@ -88,9 +103,15 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "red"
   },
-  setpointText: {
+  setpointLabelText: {
     position: "absolute",
-    right: "0%",
+    left: 4,
+    top: -16,
+    fontFamily: "monospace"
+  },
+  setpointValueText: {
+    position: "absolute",
+    right: 4,
     top: -16,
     fontFamily: "monospace"
   },
