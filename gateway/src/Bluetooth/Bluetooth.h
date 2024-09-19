@@ -11,7 +11,7 @@ enum class BluetoothControlCode
     FirmwareInvokeReset = 0x00,
 
     /**
-     * Enviado pelo aplicativo constantemente (50 hz).
+     * Enviado pelo aplicativo constantemente.
      * O gateway deve considerar a conexão perdida caso a última mensagem StillAlive tenha ocorrido a mais de 1000ms.
      */
     StillAlive = 0x01,
