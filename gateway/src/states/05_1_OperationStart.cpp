@@ -15,6 +15,7 @@ void onOperationStartEnter()
   lastWeightClassChangeTime = millis();
   weightClassTimer = 0;
   data.meseMax = data.mese * 1.2f;
+  data.setpoint = data.collectedWeight * 0.5f;
 }
 
 void onOperationStartLoop()

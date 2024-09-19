@@ -127,7 +127,6 @@ void onMESECollecterStateBLEControl(BluetoothControlCode code, uint8_t extraData
         isWindingDown = true;
         data.mese = requestedPwm;
         data.meseMax = requestedPwm * 1.2f;
-        data.setpoint = requestedPwm * 0.5f;
         break;
     case BluetoothControlCode::MESECollecter_Complete:
         stateManager.switchTo(StateKind::ParallelWeight);
