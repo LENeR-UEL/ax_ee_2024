@@ -48,7 +48,7 @@ void onOperationTransitionLoop()
         twaiSend(TwaiSendMessageKind::ResidualWeightTotal, scaleGetTotalWeight());
 
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.mese);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+        twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetTotalWeight());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);

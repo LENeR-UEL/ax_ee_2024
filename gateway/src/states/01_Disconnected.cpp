@@ -28,12 +28,12 @@ void onDisconnectedStateLoop()
     if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
+        twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
         twaiSend(TwaiSendMessageKind::Setpoint, 0);
         twaiSend(TwaiSendMessageKind::Mese, 0);
         twaiSend(TwaiSendMessageKind::MeseMax, 0);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
         twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
     }
 }

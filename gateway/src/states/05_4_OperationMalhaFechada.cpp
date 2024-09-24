@@ -51,8 +51,7 @@ void onOperationMalhaFechadaLoop()
     {
         lastTwaiSendTime = now;
         // Malha fechada; PWM enviado não importa; é calculado pelo firmware do estimulador
-        // twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaFechadaOperacao);
+        twaiSend(TwaiSendMessageKind::UseMalhaFechada, 0);
         twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);

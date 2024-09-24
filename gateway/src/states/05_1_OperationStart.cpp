@@ -47,7 +47,7 @@ void onOperationStartLoop()
   {
     lastTwaiSendTime = now;
     twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
-    twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+    twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
     twaiSend(TwaiSendMessageKind::WeightTotal,
              scaleGetWeightL() + scaleGetWeightR());
     twaiSend(TwaiSendMessageKind::Setpoint, 0);

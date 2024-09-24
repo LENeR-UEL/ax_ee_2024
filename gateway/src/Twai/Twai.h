@@ -13,13 +13,16 @@
 
 enum TwaiSendMessageKind : uint8_t
 {
+  FirmwareInvokeReset = 0x01,
+  GatewayResetHappened = 0x02,
   WeightTotal = 0x51,
   ResidualWeightTotal = 0x52,
   SetRequestedPwm = 0x61,
   Mese = 0x71,
   MeseMax = 0x72,
   Setpoint = 0x81,
-  Trigger = 0x82,
+  UseMalhaAberta = 0x82,
+  UseMalhaFechada = 0x83,
   SetGainCoefficient = 0xA1
 };
 

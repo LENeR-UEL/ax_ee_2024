@@ -11,8 +11,6 @@ static const char *TAG = "main";
 StateManager stateManager;
 Data data;
 
-TwaiReceivedMessage latestMessage;
-
 void setup()
 {
   dataReset();
@@ -30,23 +28,19 @@ void setup()
   digitalWrite(32, LOW);
   digitalWrite(33, LOW);
 
-  stateManager.setup(StateKind::WorkingMalhaFechadaState);
+  stateManager.setup(StateKind::WorkingMalhaAbertaState);
 }
 
 void loop()
 {
   // Receber todas as mensagens na fila do CAN
+  TwaiReceivedMessage latestMessage;
   while (twaiReceive(&latestMessage) == ESP_OK)
   {
     stateManager.onTWAIMessage(&latestMessage);
   }
 
-  stateManager.loop();
+  // twaiSend(TwaiSendMessageKind::PwmFeedbackEstimulador, 0);
 
-  DEBUG(data.pulseWidth);
-  DEBUG(data.weightTotal);
-  DEBUG(data.requestedPwm);
-  DEBUG(data.meseMax);
-  DEBUG(data.setpointKg);
-  DEBUG(data.residualWeightTotal);
+  stateManager.loop();
 }

@@ -6,9 +6,11 @@
 
 static unsigned long lastDecreaseTime = 0;
 static uint16_t currentPulseWidth = 0;
+static bool gatewayResetHappened = false;
 
 void onGatewayDownSafetyStopStateEnter()
 {
+    gatewayResetHappened = false;
     lastDecreaseTime = millis();
     currentPulseWidth = data.requestedPwm;
 }
@@ -28,12 +30,30 @@ void onGatewayDownSafetyStopStateLoop()
         }
 
         lastDecreaseTime = now_ms;
-        ESP_LOGW(stateManager.current->TAG, "Barramento caiu. PWM: %u\n", (unsigned int)requestedPwm);
+        ESP_LOGW(stateManager.current->TAG, "Barramento caiu. PWM: %u\n", (unsigned int)currentPulseWidth);
+    }
+
+    if (gatewayResetHappened && currentPulseWidth == 0)
+    {
+        ESP_LOGI(stateManager.current->TAG, "Recuperando...");
+        esp_restart();
     }
 
     modulateLoop(currentPulseWidth);
 }
 
-void onGatewayDownSafetyStopStateTWAIMessage(TwaiReceivedMessage *receivedMessage) {}
+/**
+ * Talvez o barramento tenha recuperado. Lidar com pedidos de reset.
+ */
+void onGatewayDownSafetyStopStateTWAIMessage(TwaiReceivedMessage *receivedMessage)
+{
+    switch (receivedMessage->Kind)
+    {
+    case TwaiReceivedMessageKind::GatewayResetHappened:
+        ESP_LOGI(stateManager.current->TAG, "O Gateway reiniciou.");
+        gatewayResetHappened = true;
+        break;
+    }
+}
 
 void onGatewayDownSafetyStopStateExit() {}

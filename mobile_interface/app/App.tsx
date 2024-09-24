@@ -17,16 +17,16 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <BluetoothProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <NavigationContainer ref={navigator}>
+      <NavigationContainer ref={navigator}>
+        <BluetoothProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <PaperProvider theme={theme}>
               <StatusBar backgroundColor={theme.colors.elevation.level2} style="dark" />
               <Router />
             </PaperProvider>
-          </NavigationContainer>
-        </GestureHandlerRootView>
-      </BluetoothProvider>
+          </GestureHandlerRootView>
+        </BluetoothProvider>
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }

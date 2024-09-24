@@ -11,6 +11,9 @@ import requestBluetoothPermission from "./requestPermission";
 import { BleManager, Device, ScanMode, State, fullUUID } from "react-native-ble-plx";
 import connectToDevice from "./connectToDevice";
 import { ToastAndroid } from "react-native";
+import { useNavigation } from "../hooks/useNavigation";
+import { CommonActions } from "@react-navigation/native";
+import { ScreenNames } from "../Routing";
 
 export const SERVICE_UUID = fullUUID("ab04");
 export const STATUS_UUID = fullUUID("ff01");
@@ -151,6 +154,19 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
       }
     };
   }
+
+  const navigator = useNavigation();
+  const previousHasDeviceRef = useRef(false);
+  if (previousHasDeviceRef.current && btDevice === null) {
+    navigator.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: "Bluetooth" satisfies ScreenNames[number] }]
+      })
+    );
+    alert("Conexão Bluetooth caiu. Não é possível operar o aplicativo.");
+  }
+  previousHasDeviceRef.current = btDevice !== null;
 
   return <btContext.Provider value={btObject}>{props.children}</btContext.Provider>;
 };

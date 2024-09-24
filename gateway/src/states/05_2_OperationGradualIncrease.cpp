@@ -49,7 +49,7 @@ void onOperationGradualIncreaseLoop()
     if (pwmIncreaseTimeDelta >= gradualIncreaseInterval)
     {
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + 1);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+        twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
         lastStepTime = now;
     }
 

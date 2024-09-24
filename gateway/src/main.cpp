@@ -14,7 +14,6 @@
 static const char *TAG = "main";
 
 StateManager stateManager;
-FlagTrigger trigger;
 Data data;
 
 void setup()
@@ -23,6 +22,8 @@ void setup()
   scaleBeginOrDie();
   bluetoothSetup();
   twaiStart();
+
+  twaiSend(TwaiSendMessageKind::GatewayResetHappened, 0);
 
   stateManager.setup(StateKind::Disconnected);
 

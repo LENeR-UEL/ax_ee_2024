@@ -57,14 +57,18 @@ void onWorkingMalhaAbertaStateTWAIMessage(TwaiReceivedMessage *receivedMessage)
     case TwaiReceivedMessageKind::Setpoint:
         data.setpointKg = receivedMessage->ExtraData;
         break;
-    case TwaiReceivedMessageKind::Trigger:
-        // data.flagTrigger = receivedMessage->ExtraData > 0 ? FlagTrigger::MalhaFechadaOperacao : FlagTrigger::MalhaAberta;
+    case TwaiReceivedMessageKind::UseMalhaFechada:
+        stateManager.switchTo(StateKind::WorkingMalhaFechadaState);
         break;
     case TwaiReceivedMessageKind::Mese:
         data.mese = receivedMessage->ExtraData;
         break;
     case TwaiReceivedMessageKind::SetGainCoefficient:
         data.gainCoefficient = receivedMessage->ExtraData / 100.0f;
+        break;
+    case TwaiReceivedMessageKind::GatewayResetHappened:
+        ESP_LOGE(stateManager.current->TAG, "O Gateway reiniciou inesperadamente.");
+        stateManager.switchTo(StateKind::GatewayDownSafetyStopState);
         break;
     }
 }

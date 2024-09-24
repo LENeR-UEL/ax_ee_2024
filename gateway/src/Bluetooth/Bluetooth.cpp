@@ -42,7 +42,6 @@ void onControlWritten(BLEDevice device, BLECharacteristic characteristic)
   {
     lastAlivePacketTime = now;
     deviceReady = true;
-    Serial.print("Got still alive packet.");
   }
 
   if (controlCallback != nullptr)
