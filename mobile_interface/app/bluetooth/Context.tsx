@@ -81,7 +81,8 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
 
         // Enviar StillAlive periódico para que o hardware não considere que a conexão foi perdida
         const timer = setInterval(() => {
-          device.writeCharacteristicWithoutResponseForService(
+          console.debug("Sending still alive packet...");
+          device.writeCharacteristicWithResponseForService(
             SERVICE_UUID,
             CONTROL_UUID,
             "AQA=" // 0x0100, code=StillAlive extraData=00
