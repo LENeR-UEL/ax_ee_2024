@@ -107,7 +107,8 @@ void bluetoothLoop()
   if (libConnected && deviceReady && now - lastAlivePacketTime >= TIMEOUT)
   {
     ESP_LOGW(TAG, "O dispositivo continua conectado para a ArduinoBLE, mas passou o tempo de timeout de StillAlive. Desconectando...");
-    BLE.disconnect();
+    ESP_LOGW(TAG, "Desconexão do mecanismo StillAlive foi removido do código.");
+    // BLE.disconnect();
   }
 }
 

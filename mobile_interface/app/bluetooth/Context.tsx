@@ -61,6 +61,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
 
   const [btDevice, setBtDevice] = useState<Device | null>(null);
   const deviceRef = useRef<Device | null>(null);
+  const disconnectReasonRef = useRef<null | "ExplicitDisconnectByUser">(null);
 
   let btObject: BluetoothContext;
 
@@ -101,6 +102,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
         });
 
         setBtDevice(device);
+        disconnectReasonRef.current = null;
         deviceRef.current = device;
 
         return true;
@@ -148,6 +150,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
       device: btDevice,
       deviceRef,
       disconnect: async () => {
+        disconnectReasonRef.current = "ExplicitDisconnectByUser";
         await btDevice?.cancelConnection();
         setBtDevice(null);
         deviceRef.current = null;
@@ -164,7 +167,8 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
         routes: [{ name: "Bluetooth" satisfies ScreenNames[number] }]
       })
     );
-    alert("Conexão Bluetooth caiu. Não é possível operar o aplicativo.");
+    if (disconnectReasonRef.current !== "ExplicitDisconnectByUser")
+      alert("Conexão Bluetooth caiu inesperadamente. Não é possível operar o aplicativo.");
   }
   previousHasDeviceRef.current = btDevice !== null;
 

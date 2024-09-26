@@ -9,12 +9,18 @@ export interface OverlayBar {
   color: string;
 }
 
+export interface OverlayRectangle {
+  weightRange: [number, number];
+  color: string;
+}
+
 interface Props {
   style?: StyleProp<ViewStyle> | StyleProp<ViewStyle>[];
   textTop?: string;
   maximumValue: number;
   value: number;
   bars: OverlayBar[];
+  rectangles: OverlayRectangle[];
   setpointValue: number;
   onSetpointChange(newValue: number): void;
   hideBarText?: boolean;
@@ -39,6 +45,37 @@ export function WeightIndicationBar(props: Props) {
         })}
         pointerEvents="none"
       />
+      {props.rectangles.map((rectangle, index) => {
+        rectangle.weightRange.sort();
+
+        let y = rectangle.weightRange[0];
+        let height = rectangle.weightRange[0] - rectangle.weightRange[1];
+
+        if (height < 0) {
+          height = Math.abs(height);
+          //y = y + height;
+        }
+
+        return (
+          <View
+            key={index}
+            //@ts-ignore
+            style={{
+              position: "absolute",
+              bottom: (y / props.maximumValue) * 100 + "%",
+              left: 0,
+              width: "100%",
+              height: (Math.abs(height) / props.maximumValue) * 100 + "%",
+              backgroundColor: rectangle.color,
+              overflow: "hidden",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+            <Text>Valor do Erro: {height} kg</Text>
+          </View>
+        );
+      })}
       {props.bars.map((bar, index) => {
         const setpointHeight = (bar.showAtWeight / props.maximumValue) * 100;
 
