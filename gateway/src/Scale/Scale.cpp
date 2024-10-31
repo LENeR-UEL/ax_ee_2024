@@ -71,13 +71,6 @@ float scaleGetMeasurement(Scale scaleId)
     return menor;
 }
 
-
-
-
-
-
-
-
 void scaleBeginOrDie()
 {
     ESP_LOGI(TAG, "Scale setup");
@@ -114,12 +107,12 @@ void scaleUpdate()
 
 int scaleGetWeightL()
 {
-    return scaleGetMeasurement(Scale::C) + scaleGetMeasurement(Scale::D);
+    return scaleGetMeasurement(Scale::A) + scaleGetMeasurement(Scale::B);
 }
 
 int scaleGetWeightR()
 {
-    return scaleGetMeasurement(Scale::A) + scaleGetMeasurement(Scale::B);
+    return scaleGetMeasurement(Scale::C) + scaleGetMeasurement(Scale::D);
 }
 
 int scaleGetTotalWeight()
