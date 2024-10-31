@@ -46,15 +46,11 @@ export function WeightIndicationBar(props: Props) {
         pointerEvents="none"
       />
       {props.rectangles.map((rectangle, index) => {
-        rectangle.weightRange.sort();
-
-        let y = rectangle.weightRange[0];
-        let height = rectangle.weightRange[0] - rectangle.weightRange[1];
-
-        if (height < 0) {
-          height = Math.abs(height);
-          //y = y + height;
-        }
+        const y =
+          rectangle.weightRange[1] > rectangle.weightRange[0]
+            ? rectangle.weightRange[0]
+            : rectangle.weightRange[1];
+        const height = Math.abs(rectangle.weightRange[0] - rectangle.weightRange[1]);
 
         return (
           <View

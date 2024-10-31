@@ -237,7 +237,21 @@ export default function OperationView() {
         />
       </View>
       <View style={StyleSheet.compose(styles.group, styles.displaysGroup)}>
-        <StatusDisplay textLeft="PWM" textMain={`${status.pwm}/${status.meseMax}`} textRight="µS" />
+        {run(() => {
+          if (status.mainOperationState?.state === FirmwareState.OperationMalhaFechada) {
+            return (
+              <StatusDisplay
+                textLeft="@@@"
+                textMain={`[${Math.floor(status.meseMax * 0.8)} / ${status.pwm} / ${status.meseMax}]`}
+                textRight="µS"
+              />
+            );
+          } else {
+            return (
+              <StatusDisplay textLeft="Malha Aberta" textMain={`${status.pwm}`} textRight="µS" />
+            );
+          }
+        })}
         <View style={styles.statusDisplayButtons}>
           <Text>MESE máximo: </Text>
           <FAB
