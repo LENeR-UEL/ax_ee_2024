@@ -1,23 +1,21 @@
 #include "Data.h"
+#include "Bluetooth/Bluetooth.h"
 #include "string.h"
 #include <Arduino.h>
-#include "Bluetooth/Bluetooth.h"
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d", variable)
 
-#define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
+// #define DEVELOPMENT_OVERRIDE_OVBOX_INPUT 1
 
 static const char *TAG = "Data";
 
-Data::Data()
-{
+Data::Data() {
   pinMode(OVBOXPin, INPUT);
   this->lastBluetoothSendTime = 0;
   this->reset();
 }
 
-void Data::reset()
-{
+void Data::reset() {
   this->mese = 0;
   this->meseMax = 0;
   this->weightL = 0;
@@ -31,10 +29,8 @@ void Data::reset()
   this->parameterSetup.gainCoefficient = 50;
 }
 
-void Data::sendToBle()
-{
-  if (!bluetoothIsConnected())
-  {
+void Data::sendToBle() {
+  if (!bluetoothIsConnected()) {
     return;
   }
 
@@ -42,8 +38,7 @@ void Data::sendToBle()
   // sobrecarregado Enviamos o payload com o status mais recente a cada N
   // milissegundos.
   unsigned long now = millis();
-  if (now - data.lastBluetoothSendTime < 120)
-  {
+  if (now - data.lastBluetoothSendTime < 120) {
     return;
   }
 
@@ -69,8 +64,7 @@ void Data::sendToBle()
   bluetoothWriteStatusData(&status);
 }
 
-void Data::debugPrintAll()
-{
+void Data::debugPrintAll() {
   ESP_LOGI(TAG, "");
   DEBUG(this->weightL);
   DEBUG(this->weightR);
@@ -82,8 +76,7 @@ void Data::debugPrintAll()
   ESP_LOGI(TAG, "");
 }
 
-bool Data::isOVBoxFlagSet()
-{
+bool Data::isOVBoxFlagSet() {
 #ifdef DEVELOPMENT_OVERRIDE_OVBOX_INPUT
   return true;
 #endif
