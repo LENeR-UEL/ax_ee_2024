@@ -177,7 +177,7 @@ export default function OperationView() {
   previousPwmRef.current = status.pwm;
 
   const indicatorBars: OverlayBar[] = [
-    { label: "Setpoint", showAtWeight: status.setpoint, color: "#C8E6C9" }
+    { label: "Ponto de Fadiga", showAtWeight: status.setpoint, color: "#C8E6C9" }
   ];
 
   if (status.mainOperationState?.state === FirmwareState.OperationStart) {
@@ -241,8 +241,8 @@ export default function OperationView() {
           if (status.mainOperationState?.state === FirmwareState.OperationMalhaFechada) {
             return (
               <StatusDisplay
-                textLeft="@@@"
-                textMain={`[${Math.floor(status.meseMax * 0.8)} / ${status.pwm} / ${status.meseMax}]`}
+                textLeft="~"
+                textMain={`${Math.floor(status.meseMax * 0.8)} | ${status.pwm} | ${status.meseMax}`}
                 textRight="µS"
               />
             );

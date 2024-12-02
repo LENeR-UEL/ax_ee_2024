@@ -10,13 +10,9 @@ static unsigned long lastTwaiRecvTime = 0;
 static int largerPi = 0;
 static int integralErro = 0;
 
-int calculatePulseWidth() {
-  // int erro = data.weightTotal - data.setpointKg * 2;
-  // integralErro += erro;
-
-  // Saturar integralErro em [-50 e 50]
-  // integralErro = max(-50, min(50, integralErro));
-
+int calculatePulseWidth()
+{
+  // O setpoint é setado no aplicativo considerando apenas um dos lados devido à escala das barras. Para o controle, devemos considerar o setpoint "total" das duas barras.
   const int setpoint = data.setpointKg * 2;
 
   int pesoControle =
@@ -28,7 +24,7 @@ int calculatePulseWidth() {
       pesoControle * data.gainCoefficient + data.mese + 0.3f * erroControle;
 
   int maximo = data.meseMax;
-  int minimo = maximo * 0.8f; // todo renomear variavel em Data.h
+  int minimo = maximo * 0.8f;
 
   if (pi < minimo)
     pi = minimo;
@@ -41,24 +37,28 @@ int calculatePulseWidth() {
     largerPi = maximo;
 
   // O PWM nunca será reduzido, apenas aumentado
-  if (pi > largerPi) {
+  if (pi > largerPi)
+  {
     largerPi = pi;
   }
 
   return largerPi;
 }
 
-void onWorkingMalhaFechadaStateEnter() {
+void onWorkingMalhaFechadaStateEnter()
+{
   lastTwaiSendTime = millis();
   lastTwaiRecvTime = millis();
   largerPi = 0;
   integralErro = 0;
 }
 
-void onWorkingMalhaFechadaStateLoop() {
+void onWorkingMalhaFechadaStateLoop()
+{
   // Segurança: Se o barramento cair durante a operação, o estimulador deverá
   // tomar uma ação de decremento independente
-  if (millis() - lastTwaiRecvTime >= 1000) {
+  if (millis() - lastTwaiRecvTime >= 1000)
+  {
     stateManager.switchTo(StateKind::GatewayDownSafetyStopState);
     return;
   }
@@ -67,7 +67,8 @@ void onWorkingMalhaFechadaStateLoop() {
   modulateLoop(data.requestedPwm);
 
   unsigned long now_ms = millis();
-  if (now_ms - lastTwaiSendTime > 5) {
+  if (now_ms - lastTwaiSendTime > 5)
+  {
     lastTwaiSendTime = now_ms;
 
     twaiSend(TwaiSendMessageKind::PwmFeedbackEstimulador,
@@ -76,10 +77,12 @@ void onWorkingMalhaFechadaStateLoop() {
 }
 
 void onWorkingMalhaFechadaStateTWAIMessage(
-    TwaiReceivedMessage *receivedMessage) {
+    TwaiReceivedMessage *receivedMessage)
+{
   lastTwaiRecvTime = millis();
 
-  switch (receivedMessage->Kind) {
+  switch (receivedMessage->Kind)
+  {
   case TwaiReceivedMessageKind::FirmwareInvokeReset:
     esp_restart();
     break;

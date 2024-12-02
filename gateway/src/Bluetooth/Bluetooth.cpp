@@ -12,13 +12,13 @@ static BLEShortCharacteristic characteristicControl("ff0f", BLEWriteWithoutRespo
 static BluetoothControlCallback controlCallback = nullptr;
 
 static unsigned long lastAlivePacketTime = 0;
-static const unsigned long TIMEOUT = 3000;
+static const unsigned long TIMEOUT = 9000;
 static bool deviceReady = false;
 
 void onDeviceConnected(BLEDevice device)
 {
   ESP_LOGI(TAG, "Conexão Bluetooth estabelecida!");
-  lastAlivePacketTime = millis() + 5000;
+  lastAlivePacketTime = millis() + 10000;
   deviceReady = false;
 }
 
