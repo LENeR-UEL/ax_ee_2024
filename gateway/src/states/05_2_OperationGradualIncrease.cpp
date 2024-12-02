@@ -15,8 +15,6 @@ static uint16_t gradualIncreaseInterval;
 
 void onOperationGradualIncreaseEnter()
 {
-    lastWeightClassChangeTime = millis();
-    weightClassTimer = 0;
     lastStepTime = millis();
     gradualIncreaseInterval = data.parameterSetup.gradualIncreaseTime / data.mese;
 }
@@ -31,8 +29,6 @@ void onOperationGradualIncreaseLoop()
         stateManager.switchTo(StateKind::OperationStop);
         return;
     }
-
-    updateCurrentWeightClass();
 
     ESP_LOGD(TAG, "PWM: %d/%d", data.pwmFeedback, data.mese);
 

@@ -27,8 +27,6 @@ void onOperationTransitionLoop()
         return;
     }
 
-    updateCurrentWeightClass();
-
     unsigned long delta = now - timer;
     ESP_LOGD(TAG, "Transição... Aguardando %dms. Timer: %d", data.parameterSetup.transitionTime, delta);
     if (delta >= data.parameterSetup.transitionTime)
