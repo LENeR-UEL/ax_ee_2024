@@ -11,6 +11,9 @@ import requestBluetoothPermission from "./requestPermission";
 import { BleManager, Device, ScanMode, State, fullUUID } from "react-native-ble-plx";
 import connectToDevice from "./connectToDevice";
 import { ToastAndroid } from "react-native";
+import { useNavigation } from "../hooks/useNavigation";
+import { CommonActions } from "@react-navigation/native";
+import { ScreenNames } from "../Routing";
 
 export const SERVICE_UUID = fullUUID("ab04");
 export const STATUS_UUID = fullUUID("ff01");
@@ -58,6 +61,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
 
   const [btDevice, setBtDevice] = useState<Device | null>(null);
   const deviceRef = useRef<Device | null>(null);
+  const disconnectReasonRef = useRef<null | "ExplicitDisconnectByUser">(null);
 
   let btObject: BluetoothContext;
 
@@ -98,6 +102,7 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
         });
 
         setBtDevice(device);
+        disconnectReasonRef.current = null;
         deviceRef.current = device;
 
         return true;
@@ -145,12 +150,27 @@ export const BluetoothProvider = (props: PropsWithChildren) => {
       device: btDevice,
       deviceRef,
       disconnect: async () => {
+        disconnectReasonRef.current = "ExplicitDisconnectByUser";
         await btDevice?.cancelConnection();
         setBtDevice(null);
         deviceRef.current = null;
       }
     };
   }
+
+  const navigator = useNavigation();
+  const previousHasDeviceRef = useRef(false);
+  if (previousHasDeviceRef.current && btDevice === null) {
+    navigator.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: "Bluetooth" satisfies ScreenNames[number] }]
+      })
+    );
+    if (disconnectReasonRef.current !== "ExplicitDisconnectByUser")
+      alert("Conexão Bluetooth caiu inesperadamente. Não é possível operar o aplicativo.");
+  }
+  previousHasDeviceRef.current = btDevice !== null;
 
   return <btContext.Provider value={btObject}>{props.children}</btContext.Provider>;
 };

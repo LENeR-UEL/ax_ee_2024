@@ -5,12 +5,6 @@
 
 #define OVBOXPin 34
 
-enum class FlagTrigger
-{
-    MalhaAberta,
-    MalhaFechadaOperacao
-};
-
 class Data
 {
 public:

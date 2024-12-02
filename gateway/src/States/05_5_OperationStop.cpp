@@ -35,7 +35,7 @@ void onOperationStopLoop()
     if (pwmDecreaseTimeDelta >= gradualDecreaseInterval)
     {
         twaiSend(TwaiSendMessageKind::SetRequestedPwm, requestedPwm);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+        twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
         twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
         lastStepTime = now;
     }

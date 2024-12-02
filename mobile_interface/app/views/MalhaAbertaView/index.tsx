@@ -13,11 +13,13 @@ import { useEffect } from "react";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { NextViewButton } from "../../components/NextViewButton";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
+import { useBluetoothConnection } from "../../bluetooth/Context";
 
 export default function MalhaAbertaView() {
   const isOperating = useBoolean();
   const isWindingDown = useBoolean();
 
+  const ble = useBluetoothConnection();
   const [status, sendControl] = useFirmwareStatus();
 
   const handleStartOperation = () => {
@@ -66,6 +68,7 @@ export default function MalhaAbertaView() {
 
   useEffect(() => {
     return () => {
+      if (!ble.deviceRef.current) return;
       sendControl({ controlCode: "MESECollecter_GoBackToParameterSetup", waitForResponse: true });
     };
   }, []);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BleError, BleErrorCode, Characteristic } from "react-native-ble-plx";
 import { Buffer } from "buffer";
 import { CONTROL_UUID, SERVICE_UUID, STATUS_UUID, useBluetoothConnection } from "./Context";
@@ -258,6 +258,12 @@ export function useFirmwareStatus(): [StatusPacket, ControlCodeDispatcher] {
       statusSubscription.remove();
     };
   }, [ble.device]);
+
+  const previousCanStateRef = useRef<boolean>(false);
+  if (previousCanStateRef.current === true && value.statusFlags.isCANAvailable === false) {
+    alert("O barramento CAN caiu.");
+  }
+  previousCanStateRef.current = value.statusFlags.isCANAvailable;
 
   const dispatchControlCode: ControlCodeDispatcher = async function ({
     controlCode,

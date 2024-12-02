@@ -7,16 +7,19 @@
 #include "../Scale/Scale.h"
 #include "./05_OperationCommon.h"
 
-static const char *TAG = "OperationTransition";
+static const char *TAG = "OperationGradualIncrease";
 static unsigned long lastTwaiSendTime = 0;
-static unsigned long timer;
+static unsigned long lastStepTime = 0;
 
-void onOperationTransitionEnter()
+static uint16_t gradualIncreaseInterval;
+
+void onOperationGradualIncreaseEnter()
 {
-    timer = millis();
+    lastStepTime = millis();
+    gradualIncreaseInterval = data.parameterSetup.gradualIncreaseTime / data.mese;
 }
 
-void onOperationTransitionLoop()
+void onOperationGradualIncreaseLoop()
 {
     long now = millis();
 
@@ -27,44 +30,44 @@ void onOperationTransitionLoop()
         return;
     }
 
-    updateCurrentWeightClass();
+    ESP_LOGD(TAG, "PWM: %d/%d", data.pwmFeedback, data.mese);
 
-    unsigned long delta = now - timer;
-    ESP_LOGD(TAG, "Transição... Aguardando %dms. Timer: %d", data.parameterSetup.transitionTime, delta);
-    if (delta >= data.parameterSetup.transitionTime)
+    if (data.pwmFeedback >= data.mese)
     {
         ESP_LOGD(TAG, "Condição atingida.");
-        stateManager.switchTo(StateKind::OperationMalhaFechada);
+        stateManager.switchTo(StateKind::OperationTransition);
         return;
+    }
+
+    ESP_LOGI(TAG, "Interval: %d\n", gradualIncreaseInterval);
+
+    unsigned int pwmIncreaseTimeDelta = now - lastStepTime;
+    if (pwmIncreaseTimeDelta >= gradualIncreaseInterval)
+    {
+        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + 1);
+        twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
+        lastStepTime = now;
     }
 
     if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
-
-        // Peso residual: peso coletado no final da etapa de transição
-        // Mandamos a todo instante durante a etapa de transição, e ao mudar para o próximo estado,
-        // teremos o peso residual do final da etapa de transição
-        twaiSend(TwaiSendMessageKind::ResidualWeightTotal, scaleGetTotalWeight());
-
-        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.mese);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
-        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetTotalWeight());
-        twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
-        twaiSend(TwaiSendMessageKind::Mese, data.mese);
-        twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
+        twaiSend(TwaiSendMessageKind::Setpoint, 0);
+        twaiSend(TwaiSendMessageKind::Mese, 0);
+        twaiSend(TwaiSendMessageKind::MeseMax, 0);
         twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-    data.mainOperationStateInformApp[1] = delta & 0xFF;
-    data.mainOperationStateInformApp[2] = (delta >> 8) & 0xFF;
+    data.mainOperationStateInformApp[1] = pwmIncreaseTimeDelta & 0xFF;
+    data.mainOperationStateInformApp[2] = (pwmIncreaseTimeDelta >> 8) & 0xFF;
     data.mainOperationStateInformApp[3] = 0;
     data.mainOperationStateInformApp[4] = 0;
     data.mainOperationStateInformApp[5] = 0;
 }
 
-void onOperationTransitionTWAIMessage(TwaiReceivedMessage *receivedMessage)
+void onOperationGradualIncreaseTWAIMessage(TwaiReceivedMessage *receivedMessage)
 {
     switch (receivedMessage->Kind)
     {
@@ -74,7 +77,7 @@ void onOperationTransitionTWAIMessage(TwaiReceivedMessage *receivedMessage)
     }
 }
 
-void onOperationTransitionBLEControl(BluetoothControlCode code, uint8_t extraData)
+void onOperationGradualIncreaseBLEControl(BluetoothControlCode code, uint8_t extraData)
 {
     switch (code)
     {
@@ -106,4 +109,4 @@ void onOperationTransitionBLEControl(BluetoothControlCode code, uint8_t extraDat
     }
 }
 
-void onOperationTransitionExit() {}
+void onOperationGradualIncreaseExit() {}

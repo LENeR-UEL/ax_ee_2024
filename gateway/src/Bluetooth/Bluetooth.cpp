@@ -12,13 +12,13 @@ static BLEShortCharacteristic characteristicControl("ff0f", BLEWriteWithoutRespo
 static BluetoothControlCallback controlCallback = nullptr;
 
 static unsigned long lastAlivePacketTime = 0;
-static const unsigned long TIMEOUT = 3000;
+static const unsigned long TIMEOUT = 9000;
 static bool deviceReady = false;
 
 void onDeviceConnected(BLEDevice device)
 {
   ESP_LOGI(TAG, "Conexão Bluetooth estabelecida!");
-  lastAlivePacketTime = millis() + 5000;
+  lastAlivePacketTime = millis() + 10000;
   deviceReady = false;
 }
 
@@ -42,7 +42,6 @@ void onControlWritten(BLEDevice device, BLECharacteristic characteristic)
   {
     lastAlivePacketTime = now;
     deviceReady = true;
-    Serial.print("Got still alive packet.");
   }
 
   if (controlCallback != nullptr)
@@ -108,7 +107,8 @@ void bluetoothLoop()
   if (libConnected && deviceReady && now - lastAlivePacketTime >= TIMEOUT)
   {
     ESP_LOGW(TAG, "O dispositivo continua conectado para a ArduinoBLE, mas passou o tempo de timeout de StillAlive. Desconectando...");
-    BLE.disconnect();
+    ESP_LOGW(TAG, "Desconexão do mecanismo StillAlive foi removido do código.");
+    // BLE.disconnect();
   }
 }
 

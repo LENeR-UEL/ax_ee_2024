@@ -7,19 +7,16 @@
 #include "../Scale/Scale.h"
 #include "./05_OperationCommon.h"
 
-static const char *TAG = "OperationMalhaFechada";
+static const char *TAG = "OperationTransition";
 static unsigned long lastTwaiSendTime = 0;
+static unsigned long timer;
 
-// Instante mais recente onde o valor de erro era negativo
-// Usado para calcular quanto tempo o erro está positivo, no estado de malha fechada
-static long calculatedErrorValueLastNegativeTime = 0;
-
-void onOperationMalhaFechadaEnter()
+void onOperationTransitionEnter()
 {
-    calculatedErrorValueLastNegativeTime = millis();
+    timer = millis();
 }
 
-void onOperationMalhaFechadaLoop()
+void onOperationTransitionLoop()
 {
     long now = millis();
 
@@ -30,46 +27,42 @@ void onOperationMalhaFechadaLoop()
         return;
     }
 
-    short currentErrorValue = scaleGetTotalWeight() - data.setpoint * 2;
-    if (currentErrorValue < 0)
-    {
-        calculatedErrorValueLastNegativeTime = now;
-    }
-
-    ESP_LOGD(TAG, "Operação... Aguardando erro negativo durante %dms. Delta = %d ms, erro = %d", data.parameterSetup.malhaFechadaAboveSetpointTime, now - calculatedErrorValueLastNegativeTime, currentErrorValue);
-
-    // Erro positivo durante 2000ms?
-    unsigned short delta = now - calculatedErrorValueLastNegativeTime;
-    if (delta >= data.parameterSetup.malhaFechadaAboveSetpointTime)
+    unsigned long delta = now - timer;
+    ESP_LOGD(TAG, "Transição... Aguardando %dms. Timer: %d", data.parameterSetup.transitionTime, delta);
+    if (delta >= data.parameterSetup.transitionTime)
     {
         ESP_LOGD(TAG, "Condição atingida.");
-        stateManager.switchTo(StateKind::OperationStop);
+        stateManager.switchTo(StateKind::OperationMalhaFechada);
         return;
     }
 
     if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
-        // Malha fechada; PWM enviado não importa; é calculado pelo firmware do estimulador
-        // twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaFechadaOperacao);
-        twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
-        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
+
+        // Peso residual: peso coletado no final da etapa de transição
+        // Mandamos a todo instante durante a etapa de transição, e ao mudar para o próximo estado,
+        // teremos o peso residual do final da etapa de transição
+        twaiSend(TwaiSendMessageKind::ResidualWeightTotal, scaleGetTotalWeight());
+
+        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.mese);
+        twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
+        twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetTotalWeight());
         twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
         twaiSend(TwaiSendMessageKind::Mese, data.mese);
+        twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
         twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-    // little-endian
-    data.mainOperationStateInformApp[1] = currentErrorValue & 0xFF;
-    data.mainOperationStateInformApp[2] = (currentErrorValue >> 8) & 0xFF;
-    data.mainOperationStateInformApp[3] = delta & 0xFF;
-    data.mainOperationStateInformApp[4] = (delta >> 8) & 0xFF;
+    data.mainOperationStateInformApp[1] = delta & 0xFF;
+    data.mainOperationStateInformApp[2] = (delta >> 8) & 0xFF;
+    data.mainOperationStateInformApp[3] = 0;
+    data.mainOperationStateInformApp[4] = 0;
     data.mainOperationStateInformApp[5] = 0;
 }
 
-void onOperationMalhaFechadaTWAIMessage(TwaiReceivedMessage *receivedMessage)
+void onOperationTransitionTWAIMessage(TwaiReceivedMessage *receivedMessage)
 {
     switch (receivedMessage->Kind)
     {
@@ -79,7 +72,7 @@ void onOperationMalhaFechadaTWAIMessage(TwaiReceivedMessage *receivedMessage)
     }
 }
 
-void onOperationMalhaFechadaBLEControl(BluetoothControlCode code, uint8_t extraData)
+void onOperationTransitionBLEControl(BluetoothControlCode code, uint8_t extraData)
 {
     switch (code)
     {
@@ -111,4 +104,4 @@ void onOperationMalhaFechadaBLEControl(BluetoothControlCode code, uint8_t extraD
     }
 }
 
-void onOperationMalhaFechadaExit() {}
+void onOperationTransitionExit() {}

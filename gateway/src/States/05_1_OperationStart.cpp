@@ -12,8 +12,6 @@ static unsigned long lastTwaiSendTime = 0;
 
 void onOperationStartEnter()
 {
-  lastWeightClassChangeTime = millis();
-  weightClassTimer = 0;
   data.meseMax = data.mese * 1.2f;
   data.setpoint = data.collectedWeight * 0.5f;
 }
@@ -28,8 +26,6 @@ void onOperationStartLoop()
     stateManager.switchTo(StateKind::OperationStop);
     return;
   }
-
-  updateCurrentWeightClass();
 
   const unsigned short targetWeight = (data.setpoint * 2) * 0.2f;
 
@@ -47,7 +43,7 @@ void onOperationStartLoop()
   {
     lastTwaiSendTime = now;
     twaiSend(TwaiSendMessageKind::SetRequestedPwm, 0);
-    twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
+    twaiSend(TwaiSendMessageKind::UseMalhaAberta, 0);
     twaiSend(TwaiSendMessageKind::WeightTotal,
              scaleGetWeightL() + scaleGetWeightR());
     twaiSend(TwaiSendMessageKind::Setpoint, 0);

@@ -9,8 +9,10 @@ import { NextViewButton } from "../../components/NextViewButton";
 import { useUpdateEffect } from "../../hooks/useUpdateEffect";
 import { useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import { WeightInputDialog } from "./WeightInputDialog";
+import { useBluetoothConnection } from "../../bluetooth/Context";
 
 export default function ParalelaView() {
+  const ble = useBluetoothConnection();
   const [status, sendControl] = useFirmwareStatus();
 
   const weightLRef = useRef<number>();
@@ -37,6 +39,7 @@ export default function ParalelaView() {
 
   useEffect(() => {
     return () => {
+      if (!ble.deviceRef.current) return;
       sendControl({ controlCode: "Parallel_GoBackToMESECollecter", waitForResponse: true });
     };
   }, []);

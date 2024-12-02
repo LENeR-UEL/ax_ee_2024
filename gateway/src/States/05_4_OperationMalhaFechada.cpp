@@ -7,21 +7,19 @@
 #include "../Scale/Scale.h"
 #include "./05_OperationCommon.h"
 
-static const char *TAG = "OperationGradualIncrease";
+static const char *TAG = "OperationMalhaFechada";
 static unsigned long lastTwaiSendTime = 0;
-static unsigned long lastStepTime = 0;
 
-static uint16_t gradualIncreaseInterval;
+// Instante mais recente onde o valor de erro era negativo
+// Usado para calcular quanto tempo o erro está positivo, no estado de malha fechada
+static long calculatedErrorValueLastNegativeTime = 0;
 
-void onOperationGradualIncreaseEnter()
+void onOperationMalhaFechadaEnter()
 {
-    lastWeightClassChangeTime = millis();
-    weightClassTimer = 0;
-    lastStepTime = millis();
-    gradualIncreaseInterval = data.parameterSetup.gradualIncreaseTime / data.mese;
+    calculatedErrorValueLastNegativeTime = millis();
 }
 
-void onOperationGradualIncreaseLoop()
+void onOperationMalhaFechadaLoop()
 {
     long now = millis();
 
@@ -32,46 +30,45 @@ void onOperationGradualIncreaseLoop()
         return;
     }
 
-    updateCurrentWeightClass();
-
-    ESP_LOGD(TAG, "PWM: %d/%d", data.pwmFeedback, data.mese);
-
-    if (data.pwmFeedback >= data.mese)
+    short currentErrorValue = scaleGetTotalWeight() - data.setpoint * 2;
+    if (currentErrorValue < 0)
     {
-        ESP_LOGD(TAG, "Condição atingida.");
-        stateManager.switchTo(StateKind::OperationTransition);
-        return;
+        calculatedErrorValueLastNegativeTime = now;
     }
 
-    ESP_LOGI(TAG, "Interval: %d\n", gradualIncreaseInterval);
+    ESP_LOGD(TAG, "Operação... Aguardando erro negativo durante %dms. Delta = %d ms, erro = %d", data.parameterSetup.malhaFechadaAboveSetpointTime, now - calculatedErrorValueLastNegativeTime, currentErrorValue);
 
-    unsigned int pwmIncreaseTimeDelta = now - lastStepTime;
-    if (pwmIncreaseTimeDelta >= gradualIncreaseInterval)
+    // Erro positivo durante 2000ms?
+    unsigned short delta = now - calculatedErrorValueLastNegativeTime;
+    if (delta >= data.parameterSetup.malhaFechadaAboveSetpointTime)
     {
-        twaiSend(TwaiSendMessageKind::SetRequestedPwm, data.pwmFeedback + 1);
-        twaiSend(TwaiSendMessageKind::Trigger, (uint8_t)FlagTrigger::MalhaAberta);
-        lastStepTime = now;
+        ESP_LOGD(TAG, "Condição atingida.");
+        stateManager.switchTo(StateKind::OperationStop);
+        return;
     }
 
     if (now - lastTwaiSendTime >= 15)
     {
         lastTwaiSendTime = now;
+        // Malha fechada; PWM enviado não importa; é calculado pelo firmware do estimulador
+        twaiSend(TwaiSendMessageKind::UseMalhaFechada, 0);
+        twaiSend(TwaiSendMessageKind::MeseMax, data.meseMax);
         twaiSend(TwaiSendMessageKind::WeightTotal, scaleGetWeightL() + scaleGetWeightR());
-        twaiSend(TwaiSendMessageKind::Setpoint, 0);
-        twaiSend(TwaiSendMessageKind::Mese, 0);
-        twaiSend(TwaiSendMessageKind::MeseMax, 0);
+        twaiSend(TwaiSendMessageKind::Setpoint, data.setpoint);
+        twaiSend(TwaiSendMessageKind::Mese, data.mese);
         twaiSend(TwaiSendMessageKind::SetGainCoefficient, data.parameterSetup.gainCoefficient);
     }
 
     data.mainOperationStateInformApp[0] = (uint8_t)stateManager.currentKind;
-    data.mainOperationStateInformApp[1] = pwmIncreaseTimeDelta & 0xFF;
-    data.mainOperationStateInformApp[2] = (pwmIncreaseTimeDelta >> 8) & 0xFF;
-    data.mainOperationStateInformApp[3] = 0;
-    data.mainOperationStateInformApp[4] = 0;
+    // little-endian
+    data.mainOperationStateInformApp[1] = currentErrorValue & 0xFF;
+    data.mainOperationStateInformApp[2] = (currentErrorValue >> 8) & 0xFF;
+    data.mainOperationStateInformApp[3] = delta & 0xFF;
+    data.mainOperationStateInformApp[4] = (delta >> 8) & 0xFF;
     data.mainOperationStateInformApp[5] = 0;
 }
 
-void onOperationGradualIncreaseTWAIMessage(TwaiReceivedMessage *receivedMessage)
+void onOperationMalhaFechadaTWAIMessage(TwaiReceivedMessage *receivedMessage)
 {
     switch (receivedMessage->Kind)
     {
@@ -81,7 +78,7 @@ void onOperationGradualIncreaseTWAIMessage(TwaiReceivedMessage *receivedMessage)
     }
 }
 
-void onOperationGradualIncreaseBLEControl(BluetoothControlCode code, uint8_t extraData)
+void onOperationMalhaFechadaBLEControl(BluetoothControlCode code, uint8_t extraData)
 {
     switch (code)
     {
@@ -113,4 +110,4 @@ void onOperationGradualIncreaseBLEControl(BluetoothControlCode code, uint8_t ext
     }
 }
 
-void onOperationGradualIncreaseExit() {}
+void onOperationMalhaFechadaExit() {}

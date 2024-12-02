@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
 import { Text, FAB, Button } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusDisplay } from "../../components/StatusDisplay";
-import { OverlayBar, WeightIndicationBar } from "./WeightIndicatorBar";
+import { OverlayBar, OverlayRectangle, WeightIndicationBar } from "./WeightIndicatorBar";
 import { useEffect, useRef } from "react";
 import { FirmwareState, useFirmwareStatus } from "../../bluetooth/useFirmwareStatus";
 import {
@@ -170,8 +170,14 @@ export default function OperationView() {
       .then(() => hapticFeedbackControl());
   }, [status.mainOperationState?.state]);
 
+  const previousPwmRef = useRef<number | null>(null);
+  if (previousPwmRef.current !== null && previousPwmRef.current < status.pwm) {
+    hapticFeedbackControl();
+  }
+  previousPwmRef.current = status.pwm;
+
   const indicatorBars: OverlayBar[] = [
-    { label: "Setpoint", showAtWeight: status.setpoint, color: "#C8E6C9" }
+    { label: "Ponto de Fadiga", showAtWeight: status.setpoint, color: "#C8E6C9" }
   ];
 
   if (status.mainOperationState?.state === FirmwareState.OperationStart) {
@@ -179,6 +185,23 @@ export default function OperationView() {
       label: "Início",
       showAtWeight: status.setpoint * 0.2,
       color: "#ff0000"
+    });
+  }
+
+  const indicatorRectsLeft: OverlayRectangle[] = [];
+  const indicatorRectsRight: OverlayRectangle[] = [];
+
+  if (status.weightL > status.setpoint) {
+    indicatorRectsLeft.push({
+      color: "#ffffff60",
+      weightRange: [status.setpoint, status.weightL]
+    });
+  }
+
+  if (status.weightR > status.setpoint) {
+    indicatorRectsRight.push({
+      color: "#ffffff60",
+      weightRange: [status.setpoint, status.weightR]
     });
   }
 
@@ -199,6 +222,7 @@ export default function OperationView() {
           hideBarText
           style={styles.weightBar}
           bars={indicatorBars}
+          rectangles={indicatorRectsLeft}
         />
         <WeightIndicationBar
           textTop="DIR"
@@ -209,10 +233,25 @@ export default function OperationView() {
           fillColor="#9E9D24"
           style={styles.weightBar}
           bars={indicatorBars}
+          rectangles={indicatorRectsRight}
         />
       </View>
       <View style={StyleSheet.compose(styles.group, styles.displaysGroup)}>
-        <StatusDisplay textLeft="PWM" textMain={`${status.pwm}/${status.meseMax}`} textRight="µS" />
+        {run(() => {
+          if (status.mainOperationState?.state === FirmwareState.OperationMalhaFechada) {
+            return (
+              <StatusDisplay
+                textLeft="~"
+                textMain={`${Math.floor(status.meseMax * 0.8)} | ${status.pwm} | ${status.meseMax}`}
+                textRight="µS"
+              />
+            );
+          } else {
+            return (
+              <StatusDisplay textLeft="Malha Aberta" textMain={`${status.pwm}`} textRight="µS" />
+            );
+          }
+        })}
         <View style={styles.statusDisplayButtons}>
           <Text>MESE máximo: </Text>
           <FAB
