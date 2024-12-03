@@ -1,6 +1,7 @@
 #include "Scale.h"
+#include "../Flags.h"
 
-#ifdef SCALE_USE_STUB
+#ifdef USE_EMULATED_SCALES_POTENTIOMETER
 
 #include <random>
 #include <Arduino.h>

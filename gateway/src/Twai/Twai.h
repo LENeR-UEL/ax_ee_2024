@@ -2,9 +2,9 @@
 
 #include <Arduino.h>
 #include <driver/twai.h>
-#include "../Props.h"
+#include "../Flags.h"
 
-#ifdef IS_DEVELOPMENT
+#ifdef USE_DEVELOPMENT_CAN_PINOUT
 // ESP-32 de desenvolvimento
 #define WIRESS_GPIO_TX GPIO_NUM_5
 #define WIRESS_GPIO_RX GPIO_NUM_4

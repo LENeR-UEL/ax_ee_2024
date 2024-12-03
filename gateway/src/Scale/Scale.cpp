@@ -1,6 +1,7 @@
 #include "Scale.h"
+#include "../Flags.h"
 
-#ifndef SCALE_USE_STUB
+#ifndef USE_EMULATED_SCALES_POTENTIOMETER
 #include <HX711.h>
 
 #define SCALE_RING_BUFFER_SIZE 5
@@ -63,9 +64,11 @@ float scaleGetMeasurement(Scale scaleId)
     // Retornar o menor valor
     float menor = 99999.0f;
 
-    for (int i = 0; i < SCALE_RING_BUFFER_SIZE; i++) {
+    for (int i = 0; i < SCALE_RING_BUFFER_SIZE; i++)
+    {
         float atual = readingRing[scaleId][i];
-        if (atual < menor) menor = atual;
+        if (atual < menor)
+            menor = atual;
     }
 
     return menor;
@@ -100,7 +103,8 @@ void scaleUpdate()
     readScale(Scale::D);
 
     ringIndex++;
-    if (ringIndex >= SCALE_RING_BUFFER_SIZE) {
+    if (ringIndex >= SCALE_RING_BUFFER_SIZE)
+    {
         ringIndex = 0;
     }
 }

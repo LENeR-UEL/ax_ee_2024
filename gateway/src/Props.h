@@ -1,2 +1,0 @@
-#define IS_DEVELOPMENT 1
-#define OVERRIDE_OVBOX_INPUT 1

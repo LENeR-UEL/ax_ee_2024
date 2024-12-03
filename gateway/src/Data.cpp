@@ -2,7 +2,7 @@
 #include "Bluetooth/Bluetooth.h"
 #include "string.h"
 #include <Arduino.h>
-#include "./Props.h"
+#include "./Flags.h"
 
 #define DEBUG(variable) ESP_LOGD(TAG, #variable ": %d", variable)
 
@@ -37,15 +37,13 @@ void Data::sendToBle()
     return;
   }
 
-  // Se enviarmos o payload pelo Bluetooth tod0 instante, o frontend ficará
-  // sobrecarregado Enviamos o payload com o status mais recente a cada N
-  // milissegundos.
+  // If the last Bluetooth send time is less than 120 milliseconds ago, return.
+  // This is to prevent overloading the frontend by sending data too frequently.
   unsigned long now = millis();
   if (now - data.lastBluetoothSendTime < 120)
   {
     return;
   }
-
   data.lastBluetoothSendTime = now;
 
   BleStatusPacket status;
@@ -60,8 +58,12 @@ void Data::sendToBle()
   status.setpoint = data.setpoint;
   status.status_flags.isEEGFlagSet = data.isOVBoxFlagSet() ? 1 : 0;
   status.status_flags.isCANAvailable = twaiIsAvailable() ? 1 : 0;
+
+  // Copy the operation state information array from the data to the status packet.
   memcpy(status.mainOperationStateInformApp, this->mainOperationStateInformApp,
          sizeof(status.mainOperationStateInformApp));
+
+  // Copy the parameter setup struct from the data to the status packet.
   memcpy(&status.parameterSetup, &this->parameterSetup,
          sizeof(this->parameterSetup));
 
@@ -83,7 +85,7 @@ void Data::debugPrintAll()
 
 bool Data::isOVBoxFlagSet()
 {
-#ifdef OVERRIDE_OVBOX_INPUT
+#ifdef OVERRIDE_OVBOX_TRIGGER_ALWAYS_HIGH
   return true;
 #endif
 
