@@ -36,7 +36,7 @@ export function WeightInputDialog(props: WeightInputDialogProps) {
           keyboardType="numeric"
           textAlign="right"
           value={valueStr}
-          onChangeText={(v) => setValueStr(v)}></Dialog.Input>
+          onChangeText={(v) => setValueStr(v)} style={{color: "black"}}></Dialog.Input>
         <Dialog.Button label="Cancelar" onPress={props.onDismiss} />
         <Dialog.Button
           label="Definir peso"
